@@ -357,39 +357,51 @@ class Nicodemus implements NicodemusGame {
 
     public removeTiles(tiles: Tile[], fadeOut?: boolean) {
         tiles.forEach(tile => this.removeTile(tile, fadeOut));
-    }
+    }*/
 
-    public selectLine(line: number) {
-        if(!(this as any).checkAction('selectLine')) {
+    public playMachine(id: number) {
+        if(!(this as any).checkAction('playMachine')) {
             return;
         }
 
-        this.takeAction('selectLine', {
-            line
-        });
-    }
-
-    public selectColumn(column: number) {
-        if(!(this as any).checkAction('selectColumn')) {
-            return;
-        }
-
-        this.takeAction('selectColumn', {
-            column
-        });
-
-        this.onLeavingChooseColumn();
-    }
-
-    public takeTiles(id: number) {
-        if(!(this as any).checkAction('takeTiles')) {
-            return;
-        }
-
-        this.takeAction('takeTiles', {
+        this.takeAction('playMachine', {
             id
         });
-    }*/
+    }
+
+    public fixMachine(id: number) {
+        if(!(this as any).checkAction('fixMachine')) {
+            return;
+        }
+
+        this.takeAction('fixMachine', {
+            id
+        });
+    }
+
+    public getCarbonium() {
+        if(!(this as any).checkAction('getCarbonium')) {
+            return;
+        }
+
+        this.takeAction('getCarbonium');
+    }
+
+    public getResource() {
+        if(!(this as any).checkAction('getResource')) {
+            return;
+        }
+
+        this.takeAction('getResource');
+    }
+
+    public applyEffect() {
+        if(!(this as any).checkAction('applyEffect')) {
+            return;
+        }
+
+        this.takeAction('applyEffect');
+    }
 
     public takeAction(action: string, data?: any) {
         data = data || {};

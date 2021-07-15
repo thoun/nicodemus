@@ -53,5 +53,29 @@
 
         self::ajaxResponse();
     }
+  	
+    public function getCarbonium() {
+        self::setAjaxMode();
+
+        $this->game->getCarbonium();
+
+        self::ajaxResponse();
+    }
+  	
+    public function getResource() {
+        self::setAjaxMode();
+
+        $this->game->getResource();
+
+        self::ajaxResponse();
+    }
+  	
+    public function applyEffect() {
+        self::setAjaxMode();
+
+        $this->game->applyEffect();
+
+        self::ajaxResponse();
+    }
 
   }

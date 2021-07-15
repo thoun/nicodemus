@@ -390,39 +390,41 @@ var Nicodemus = /** @class */ (function () {
 
     public removeTiles(tiles: Tile[], fadeOut?: boolean) {
         tiles.forEach(tile => this.removeTile(tile, fadeOut));
-    }
-
-    public selectLine(line: number) {
-        if(!(this as any).checkAction('selectLine')) {
-            return;
-        }
-
-        this.takeAction('selectLine', {
-            line
-        });
-    }
-
-    public selectColumn(column: number) {
-        if(!(this as any).checkAction('selectColumn')) {
-            return;
-        }
-
-        this.takeAction('selectColumn', {
-            column
-        });
-
-        this.onLeavingChooseColumn();
-    }
-
-    public takeTiles(id: number) {
-        if(!(this as any).checkAction('takeTiles')) {
-            return;
-        }
-
-        this.takeAction('takeTiles', {
-            id
-        });
     }*/
+    Nicodemus.prototype.playMachine = function (id) {
+        if (!this.checkAction('playMachine')) {
+            return;
+        }
+        this.takeAction('playMachine', {
+            id: id
+        });
+    };
+    Nicodemus.prototype.fixMachine = function (id) {
+        if (!this.checkAction('fixMachine')) {
+            return;
+        }
+        this.takeAction('fixMachine', {
+            id: id
+        });
+    };
+    Nicodemus.prototype.getCarbonium = function () {
+        if (!this.checkAction('getCarbonium')) {
+            return;
+        }
+        this.takeAction('getCarbonium');
+    };
+    Nicodemus.prototype.getResource = function () {
+        if (!this.checkAction('getResource')) {
+            return;
+        }
+        this.takeAction('getResource');
+    };
+    Nicodemus.prototype.applyEffect = function () {
+        if (!this.checkAction('applyEffect')) {
+            return;
+        }
+        this.takeAction('applyEffect');
+    };
     Nicodemus.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;

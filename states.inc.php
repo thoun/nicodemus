@@ -98,6 +98,7 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "choosePlayAction" => ST_PLAYER_CHOOSE_PLAY_ACTION,
+            "chooseProject" => ST_PLAYER_CHOOSE_PROJECT,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -113,7 +114,6 @@ $playerActionsGameStates = [
             "applyEffect",
         ],
         "transitions" => [
-            "chooseProject" => ST_PLAYER_CHOOSE_PROJECT,
             "nextPlayer" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]

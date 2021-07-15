@@ -74,9 +74,45 @@ trait ActionTrait {
             'player_name' => self::getActivePlayerName(),
             'machine' => $this->getMachineFromDb($this->machines->getCard($id)),
         ]);
-
-        $this->gamestate->nextState('choosePlayAction');
         
         // TODO
+
+        $this->gamestate->nextState(true ? 'chooseProject' : 'nextPlayer');
+    }
+
+    public function getCarbonium() {
+        self::checkAction('getCarbonium'); 
+        
+        $playerId = self::getActivePlayerId();
+
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        // TODO getCarbonium
+
+        $this->gamestate->nextState('nextPlayer');
+    }
+  	
+    public function getResource() {
+        self::checkAction('getResource'); 
+        
+        $playerId = self::getActivePlayerId();
+
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        // TODO getResource
+
+        $this->gamestate->nextState('nextPlayer');
+    }
+  	
+    public function applyEffect() {
+        self::checkAction('applyEffect'); 
+        
+        $playerId = self::getActivePlayerId();
+
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        // TODO applyEffect
+
+        $this->gamestate->nextState('nextPlayer');
     }
 }
