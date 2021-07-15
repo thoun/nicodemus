@@ -105,7 +105,8 @@ class Nicodemus extends Table {
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
         $this->setup();
-       
+
+        $this->projects->pickCardsForLocation(6, 'deck', 'table');       
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();

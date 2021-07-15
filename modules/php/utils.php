@@ -16,7 +16,7 @@ trait UtilTrait {
     }
 
     function setup() {
-        //TODO 56 cartes machine     
+        //TODO 56 machine cards    
         /*$carboniums = [];
         $carboniums[] = [ 'type' => 0, 'type_arg' => null, 'nbr' => 1 ];
         for ($color=1; $color<=5; $color++) {
@@ -25,15 +25,21 @@ trait UtilTrait {
         $this->carboniums->createCards($cards, 'deck');
         $this->carboniums->shuffle('deck');*/
         
-        //17 tuiles projet
+        //17 project tiles
+        $projects = [];
+        foreach(array_keys($this->PROJECTS) as $projectId) {
+            $projects[] = [ 'type' => floor($projectId / 10), 'type_arg' => $projectId % 10, 'nbr' => 1 ];
+        }
+        $this->projects->createCards($projects, 'deck');
+        $this->projects->shuffle('deck');
 
-        //12 charboniums, la monnaie du jeu.        
+        //12 carboniums       
         $carboniums = [
             [ 'type' => 0, 'type_arg' => null, 'nbr' => 12 ],
         ];
         $this->carboniums->createCards($carboniums, 'table');
 
-        //24 ressources : 8 cubes de bois, 8 cubes de cuivre, 8 cubes de cristal./        
+        //24 resources : 8 wood, 8 copper, 8 crystal        
         $resources = [
             [ 'type' => 1, 'type_arg' => null, 'nbr' => 8 ],
             [ 'type' => 2, 'type_arg' => null, 'nbr' => 8 ],
@@ -46,7 +52,7 @@ trait UtilTrait {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new Error("machine doesn't exists ".json_encode($dbObject));
         }
-        return new Machine($dbObject);
+        return new Machine($dbObject, $this->MACHINES);
     }
 
     function getMachinesFromDb(array $dbObjects) {
@@ -57,7 +63,7 @@ trait UtilTrait {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new Error("project doesn't exists ".json_encode($dbObject));
         }
-        return new Project($dbObject);
+        return new Project($dbObject, $this->PROJECTS);
     }
 
     function getProjectsFromDb(array $dbObjects) {

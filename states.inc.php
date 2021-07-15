@@ -108,7 +108,7 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} must choose action for played card'),
         "type" => "activeplayer",
         "possibleactions" => [ 
-            "getCharbonium",
+            "getCarbonium",
             "getResource",
             "applyEffect",
         ],
