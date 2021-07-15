@@ -2,9 +2,13 @@
 
 class MachineCard {
     public /*int*/ $points;
+    public /*int*/ $produce; // 0 = carbonium, 1 = wood, 2 = copper, 3 = crystal, 9 = *
+    public /*array*/ $cost;
   
-    public function __construct(int $points) {
+    public function __construct(int $points, int $produce, array $cost) {
         $this->points = $points;
+        $this->produce = $produce;
+        $this->cost = $cost;
     } 
 }
 
@@ -24,6 +28,8 @@ class Machine extends MachineCard {
 
         $machineCard = $MACHINES[$this->type * 10 + $this->subType];
         $this->points = $machineCard->points;
+        $this->produce = $machineCard->produce;
+        $this->cost = $machineCard->cost;
     } 
 }
 ?>

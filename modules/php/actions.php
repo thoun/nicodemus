@@ -87,7 +87,8 @@ trait ActionTrait {
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
-        // TODO getCarbonium
+        $this->addCarbonium($playerId, $machine->points);
+        // TODO notif
 
         $this->gamestate->nextState('nextPlayer');
     }
