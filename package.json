@@ -1,0 +1,16 @@
+{
+  "name": "nicodemus",
+  "version": "1.0.0",
+  "description": "",
+  "main": "nicodemus.js",
+  "scripts": {
+    "build:ts": "tsc",
+    "build:scss": "sass --no-source-map src/nicodemus.scss nicodemus.css"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.32.6",
+    "typescript": "^4.1.3"
+  }
+}

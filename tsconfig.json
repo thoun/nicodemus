@@ -1,0 +1,21 @@
+{
+    "rootDir": ".", 
+    "compilerOptions": {
+      "target": "es5",
+      "module": "none",
+      "lib": ["dom", "esnext"],  
+      "sourceMap": false,
+      "outFile": "nicodemus.js",
+    },
+    "files": [
+        "src/framework.d.ts",
+        "src/counter.d.ts",
+        "src/stock.d.ts",
+        "src/nicodemus.d.ts",
+        "src/slide-utils.ts",
+        "src/table/table.ts",
+        "src/players-tables/player-table.ts",
+        "src/nicodemus.ts",
+        "src/define.ts"
+    ]
+}

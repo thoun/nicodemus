@@ -1,125 +1,41 @@
-function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
-    var destination = document.getElementById(destinationId);
-    if (destination.contains(object)) {
-        return Promise.resolve(true);
-    }
-    return new Promise(function (resolve) {
-        var originalZIndex = Number(object.style.zIndex);
-        object.style.zIndex = '10';
-        var objectCR = object.getBoundingClientRect();
-        var destinationCR = destination.getBoundingClientRect();
-        var deltaX = destinationCR.left - objectCR.left + (posX !== null && posX !== void 0 ? posX : 0) * game.getZoom();
-        var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0) * game.getZoom();
-        //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
-        object.style.transition = "transform 0.5s ease-in";
-        object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px)";
-        var transitionend = function () {
-            console.log('ontransitionend', object, destination);
-            object.style.top = posY !== undefined ? posY + "px" : 'unset';
-            object.style.left = posX !== undefined ? posX + "px" : 'unset';
-            object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
-            object.style.zIndex = originalZIndex ? '' + originalZIndex : 'unset';
-            object.style.transform = 'unset';
-            object.style.transition = 'unset';
-            destination.appendChild(object);
-            object.removeEventListener('transitionend', transitionend);
-            resolve(true);
-        };
-        object.addEventListener('transitionend', transitionend);
-    });
-}
-var Table = /** @class */ (function () {
-    function Table(game) {
-        this.game = game;
-        /*const factoriesDiv = document.getElementById('factories');
+declare const define;
+declare const ebg;
+declare const $;
+declare const dojo: Dojo;
+declare const _;
+declare const g_gamethemeurl;
 
-        const radius = 175 + factoryNumber*25;
-        const halfSize = radius + FACTORY_RADIUS;
-        const size = `${halfSize*2}px`;
-        factoriesDiv.style.width = size;
-        factoriesDiv.style.height = size;
+declare const board: HTMLDivElement;
 
-        let html = `<div>`;
-        html += `<div id="factory0" class="factory-center"></div>`;
-        for (let i=1; i<=factoryNumber; i++) {
-            const angle = (i-1)*Math.PI*2/factoryNumber; // in radians
-            const left = radius*Math.sin(angle);
-            const top = radius*Math.cos(angle);
-            
-            html += `<div id="factory${i}" class="factory" style="left: ${halfSize-FACTORY_RADIUS+left}px; top: ${halfSize-FACTORY_RADIUS-top}px;"></div>`;
-        }
-        html += `</div>`;
-
-        dojo.place(html, 'factories');
-
-        this.fillFactories(factories);*/
-    }
-    return Table;
-}());
-var PlayerTable = /** @class */ (function () {
-    function PlayerTable(game, player) {
-        this.game = game;
-        this.playerId = Number(player.id);
-        /*let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
-        <div id="player-table-${this.playerId}" class="player-table" style="border-color: #${player.color};">`;
-        for (let i=1; i<=5; i++) {
-            html += `<div id="player-table-${this.playerId}-line${i}" class="line" style="top: ${10 + 70*(i-1)}px; width: ${69*i - 5}px;"></div>`;
-        }
-        html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
-        html += `<div id="player-table-${this.playerId}-wall" class="wall ${this.game.isVariant() ? 'grayed-side' : 'colored-side'}"></div>`;
-        if (this.game.isVariant()) {
-            for (let i=1; i<=5; i++) {
-                html += `<div id="player-table-${this.playerId}-column${i}" class="column" style="left: ${384 + 69*(i-1)}px; width: ${64}px;"></div>`;
-            }
-            html += `<div id="player-table-${this.playerId}-column0" class="floor column"></div>`;
-        }
-        html += `    </div>
-        
-            <div class="player-name" style="color: #${player.color};">${player.name}</div>
-            <div class="player-name dark">${player.name}</div>
-        </div>`;
-
-        dojo.place(html, 'table');
-
-        for (let i=0; i<=5; i++) {
-            document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
-        }
-        if (this.game.isVariant()) {
-            for (let i=0; i<=5; i++) {
-                document.getElementById(`player-table-${this.playerId}-column${i}`).addEventListener('click', () => this.game.selectColumn(i));
-            }
-        }
-
-        for (let i=0; i<=5; i++) {
-            const tiles = player.lines.filter(tile => tile.line === i);
-            this.placeTilesOnLine(tiles, i);
-        }
-
-        this.placeTilesOnWall(player.wall);*/
-    }
-    return PlayerTable;
-}());
-var ANIMATION_MS = 500;
+const ANIMATION_MS = 500;
 /*const SCORE_MS = 1500;
 
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 const LOCAL_STORAGE_ZOOM_KEY = 'Nicodemus-zoom';*/
-var isDebug = window.location.host == 'studio.boardgamearena.com';
-var log = isDebug ? console.log.bind(window.console) : function () { };
-var Nicodemus = /** @class */ (function () {
-    function Nicodemus() {
-        this.carboniumCounters = [];
-        this.woodCounters = [];
-        this.copperCounters = [];
-        this.crystalCounters = [];
-        this.playersTables = [];
-        this.zoom = 1;
+
+const isDebug = window.location.host == 'studio.boardgamearena.com';
+const log = isDebug ? console.log.bind(window.console) : function () { };
+
+class Nicodemus implements NicodemusGame {
+    private gamedatas: NicodemusGamedatas;
+    private carboniumCounters: Counter[] = [];
+    private woodCounters: Counter[] = [];
+    private copperCounters: Counter[] = [];
+    private crystalCounters: Counter[] = [];
+
+    private factories: Table;
+    private playersTables: PlayerTable[] = [];
+
+    public zoom: number = 1;
+
+    constructor() {    
         /*const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
         } */
     }
+    
     /*
         setup:
 
@@ -132,34 +48,44 @@ var Nicodemus = /** @class */ (function () {
 
         "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
     */
-    Nicodemus.prototype.setup = function (gamedatas) {
+
+    public setup(gamedatas: NicodemusGamedatas) {
         // ignore loading of some pictures
         /*(this as any).dontPreloadImage('eye-shadow.png');
         (this as any).dontPreloadImage('publisher.png');
         [1,2,3,4,5,6,7,8,9,10].filter(i => !Object.values(gamedatas.players).some(player => Number((player as any).mat) === i)).forEach(i => (this as any).dontPreloadImage(`playmat_${i}.jpg`));
 */
-        log("Starting game setup");
+        log( "Starting game setup" );
+        
         this.gamedatas = gamedatas;
+
         log('gamedatas', gamedatas);
+
         this.createPlayerPanels(gamedatas);
         /*this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories);
         this.createPlayerTables(gamedatas);*/
+
         this.setupNotifications();
+
         /*document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
         document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
 
         (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
         */
-        log("Ending game setup");
-    };
+
+        log( "Ending game setup" );
+    }
+
     ///////////////////////////////////////////////////
     //// Game & client states
+
     // onEnteringState: this method is called each time we are entering into a new game state.
     //                  You can use this method to perform some user interface changes at this moment.
     //
-    Nicodemus.prototype.onEnteringState = function (stateName, args) {
-        log('Entering state: ' + stateName, args.args);
+    public onEnteringState(stateName: string, args: any) {
+        log( 'Entering state: '+stateName , args.args );
+
         switch (stateName) {
             case 'chooseTile':
                 this.onEnteringChooseTile();
@@ -168,18 +94,21 @@ var Nicodemus = /** @class */ (function () {
                 this.onEnteringChooseLine(args.args);
                 break;*/
         }
-    };
+    }
+    
     /*private setGamestateDescription(property: string = '') {
         const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
-        this.gamedatas.gamestate.description = `${originalState['description' + property]}`;
-        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`;
-        (this as any).updatePageTitle();
+        this.gamedatas.gamestate.description = `${originalState['description' + property]}`; 
+        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`; 
+        (this as any).updatePageTitle();        
     }*/
-    Nicodemus.prototype.onEnteringChooseTile = function () {
-        if (this.isCurrentPlayerActive()) {
+
+    onEnteringChooseTile() {
+        if ((this as any).isCurrentPlayerActive()) {
             dojo.addClass('factories', 'selectable');
         }
-    };
+    }
+
     /*onEnteringChooseLine(args: EnteringChooseLineArgs) {
         if ((this as any).isCurrentPlayerActive()) {
             args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
@@ -193,11 +122,13 @@ var Nicodemus = /** @class */ (function () {
             args.columns[playerId].forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-column${i}`, 'selectable'));
         }
     }*/
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
-    Nicodemus.prototype.onLeavingState = function (stateName) {
-        log('Leaving state: ' + stateName);
+    public onLeavingState(stateName: string) {
+        log( 'Leaving state: '+stateName );
+
         switch (stateName) {
             case 'chooseTile':
                 this.onLeavingChooseTile();
@@ -209,10 +140,12 @@ var Nicodemus = /** @class */ (function () {
                 this.onLeavingChooseColumn();
                 break;*/
         }
-    };
-    Nicodemus.prototype.onLeavingChooseTile = function () {
+    }
+
+    onLeavingChooseTile() {
         dojo.removeClass('factories', 'selectable');
-    };
+    }
+
     /*onLeavingChooseLine() {
         for (let i=0; i<=5; i++) {
             dojo.removeClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
@@ -225,21 +158,27 @@ var Nicodemus = /** @class */ (function () {
         }
         dojo.removeClass(`player-table-${this.getPlayerId()}-line0`, 'selectable');
     }*/
+
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
-    Nicodemus.prototype.onUpdateActionButtons = function (stateName, args) {
-        if (this.isCurrentPlayerActive()) {
-            switch (stateName) {
+    public onUpdateActionButtons(stateName: string, args: any) {
+        if((this as any).isCurrentPlayerActive()) {
+            switch (stateName) {                
                 case 'chooseColumn': // for multiplayer states we have to do it here
                     /*this.onEnteringChooseColumn(args);*/
                     break;
             }
         }
-    };
+    } 
+    
+
     ///////////////////////////////////////////////////
     //// Utility methods
+
+
     ///////////////////////////////////////////////////
+
     /*public getZoom() {
         return this.zoom;
     }
@@ -253,7 +192,7 @@ var Nicodemus = /** @class */ (function () {
         }
         // zoom will also place player tables. we call setZoom even if this method didn't change it because it might have been changed by localStorage zoom
         this.setZoom(newZoom);
-    }
+    }    
 
     private setZoom(zoom: number = 1) {
         this.zoom = zoom;
@@ -334,44 +273,72 @@ var Nicodemus = /** @class */ (function () {
         }
         
     }*/
-    Nicodemus.prototype.createPlayerPanels = function (gamedatas) {
-        var _this = this;
-        Object.values(gamedatas.players).forEach(function (player) {
-            var playerId = Number(player.id);
+
+    private createPlayerPanels(gamedatas: NicodemusGamedatas) {
+
+        Object.values(gamedatas.players).forEach(player => {
+            const playerId = Number(player.id);     
+
             // first player token
             /*if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper"></div>`, `player_board_${player.id}`);
             }*/
+
             // carbonium & resources counters
-            dojo.place("<div class=\"counters\">\n                <div id=\"carbonium-counter-wrapper-" + player.id + "\" class=\"carbonium-counter\">\n                    <div class=\"icon carbonium\"></div> \n                    <span id=\"carbonium-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            <div class=\"counters\">\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
-            var carboniumCounter = new ebg.counter();
-            carboniumCounter.create("carbonium-counter-" + playerId);
+            dojo.place(`<div class="counters">
+                <div id="carbonium-counter-wrapper-${player.id}" class="carbonium-counter">
+                    <div class="icon carbonium"></div> 
+                    <span id="carbonium-counter-${player.id}"></span>
+                </div>
+            </div>
+            <div class="counters">
+                <div id="wood-counter-wrapper-${player.id}" class="wood-counter">
+                    <div class="icon wood"></div> 
+                    <span id="wood-counter-${player.id}"></span>
+                </div>
+                <div id="copper-counter-wrapper-${player.id}" class="copper-counter">
+                    <div class="icon copper"></div> 
+                    <span id="copper-counter-${player.id}"></span>
+                </div>
+                <div id="crystal-counter-wrapper-${player.id}" class="crystal-counter">
+                    <div class="icon crystal"></div> 
+                    <span id="crystal-counter-${player.id}"></span>
+                </div>
+            </div>`, `player_board_${player.id}`);
+
+            const carboniumCounter = new ebg.counter();
+            carboniumCounter.create(`carbonium-counter-${playerId}`);
             carboniumCounter.setValue(player.carbonium);
-            _this.carboniumCounters[playerId] = carboniumCounter;
-            var woodCounter = new ebg.counter();
-            woodCounter.create("wood-counter-" + playerId);
+            this.carboniumCounters[playerId] = carboniumCounter;
+
+            const woodCounter = new ebg.counter();
+            woodCounter.create(`wood-counter-${playerId}`);
             woodCounter.setValue(player.wood);
-            _this.woodCounters[playerId] = woodCounter;
-            var copperCounter = new ebg.counter();
-            copperCounter.create("copper-counter-" + playerId);
+            this.woodCounters[playerId] = woodCounter;
+
+            const copperCounter = new ebg.counter();
+            copperCounter.create(`copper-counter-${playerId}`);
             copperCounter.setValue(player.copper);
-            _this.copperCounters[playerId] = copperCounter;
-            var crystalCounter = new ebg.counter();
-            crystalCounter.create("crystal-counter-" + playerId);
+            this.copperCounters[playerId] = copperCounter;
+
+            const crystalCounter = new ebg.counter();
+            crystalCounter.create(`crystal-counter-${playerId}`);
             crystalCounter.setValue(player.crystal);
-            _this.crystalCounters[playerId] = crystalCounter;
+            this.crystalCounters[playerId] = crystalCounter;
         });
-        this.addTooltipHtmlToClass('carbonium-counter', _("Carbonium"));
-        this.addTooltipHtmlToClass('wood-counter', _("Wood"));
-        this.addTooltipHtmlToClass('copper-counter', _("Copper"));
-        this.addTooltipHtmlToClass('crystal-counter', _("Crystal"));
-    };
+
+        (this as any).addTooltipHtmlToClass('carbonium-counter', _("Carbonium"));
+        (this as any).addTooltipHtmlToClass('wood-counter', _("Wood"));
+        (this as any).addTooltipHtmlToClass('copper-counter', _("Copper"));
+        (this as any).addTooltipHtmlToClass('crystal-counter', _("Crystal"));
+    }
+
     /*private createPlayerTables(gamedatas: NicodemusGamedatas) {
         const players = Object.values(gamedatas.players).sort((a, b) => a.playerNo - b.playerNo);
         const playerIndex = players.findIndex(player => Number(player.id) === Number((this as any).player_id));
         const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
 
-        orderedPlayers.forEach(player =>
+        orderedPlayers.forEach(player => 
             this.createPlayerTable(gamedatas, Number(player.id))
         );
     }
@@ -423,11 +390,13 @@ var Nicodemus = /** @class */ (function () {
             id
         });
     }*/
-    Nicodemus.prototype.takeAction = function (action, data) {
+
+    public takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
-        this.ajaxcall("/nicodemus/nicodemus/" + action + ".html", data, this, function () { });
-    };
+        (this as any).ajaxcall(`/nicodemus/nicodemus/${action}.html`, data, this, () => {});
+    }
+
     /*placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
@@ -445,8 +414,10 @@ var Nicodemus = /** @class */ (function () {
         playerHandDiv.style.height = `unset`;
         playerHandDiv.style.height = `${playerHandDiv.getBoundingClientRect().height}px`;
     }*/
+
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
+
     /*
         setupNotifications:
 
@@ -456,30 +427,122 @@ var Nicodemus = /** @class */ (function () {
                 your nicodemus.game.php file.
 
     */
-    Nicodemus.prototype.setupNotifications = function () {
+    setupNotifications() {
         //log( 'notifications subscriptions setup' );
-        var _this = this;
-        var notifs = [
-        /*['factoriesFilled', ANIMATION_MS],
-        ['tilesSelected', ANIMATION_MS],
-        ['tilesPlacedOnLine', ANIMATION_MS],
-        ['placeTileOnWall', SCORE_MS],
-        ['emptyFloorLine', SCORE_MS],
-        ['endScore', SCORE_MS],
-        ['firstPlayerToken', 1],*/
+
+        const notifs = [
+            /*['factoriesFilled', ANIMATION_MS],
+            ['tilesSelected', ANIMATION_MS],
+            ['tilesPlacedOnLine', ANIMATION_MS],
+            ['placeTileOnWall', SCORE_MS],
+            ['emptyFloorLine', SCORE_MS],
+            ['endScore', SCORE_MS],
+            ['firstPlayerToken', 1],*/
         ];
-        notifs.forEach(function (notif) {
-            dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
-            _this.notifqueue.setSynchronous(notif[0], notif[1]);
+
+        notifs.forEach((notif) => {
+            dojo.subscribe(notif[0], this, `notif_${notif[0]}`);
+            (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
         });
-    };
-    return Nicodemus;
-}());
-define([
-    "dojo", "dojo/_base/declare",
-    "ebg/core/gamegui",
-    "ebg/counter",
-    "ebg/stock"
-], function (dojo, declare) {
-    return declare("bgagame.nicodemus", ebg.core.gamegui, new Nicodemus());
-});
+    }
+
+    /*notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
+        this.factories.fillFactories(notif.args.factories);
+    }
+
+    notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
+        if (notif.args.fromFactory) {
+            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+        }
+        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId).then(
+            () => this.setHandHeight(notif.args.playerId)
+        );
+    }
+
+    notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(
+            () => this.setHandHeight(notif.args.playerId)
+        );
+    }
+
+    notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
+        Object.keys(notif.args.completeLines).forEach(playerId => {
+            const completeLine: PlacedTileOnWall = notif.args.completeLines[playerId];
+            
+            this.getPlayerTable(Number(playerId)).placeTilesOnWall([completeLine.placedTile]);
+
+            completeLine.pointsDetail.columnTiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
+            setTimeout(() => completeLine.pointsDetail.columnTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+
+            this.removeTiles(completeLine.discardedTiles, true);
+            (this as any).displayScoring(`tile${completeLine.placedTile.id}`, this.getPlayerColor(Number(playerId)), completeLine.pointsDetail.points, SCORE_MS);
+            this.incScore(Number(playerId), completeLine.pointsDetail.points);
+        });
+    }
+
+    notif_emptyFloorLine(notif: Notif<NotifEmptyFloorLineArgs>) {
+        Object.keys(notif.args.floorLines).forEach(playerId => {
+            const floorLine: FloorLine = notif.args.floorLines[playerId];
+            
+            this.removeTiles(floorLine.tiles, true);
+            (this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
+            this.incScore(Number(playerId), floorLine.points);
+        });
+    }
+
+    notif_endScore(notif: Notif<NotifEndScoreArgs>) {
+        Object.keys(notif.args.scores).forEach(playerId => {
+            const endScore: EndScoreTiles = notif.args.scores[playerId];
+
+            endScore.tiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
+            setTimeout(() => endScore.tiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+
+            (this as any).displayScoring(`tile${endScore.tiles[2].id}`, this.getPlayerColor(Number(playerId)), endScore.points, SCORE_MS);
+            this.incScore(Number(playerId), endScore.points);
+        });
+    }
+
+    notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
+        this.placeFirstPlayerToken(notif.args.playerId);
+    }
+
+    private getTypeFromColorString(color: string) {
+        switch (color) {
+            case 'Black': return 1;
+            case 'Cyan': return 2;
+            case 'Blue': return 3;
+            case 'Yellow': return 4;
+            case 'Red': return 5;
+        }
+        return null;
+    }*/
+
+    /* This enable to inject translatable styled things to logs or action bar */
+    /* @Override */
+    /*public format_string_recursive(log: string, args: any) {
+        try {
+            if (log && args && !args.processed) {
+
+                if (typeof args.lineNumber === 'number') {
+                    args.lineNumber = `<strong>${args.line}</strong>`;
+                }
+
+                if (log.indexOf('${number} ${color}') !== -1) {
+                    const type = this.getTypeFromColorString(args.color);
+                    const number = args.number;
+                    let html = '';
+                    for (let i=0; i<number; i++) {
+                        html += `<div class="tile tile${type}"></div>`;
+                    }
+
+                    log = log.replace('${number} ${color}', html);
+                }
+            }
+            //console.log()${number} ${color}
+        } catch (e) {
+            console.error(log,args,"Exception thrown", e.stack);
+        }
+        return (this as any).inherited(arguments);
+    }*/
+}

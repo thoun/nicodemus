@@ -1,0 +1,12 @@
+.counters {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+  
+    .carbonium-counter, .wood-counter, .copper-counter, .crystal-counter {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+  }
+  
