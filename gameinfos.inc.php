@@ -130,11 +130,10 @@ $gameinfos = [
 // Short game presentation text that will appear on the game description page, structured as an array of paragraphs.
 // Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
 // A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
-'presentation' => array(
-//    totranslate("This wonderful game is about geometric shapes!"),
-//    totranslate("It was awarded best triangle game of the year in 2005 and nominated for the Spiel des Jahres."),
-//    ...
-),
+'presentation' => [
+    totranslate("Nicodemus Gideon is retiring! To take his place, two assistants of the Dream Factory — that is, you and one other — will face off in a duel in which you repair machines and complete projects as quickly as possible in order to score 20 or more points first."),
+    totranslate("In Nicodemus , you can return to the universe of Imaginarium in a game in which the two players must block one another repeatedly, with advantages swinging one way, then the other, with the slightest mistake possibly being fatal to your chances."),
+],
 
 // Games categories
 //  You can attribute a maximum of FIVE "tags" for your game.
@@ -143,7 +142,7 @@ $gameinfos = [
 //  http://en.doc.boardgamearena.com/Game_meta-information:_gameinfos.inc.php
 //  IMPORTANT: this list should be ORDERED, with the most important tag first.
 //  IMPORTANT: it is mandatory that the FIRST tag is 1, 2, 3 and 4 (= game category)
-'tags' => array( 2 ),
+'tags' => [ 2, 11, 30, 100, 106, 204, 206 ],
 
 
 //////// BGA SANDBOX ONLY PARAMETERS (DO NOT MODIFY)
