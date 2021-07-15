@@ -19,9 +19,34 @@
  *
  */
 
-require_once( 'modules/php/objects/project.php' );
+require_once('modules/php/objects/machine.php');
+require_once('modules/php/objects/project.php');
 
-//ProjectCard($points, $colors = null, $machinePoints = null, $carbonium = null, $wood = null, $copper = null, $crystal = null)
+$this->MACHINES = [
+  // blue
+  11 => new MachineCard(1),
+  12 => new MachineCard(1),
+  13 => new MachineCard(2),
+  14 => new MachineCard(2),
+  15 => new MachineCard(3),
+
+  // purple
+  21 => new MachineCard(1),
+  22 => new MachineCard(1),
+  23 => new MachineCard(2),
+  24 => new MachineCard(2),
+
+  // red
+  31 => new MachineCard(1),
+  32 => new MachineCard(2),
+  33 => new MachineCard(3),
+  34 => new MachineCard(3),
+
+  // yellow
+  41 => new MachineCard(3),
+  42 => new MachineCard(3),
+];
+
 $this->PROJECTS = [
   // colors
   11 => new ProjectCard(1, [1 => 2]),

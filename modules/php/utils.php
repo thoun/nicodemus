@@ -15,15 +15,15 @@ trait UtilTrait {
         return intval(self::getUniqueValueFromDB("SELECT max(player_score) FROM player"));
     }
 
-    function setup() {
-        //TODO 56 machine cards    
-        /*$carboniums = [];
-        $carboniums[] = [ 'type' => 0, 'type_arg' => null, 'nbr' => 1 ];
-        for ($color=1; $color<=5; $color++) {
-            $carboniums[] = [ 'type' => $color, 'type_arg' => null, 'nbr' => 20 ];
+    function setupCards() {
+        // 56 machine cards    
+        $machines = [];
+        foreach(array_keys($this->MACHINES) as $projectId) {
+            $type = floor($projectId / 10);
+            $machines[] = [ 'type' => $type, 'type_arg' => $projectId % 10, 'nbr' => $type == 3 ? 2 : 4 ];
         }
-        $this->carboniums->createCards($cards, 'deck');
-        $this->carboniums->shuffle('deck');*/
+        $this->machines->createCards($machines, 'deck');
+        $this->machines->shuffle('deck');
         
         //17 project tiles
         $projects = [];
@@ -46,6 +46,27 @@ trait UtilTrait {
             [ 'type' => 3, 'type_arg' => null, 'nbr' => 8 ],
         ];
         $this->resources->createCards($resources, 'table');
+    }
+
+    function setInitialCardsAndResources(array $players) {
+        // set table and players machines
+        $this->machines->pickCardForLocation('deck', 'table', 1); 
+        foreach($players as $playerId => $player) {
+            $this->machines->pickCardsForLocation(5, 'deck', 'hand', $playerId);
+        }
+
+        // set table projects
+        $this->projects->pickCardsForLocation(6, 'deck', 'table');
+
+        // set initial resources
+        foreach($players as $playerId => $player) {
+            if (self::getGameStateValue(FIRST_PLAYER) == $playerId) {
+                $this->addCarbonium($playerId, 2);
+            } else {
+                $this->addCarbonium($playerId, 1);
+                $this->addResource($playerId, 1, 1);
+            }
+        }
     }
 
     function getMachineFromDb($dbObject) {
@@ -90,5 +111,21 @@ trait UtilTrait {
 
     function getResourcesFromDb(array $dbObjects) {
         return array_map(function($dbObject) { return $this->getResourceFromDb($dbObject); }, array_values($dbObjects));
+    }
+
+    function addCarbonium(int $playerId, int $number) {
+        // TODO
+    }
+
+    function addResource(int $playerId, int $number, int $type) {
+        // TODO
+    }
+
+    function removeCarbonium(int $playerId, int $number) {
+        // TODO
+    }
+
+    function removeResource(int $playerId, int $number, int $type) {
+        // TODO
     }
 }

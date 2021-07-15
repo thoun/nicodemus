@@ -23,7 +23,7 @@
 CREATE TABLE IF NOT EXISTS `machine` (
    `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
    `card_type` int(1) NOT NULL,
-   `card_type_arg` int(1),
+   `card_type_arg` int(1) NOT NULL,
    `card_location` varchar(20) NOT NULL,
    `card_location_arg` int(11),
    PRIMARY KEY (`card_id`)

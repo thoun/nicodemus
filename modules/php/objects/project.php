@@ -11,6 +11,7 @@ class ProjectCard {
   
   
     public function __construct(int $points, $colors = null, $machinePoints = null, $carbonium = null, $wood = null, $copper = null, $crystal = null) {
+        $this->points = $points;
         $this->colors = $colors;
         $this->machinePoints = $machinePoints;
         $this->carbonium = $carbonium;
