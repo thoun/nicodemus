@@ -17,13 +17,17 @@
   */
 
 
-require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
+require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
 
+require_once('modules/php/constants.inc.php');
+require_once('modules/php/utils.php');
+require_once('modules/php/actions.php');
 
-class Nicodemus extends Table
-{
-	function __construct( )
-	{
+class Nicodemus extends Table {
+    use UtilTrait;
+    use ActionTrait;
+
+	function __construct() {
         // Your global variables labels:
         //  Here, you can assign labels to global variables you are using for this game.
         //  You can use any number of global variables with IDs between 10 and 99.
@@ -32,18 +36,29 @@ class Nicodemus extends Table
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
         
-        self::initGameStateLabels( array( 
-            //    "my_first_global_variable" => 10,
-            //    "my_second_global_variable" => 11,
-            //      ...
-            //    "my_first_game_variant" => 100,
-            //    "my_second_game_variant" => 101,
-            //      ...
-        ) );        
+        self::initGameStateLabels([
+            FIRST_PLAYER => 10,
+            PLAYED_MACHINE => 11,
+        ]); 
+
+        $this->machines = self::getNew("module.common.deck");
+        $this->machines->init("machine");
+        $this->machines->autoreshuffle = true;
+
+        $this->projects = self::getNew("module.common.deck");
+        $this->projects->init("project");
+        $this->projects->autoreshuffle = true;
+
+        $this->carboniums = self::getNew("module.common.deck");
+        $this->carboniums->init("carbonium");
+        $this->carboniums->autoreshuffle = true;
+
+        $this->resources = self::getNew("module.common.deck");
+        $this->resources->init("resource");
+        $this->resources->autoreshuffle = true;
 	}
 	
-    protected function getGameName( )
-    {
+    protected function getGameName() {
 		// Used for translations and stuff. Please do not modify.
         return "nicodemus";
     }	
@@ -55,8 +70,7 @@ class Nicodemus extends Table
         In this method, you must setup the game according to the game rules, so that
         the game is ready to be played.
     */
-    protected function setupNewGame( $players, $options = array() )
-    {    
+    protected function setupNewGame($players, $options = []) {    
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
@@ -66,15 +80,18 @@ class Nicodemus extends Table
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
-        $values = array();
-        foreach( $players as $player_id => $player )
-        {
-            $color = array_shift( $default_colors );
+        $values = [];
+        foreach($players as $player_id => $player) {
+            $color = array_shift($default_colors);
             $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
+
+            if (self::getGameStateValue(FIRST_PLAYER) == 0) {
+                self::setGameStateValue(FIRST_PLAYER, $player_id);
+            }
         }
-        $sql .= implode( $values, ',' );
-        self::DbQuery( $sql );
-        self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
+        $sql .= implode($values, ',');
+        self::DbQuery($sql);
+        self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
         self::reloadPlayersBasicInfos();
         
         /************ Start the game initialization *****/
@@ -87,7 +104,7 @@ class Nicodemus extends Table
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
-        // TODO: setup the initial game situation here
+        $this->setup();
        
 
         // Activate first player (which is in general a good idea :) )
@@ -105,18 +122,34 @@ class Nicodemus extends Table
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas()
-    {
-        $result = array();
+    protected function getAllDatas() {
+        $result = [];
     
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score FROM player ";
-        $result['players'] = self::getCollectionFromDb( $sql );
-  
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
+        $result['players'] = self::getCollectionFromDb($sql);
+
+        foreach($result['players'] as $playerId => &$player) {
+            $player['projects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('player', $playerId));
+            if ($playerId == $current_player_id) {
+                $player['handMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $playerId));
+            }
+            $player['machines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
+            $player['carbonium'] = intval($this->carboniums->countCardInLocation('player', $playerId));
+            $player['wood'] = count($this->resources->getCardsOfTypeInLocation(1, null, 'player', $playerId));
+            $player['copper'] = count($this->resources->getCardsOfTypeInLocation(2, null, 'player', $playerId));
+            $player['crystal'] = count($this->resources->getCardsOfTypeInLocation(3, null, 'player', $playerId));
+        }
+
+        $result['tableMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+        $result['tableProjects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('table'));
+        $result['carbonium'] = intval($this->carboniums->countCardInLocation('table'));
+        $result['wood'] = count($this->resources->getCardsOfTypeInLocation(1, null, 'table'));
+        $result['copper'] = count($this->resources->getCardsOfTypeInLocation(2, null, 'table'));
+        $result['crystal'] = count($this->resources->getCardsOfTypeInLocation(3, null, 'table'));
   
         return $result;
     }
@@ -131,58 +164,9 @@ class Nicodemus extends Table
         This method is called each time we are in a game state with the "updateGameProgression" property set to true 
         (see states.inc.php)
     */
-    function getGameProgression()
-    {
-        // TODO: compute and return the game progression
-
-        return 0;
+    function getGameProgression() {
+        return $this->getMaxPlayerScore() * 5;
     }
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////// Utility functions
-////////////    
-
-    /*
-        In this space, you can put any utility methods useful for your game logic
-    */
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////// Player actions
-//////////// 
-
-    /*
-        Each time a player is doing some game action, one of the methods below is called.
-        (note: each method below must match an input method in nicodemus.action.php)
-    */
-
-    /*
-    
-    Example:
-
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-          
-    }
-    
-    */
 
     
 //////////////////////////////////////////////////////////////////////////////
@@ -251,14 +235,13 @@ class Nicodemus extends Table
         you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
     */
 
-    function zombieTurn( $state, $active_player )
-    {
+    function zombieTurn($state, $active_player) {
     	$statename = $state['name'];
     	
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
                 default:
-                    $this->gamestate->nextState( "zombiePass" );
+                    $this->gamestate->nextState("zombiePass");
                 	break;
             }
 
@@ -267,12 +250,12 @@ class Nicodemus extends Table
 
         if ($state['type'] === "multipleactiveplayer") {
             // Make sure player is in a non blocking status for role turn
-            $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
+            $this->gamestate->setPlayerNonMultiactive($active_player, '');
             
             return;
         }
 
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        throw new feException("Zombie mode not supported at this game state: ".$statename);
     }
     
 ///////////////////////////////////////////////////////////////////////////////////:
@@ -290,8 +273,7 @@ class Nicodemus extends Table
     
     */
     
-    function upgradeTableDb( $from_version )
-    {
+    function upgradeTableDb($from_version) {
         // $from_version is the current version of this game database, in numerical form.
         // For example, if the game was running with a release of your game named "140430-1345",
         // $from_version is equal to 1404301345

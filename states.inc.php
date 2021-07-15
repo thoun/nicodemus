@@ -49,63 +49,93 @@
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
- 
-$machinestates = array(
+require_once("modules/php/constants.inc.php");
+
+$basicGameStates = [
 
     // The initial state. Please do not modify.
-    1 => array(
+    ST_BGA_GAME_SETUP => [
         "name" => "gameSetup",
-        "description" => "",
+        "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
-    ),
-    
-    // Note: ID=2 => your first state
+        "transitions" => [ "" => ST_PLAYER_CHOOSE_ACTION ]
+    ],
 
-    2 => array(
-    		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must play a card or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( "playCard", "pass" ),
-    		"transitions" => array( "playCard" => 2, "pass" => 2 )
-    ),
-    
-/*
-    Examples:
-    
-    2 => array(
+    ST_NEXT_PLAYER => [
         "name" => "nextPlayer",
-        "description" => '',
+        "description" => "",
         "type" => "game",
         "action" => "stNextPlayer",
-        "updateGameProgression" => true,   
-        "transitions" => array( "endGame" => 99, "nextPlayer" => 10 )
-    ),
-    
-    10 => array(
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-        "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ), 
-
-*/    
+        "transitions" => [
+            "nextPlayer" => ST_PLAYER_CHOOSE_ACTION, 
+            "endGame" => ST_END_GAME,
+        ],
+    ],
    
     // Final state.
-    // Please do not modify (and do not overload action/args methods).
-    99 => array(
+    // Please do not modify.
+    ST_END_GAME => [
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
         "action" => "stGameEnd",
-        "args" => "argGameEnd"
-    )
-
-);
-
+        "args" => "argGameEnd",
+    ],
+];
 
 
+$playerActionsGameStates = [
+
+    ST_PLAYER_CHOOSE_ACTION => [
+        "name" => "chooseAction",
+        "description" => clienttranslate('${actplayer} must play or fix a machine'),
+        "descriptionmyturn" => clienttranslate('${you} must play or fix a machine'),
+        "type" => "activeplayer",
+        "possibleactions" => [ 
+            "playMachine",
+            "fixMachine",
+        ],
+        "transitions" => [
+            "choosePlayAction" => ST_PLAYER_CHOOSE_PLAY_ACTION,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_CHOOSE_PLAY_ACTION => [
+        "name" => "choosePlayAction",
+        "description" => clienttranslate('${actplayer} must choose action for played card'),
+        "descriptionmyturn" => clienttranslate('${you} must choose action for played card'),
+        "type" => "activeplayer",
+        "possibleactions" => [ 
+            "getCharbonium",
+            "getResource",
+            "applyEffect",
+        ],
+        "transitions" => [
+            "chooseProject" => ST_PLAYER_CHOOSE_PROJECT,
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_CHOOSE_PROJECT => [
+        "name" => "chooseProject",
+        "description" => clienttranslate('${actplayer} can select project(s)'),
+        "descriptionmyturn" => clienttranslate('${you} can select project(s)'),
+        "type" => "activeplayer",
+        "possibleactions" => [ 
+            "getCharbonium",
+            "getResource",
+            "applyEffect",
+        ],
+        "transitions" => [
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+
+];
+ 
+$machinestates = $basicGameStates + $playerActionsGameStates;
