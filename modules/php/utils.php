@@ -188,4 +188,13 @@ trait UtilTrait {
     function getCompleteProjects(object $machine) {
         return [];
     }
+
+    function clearTableRowIfNecessary() {
+        if (intval($this->machines->countCardInLocation('table')) < 10) {
+            return;
+        }
+        
+        // TODO
+        // TODO notif
+    }
 }

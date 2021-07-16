@@ -458,6 +458,10 @@ var Nicodemus = /** @class */ (function () {
                     }
                     else {
                         this.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + choosePlayActionArgs_1.resource + "])"), function () { return _this.getResource(choosePlayActionArgs_1.resource); });
+                        if (choosePlayActionArgs_1.resource == 0) {
+                            dojo.removeClass('getResource-button', 'bgabutton_blue');
+                            dojo.addClass('getResource-button', 'bgabutton_gray');
+                        }
                     }
                     this.addActionButton('applyEffect-button', _('Apply effect'), function () { return _this.applyEffect(); });
                     break;

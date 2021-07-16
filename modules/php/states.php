@@ -22,6 +22,8 @@ trait StateTrait {
     }
 
     function stNextPlayer() {
+        $this->clearTableRowIfNecessary();
+
         if (intval(self::getGameStateValue(LAST_TURN)) == 1 && self::getActivePlayerId() != $this->getFirstPlayerId()) {
             $this->gamestate->nextState('endGame');
         } else {

@@ -143,6 +143,10 @@ class Nicodemus implements NicodemusGame {
                         }
                     } else {
                         (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.resource}])`), () => this.getResource(choosePlayActionArgs.resource));
+                        if (choosePlayActionArgs.resource == 0) {
+                            dojo.removeClass('getResource-button', 'bgabutton_blue');
+                            dojo.addClass('getResource-button', 'bgabutton_gray');
+                        }
                     }
                     (this as any).addActionButton('applyEffect-button', _('Apply effect'), () => this.applyEffect());
                     break;
