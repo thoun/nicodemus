@@ -99,6 +99,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "choosePlayAction" => ST_PLAYER_CHOOSE_PLAY_ACTION,
             "chooseProject" => ST_PLAYER_CHOOSE_PROJECT,
+            "nextPlayer" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -125,6 +126,7 @@ $playerActionsGameStates = [
         "description" => clienttranslate('${actplayer} can select project(s)'),
         "descriptionmyturn" => clienttranslate('${you} can select project(s)'),
         "type" => "activeplayer",
+        "args" => "argChooseProject",
         "possibleactions" => [ 
             "selectProjects",
         ],

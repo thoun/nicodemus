@@ -93,6 +93,12 @@ class Nicodemus implements NicodemusGame {
         log( 'Entering state: '+stateName , args.args );
 
         switch (stateName) {
+            case 'chooseAction':
+                if((this as any).isCurrentPlayerActive()) {
+                    this.setHandSelectable(true);
+                    this.table.setMachineSelectable(true);
+                }
+                break;
             case 'chooseProject':
                 if((this as any).isCurrentPlayerActive()) {
                     this.table.setProjectSelectable(true);
@@ -108,6 +114,10 @@ class Nicodemus implements NicodemusGame {
         log( 'Leaving state: '+stateName );
 
         switch (stateName) {
+            case 'chooseAction':
+                this.setHandSelectable(false);
+                this.table.setMachineSelectable(false);
+                break;
             case 'chooseProject':
                 this.table.setProjectSelectable(false);
                 break;
@@ -166,6 +176,10 @@ class Nicodemus implements NicodemusGame {
         setupMachineCards([this.playerMachineHand]);
 
         machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id));
+    }
+
+    public setHandSelectable(selectable: boolean) {
+        this.playerMachineHand.setSelectionMode(selectable ? 1 : 0);
     }
 
     public onPlayerMachineHandSelectionChanged(items: any) {
@@ -322,9 +336,15 @@ class Nicodemus implements NicodemusGame {
         this.table.setPoints(playerId, points);
     }
     
-    private setCharcoalium(playerId: number, charcoalium: number) {
-        this.charcoaliumCounters[playerId].toValue(charcoalium);
-        this.getPlayerTable(playerId).setCharcoalium(charcoalium)
+    private setCharcoalium(playerId: number, number: number) {
+        this.charcoaliumCounters[playerId].toValue(number);
+        this.getPlayerTable(playerId).setCharcoalium(number);
+    }
+    
+    private setResource(playerId: number, resource: number, number: number) {
+        const counters = [null, this.woodCounters, this.copperCounters, this.crystalCounters];
+        counters[resource][playerId].toValue(number);
+        this.getPlayerTable(playerId).setResource(resource, number);
     }
 
     ///////////////////////////////////////////////////
@@ -417,44 +437,31 @@ class Nicodemus implements NicodemusGame {
 
     notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
         this.placeFirstPlayerToken(notif.args.playerId);
-    }
+    }*/
 
-    private getTypeFromColorString(color: string) {
+    private getMachineColor(color: number) {
         switch (color) {
-            case 'Black': return 1;
-            case 'Cyan': return 2;
-            case 'Blue': return 3;
-            case 'Yellow': return 4;
-            case 'Red': return 5;
+            case 1: return '#006fa1';
+            case 2: return '#702c91';
+            case 3: return '#a72c32';
+            case 4: return '#c48b10';
         }
         return null;
-    }*/
+    }
 
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
-    /*public format_string_recursive(log: string, args: any) {
+    public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-
-                if (typeof args.lineNumber === 'number') {
-                    args.lineNumber = `<strong>${args.line}</strong>`;
-                }
-
-                if (log.indexOf('${number} ${color}') !== -1) {
-                    const type = this.getTypeFromColorString(args.color);
-                    const number = args.number;
-                    let html = '';
-                    for (let i=0; i<number; i++) {
-                        html += `<div class="tile tile${type}"></div>`;
-                    }
-
-                    log = log.replace('${number} ${color}', html);
+                // Representation of the color of a card
+                if (typeof args.machine_name == 'string' && args.machine_name[0] != '<') {
+                    args.machine_name = `<strong style="color: ${this.getMachineColor(args.machine.type)}">${args.machine_name}</strong>`;
                 }
             }
-            //console.log()${number} ${color}
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);
         }
         return (this as any).inherited(arguments);
-    }*/
+    }
 }

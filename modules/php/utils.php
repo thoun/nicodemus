@@ -122,6 +122,10 @@ trait UtilTrait {
         return array_map(function($dbObject) { return $this->getResourceFromDb($dbObject); }, array_values($dbObjects));
     }
 
+    function getAvailableMachineSpot() {
+        return intval($this->machines->countCardInLocation('table')) + 1;
+    }
+
     function addCharcoalium(int $playerId, int $number) {
         $availableOnTable = intval($this->charcoaliums->countCardInLocation('table'));
         
@@ -153,10 +157,27 @@ trait UtilTrait {
     }
 
     function removeCharcoalium(int $playerId, int $number) {
-        // TODO
+        $playerCharcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('player', $playerId));
+        $this->charcoaliums->moveCards(array_map(function ($r) { return $r->id; }, array_slice($playerCharcoaliums, 0, min($number, count($playerCharcoaliums)))), 'table');
     }
 
     function removeResource(int $playerId, int $number, int $type) {
-        // TODO
+        $playerResources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'player', $playerId));
+        $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($playerResources, 0, min($number, count($playerResources)))), 'table');
+    }
+
+    function getColorName(int $type) {
+        $colorName = null;
+        switch ($type) {
+            case 1: $colorName = _('Production'); break;
+            case 2: $colorName = _('Transformation'); break;
+            case 3: $colorName = _('Attack'); break;
+            case 4: $colorName = _('Special'); break;
+        }
+        return $colorName;
+    }
+
+    function getCompleteProjects(object $machine) {
+        return [];
     }
 }

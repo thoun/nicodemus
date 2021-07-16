@@ -21,16 +21,17 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        $freeTableSpot = 1; // TODO
+        $freeTableSpot = $this->getAvailableMachineSpot();
         $this->machines->moveCard($id, 'table', $freeTableSpot);
-
         self::setGameStateValue(PLAYED_MACHINE, $id);
 
-        self::notifyAllPlayers('machinePlayed', clienttranslate('${player_name} plays ${machine_name}'), [
+        $machine = $this->getMachineFromDb($this->machines->getCard($id));
+
+        self::notifyAllPlayers('machinePlayed', clienttranslate('${player_name} plays ${machine_name} machine'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
-            'machine' => $this->getMachineFromDb($this->machines->getCard($id)),
-            'machine_name' => 'TODO',
+            'machine' => $machine,
+            'machine_name' => $this->getColorName($machine->type),
         ]);
 
         $this->gamestate->nextState('choosePlayAction');
@@ -41,18 +42,21 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
+        self::setGameStateValue(PLAYED_MACHINE, $id);
         $this->machines->moveCard($id, 'player', $playerId);
 
-        self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${machine_name}'), [
+        $machine = $this->getMachineFromDb($this->machines->getCard($id));
+
+        self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${machine_name} machine'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
-            'machine' => $this->getMachineFromDb($this->machines->getCard($id)),
-            'machine_name' => 'TODO',
+            'machine' => $machine,
+            'machine_name' => $this->getColorName($machine->type),
         ]);
         
         // TODO
 
-        $this->gamestate->nextState(true ? 'chooseProject' : 'nextPlayer');
+        $this->gamestate->nextState(count($this->getCompleteProjects($machine)) > 0 ? 'chooseProject' : 'nextPlayer');
     }
 
     public function getCharcoalium() {

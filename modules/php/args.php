@@ -21,4 +21,15 @@ trait ArgsTrait {
             'resource' => $machine->produce,
         ];
     }  
+    
+    function argChooseProject() {
+
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        $completeProjects = $this->getCompleteProjects($machine);
+    
+        return [
+            'completeProjects' => $completeProjects,
+        ];
+    }  
 }

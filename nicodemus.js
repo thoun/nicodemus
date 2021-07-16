@@ -239,7 +239,7 @@ var Table = /** @class */ (function () {
         html = "<div class=\"machines\">";
         for (var i = 1; i <= 10; i++) {
             var firstRow = i <= 5;
-            var left = (firstRow ? 204 : 0) + (i - 1) * 200;
+            var left = (firstRow ? 204 : 0) + (i - 1) * 204;
             var top_1 = firstRow ? 0 : 210;
             html += "<div id=\"table-machine-spot-" + i + "\" class=\"machine-spot\" style=\"left: " + left + "px; top: " + top_1 + "px\"></div>";
         }
@@ -304,6 +304,7 @@ var Table = /** @class */ (function () {
 }());
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player, side) {
+        var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
         var color = player.color.startsWith('00') ? 'blue' : 'red';
@@ -314,11 +315,16 @@ var PlayerTable = /** @class */ (function () {
         this.machineStock.selectionClass = 'selected';
         this.machineStock.create(this.game, $("player-table-" + this.playerId + "-machines"), MACHINE_WIDTH, MACHINE_HEIGHT);
         this.machineStock.setSelectionMode(0);
+        this.machineStock.centerItems = true;
         //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
         //dojo.connect(this.machineStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
         setupMachineCards([this.machineStock]);
+        player.machines.forEach(function (machine) { return _this.machineStock.addToStockWithId(getUniqueId(machine), '' + machine.id); });
     }
-    PlayerTable.prototype.setCharcoalium = function (charcoalium) {
+    PlayerTable.prototype.setCharcoalium = function (number) {
+        // TODO
+    };
+    PlayerTable.prototype.setResource = function (type, number) {
         // TODO
     };
     return PlayerTable;
@@ -395,6 +401,12 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.onEnteringState = function (stateName, args) {
         log('Entering state: ' + stateName, args.args);
         switch (stateName) {
+            case 'chooseAction':
+                if (this.isCurrentPlayerActive()) {
+                    this.setHandSelectable(true);
+                    this.table.setMachineSelectable(true);
+                }
+                break;
             case 'chooseProject':
                 if (this.isCurrentPlayerActive()) {
                     this.table.setProjectSelectable(true);
@@ -408,6 +420,10 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.onLeavingState = function (stateName) {
         log('Leaving state: ' + stateName);
         switch (stateName) {
+            case 'chooseAction':
+                this.setHandSelectable(false);
+                this.table.setMachineSelectable(false);
+                break;
             case 'chooseProject':
                 this.table.setProjectSelectable(false);
                 break;
@@ -464,6 +480,9 @@ var Nicodemus = /** @class */ (function () {
         dojo.connect(this.playerMachineHand, 'onChangeSelection', this, function () { return _this.onPlayerMachineHandSelectionChanged(_this.playerMachineHand.getSelectedItems()); });
         setupMachineCards([this.playerMachineHand]);
         machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id); });
+    };
+    Nicodemus.prototype.setHandSelectable = function (selectable) {
+        this.playerMachineHand.setSelectionMode(selectable ? 1 : 0);
     };
     Nicodemus.prototype.onPlayerMachineHandSelectionChanged = function (items) {
         if (items.length == 1) {
@@ -574,9 +593,14 @@ var Nicodemus = /** @class */ (function () {
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
         this.table.setPoints(playerId, points);
     };
-    Nicodemus.prototype.setCharcoalium = function (playerId, charcoalium) {
-        this.charcoaliumCounters[playerId].toValue(charcoalium);
-        this.getPlayerTable(playerId).setCharcoalium(charcoalium);
+    Nicodemus.prototype.setCharcoalium = function (playerId, number) {
+        this.charcoaliumCounters[playerId].toValue(number);
+        this.getPlayerTable(playerId).setCharcoalium(number);
+    };
+    Nicodemus.prototype.setResource = function (playerId, resource, number) {
+        var counters = [null, this.woodCounters, this.copperCounters, this.crystalCounters];
+        counters[resource][playerId].toValue(number);
+        this.getPlayerTable(playerId).setResource(resource, number);
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
@@ -605,6 +629,91 @@ var Nicodemus = /** @class */ (function () {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
             _this.notifqueue.setSynchronous(notif[0], notif[1]);
         });
+    };
+    /*notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
+        this.factories.fillFactories(notif.args.factories);
+    }
+
+    notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
+        if (notif.args.fromFactory) {
+            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+        }
+        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId).then(
+            () => this.setHandHeight(notif.args.playerId)
+        );
+    }
+
+    notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(
+            () => this.setHandHeight(notif.args.playerId)
+        );
+    }
+
+    notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
+        Object.keys(notif.args.completeLines).forEach(playerId => {
+            const completeLine: PlacedTileOnWall = notif.args.completeLines[playerId];
+            
+            this.getPlayerTable(Number(playerId)).placeTilesOnWall([completeLine.placedTile]);
+
+            completeLine.pointsDetail.columnTiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
+            setTimeout(() => completeLine.pointsDetail.columnTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+
+            this.removeTiles(completeLine.discardedTiles, true);
+            (this as any).displayScoring(`tile${completeLine.placedTile.id}`, this.getPlayerColor(Number(playerId)), completeLine.pointsDetail.points, SCORE_MS);
+            this.incScore(Number(playerId), completeLine.pointsDetail.points);
+        });
+    }
+
+    notif_emptyFloorLine(notif: Notif<NotifEmptyFloorLineArgs>) {
+        Object.keys(notif.args.floorLines).forEach(playerId => {
+            const floorLine: FloorLine = notif.args.floorLines[playerId];
+            
+            this.removeTiles(floorLine.tiles, true);
+            (this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
+            this.incScore(Number(playerId), floorLine.points);
+        });
+    }
+
+    notif_endScore(notif: Notif<NotifEndScoreArgs>) {
+        Object.keys(notif.args.scores).forEach(playerId => {
+            const endScore: EndScoreTiles = notif.args.scores[playerId];
+
+            endScore.tiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
+            setTimeout(() => endScore.tiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+
+            (this as any).displayScoring(`tile${endScore.tiles[2].id}`, this.getPlayerColor(Number(playerId)), endScore.points, SCORE_MS);
+            this.incScore(Number(playerId), endScore.points);
+        });
+    }
+
+    notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
+        this.placeFirstPlayerToken(notif.args.playerId);
+    }*/
+    Nicodemus.prototype.getMachineColor = function (color) {
+        switch (color) {
+            case 1: return '#006fa1';
+            case 2: return '#702c91';
+            case 3: return '#a72c32';
+            case 4: return '#c48b10';
+        }
+        return null;
+    };
+    /* This enable to inject translatable styled things to logs or action bar */
+    /* @Override */
+    Nicodemus.prototype.format_string_recursive = function (log, args) {
+        try {
+            if (log && args && !args.processed) {
+                // Representation of the color of a card
+                if (typeof args.machine_name == 'string' && args.machine_name[0] != '<') {
+                    args.machine_name = "<strong style=\"color: " + this.getMachineColor(args.machine.type) + "\">" + args.machine_name + "</strong>";
+                }
+            }
+        }
+        catch (e) {
+            console.error(log, args, "Exception thrown", e.stack);
+        }
+        return this.inherited(arguments);
     };
     return Nicodemus;
 }());

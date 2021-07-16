@@ -59,68 +59,10 @@ interface ChoosePlayActionArgs {
     resource: number;
 }
 
-interface EnteringChooseColumnArgs {
-    line: number;
-    columns: { [playerId: number]: number[] };
+interface ChooseProjectArgs {
+    completeProjects: Project[];
 }
 
 /*interface NotifFirstPlayerTokenArgs {
     playerId: number;
-}
-
-interface NotifFactoriesFilledArgs {
-    factories: { [factoryId: number]: Tile[] };
-}
-
-interface NotifTilesSelectedArgs {
-    playerId: number;
-    selectedTiles: Tile[];
-    discardedTiles: Tile[];
-    fromFactory: boolean;
-}
-
-interface NotifTilesPlacedOnLineArgs {
-    playerId: number;
-    line: number;
-    placedTiles: Tile[];
-    discardedTiles: Tile[];
-}
-
-interface WallTilePointDetail {
-    points: number;
-    rowTiles: Tile[];
-    columnTiles: Tile[];
-}
-
-interface PlacedTileOnWall {
-    placedTile: Tile;
-    discardedTiles: Tile[];
-    pointsDetail: WallTilePointDetail;
-}
-
-interface NotifPlaceTileOnWallArgs {
-    completeLines: { [playerId: number]: PlacedTileOnWall };
-}
-
-interface FloorLine {
-    points: number;
-    tiles: Tile[];
-}
-
-interface NotifEmptyFloorLineArgs {
-    floorLines: { [playerId: number]: FloorLine };
-}
-
-interface EndScoreTiles {
-    tiles: Tile[];
-    points: number;
-}
-
-interface NotifEndScoreArgs {
-    scores: { [playerId: number]: EndScoreTiles };
-}
-
-interface PlacedTile {
-    x: number;
-    y: number;
 }*/

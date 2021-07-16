@@ -28,12 +28,19 @@ class PlayerTable {
         this.machineStock.selectionClass = 'selected';
         this.machineStock.create(this.game, $(`player-table-${this.playerId}-machines`), MACHINE_WIDTH, MACHINE_HEIGHT);
         this.machineStock.setSelectionMode(0);
+        this.machineStock.centerItems = true;
         //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
         //dojo.connect(this.machineStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
         setupMachineCards([this.machineStock]);
+
+        player.machines.forEach(machine => this.machineStock.addToStockWithId(getUniqueId(machine), ''+machine.id));
     }
 
-    public setCharcoalium(charcoalium: number) {
+    public setCharcoalium(number: number) {
+        // TODO
+    }
+
+    public setResource(type: number, number: number) {
         // TODO
     }
 }

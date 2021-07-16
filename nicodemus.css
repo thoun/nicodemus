@@ -51,6 +51,9 @@
   left: 6px;
   top: 102px;
 }
+#table .machines .machine-spot {
+  position: absolute;
+}
 #table .machines #machine-deck {
   position: absolute;
   top: 208px;
