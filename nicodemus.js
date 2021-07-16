@@ -300,6 +300,11 @@ var Table = /** @class */ (function () {
         markerDiv.style.top = (points % 2 ? 40 : 52) + "px";
         markerDiv.style.left = 16 + points * 46.2 + "px";
     };
+    Table.prototype.machinePlayed = function (playerId, machine) {
+        var fromHandId = "my-machines_item_" + machine.id;
+        var from = document.getElementById(fromHandId) ? fromHandId : "player-icon-" + playerId;
+        this.machineStocks[machine.location_arg].addToStockWithId(getUniqueId(machine), '' + machine.id, from);
+    };
     return Table;
 }());
 var PlayerTable = /** @class */ (function () {
@@ -519,7 +524,7 @@ var Nicodemus = /** @class */ (function () {
             crystalCounter.setValue(player.crystal);
             _this.crystalCounters[playerId] = crystalCounter;
             if (player.playerNo == 1) {
-                dojo.place("<div class=\"player-icon first-player\"></div>", "player_board_" + player.id);
+                dojo.place("<div id=\"player-icon-" + player.id + "\" class=\"player-icon first-player\"></div>", "player_board_" + player.id);
             }
         });
         this.addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
@@ -617,24 +622,24 @@ var Nicodemus = /** @class */ (function () {
         //log( 'notifications subscriptions setup' );
         var _this = this;
         var notifs = [
-        /*['factoriesFilled', ANIMATION_MS],
-        ['tilesSelected', ANIMATION_MS],
-        ['tilesPlacedOnLine', ANIMATION_MS],
-        ['placeTileOnWall', SCORE_MS],
-        ['emptyFloorLine', SCORE_MS],
-        ['endScore', SCORE_MS],
-        ['firstPlayerToken', 1],*/
+            ['machinePlayed', ANIMATION_MS],
+            /*['tilesSelected', ANIMATION_MS],
+            ['tilesPlacedOnLine', ANIMATION_MS],
+            ['placeTileOnWall', SCORE_MS],
+            ['emptyFloorLine', SCORE_MS],
+            ['endScore', SCORE_MS],
+            ['firstPlayerToken', 1],*/
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
             _this.notifqueue.setSynchronous(notif[0], notif[1]);
         });
     };
-    /*notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
-        this.factories.fillFactories(notif.args.factories);
-    }
-
-    notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
+    Nicodemus.prototype.notif_machinePlayed = function (notif) {
+        this.playerMachineHand.removeFromStockById('' + notif.args.machine.id);
+        this.table.machinePlayed(notif.args.playerId, notif.args.machine);
+    };
+    /*notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
         if (notif.args.fromFactory) {
             this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
         }

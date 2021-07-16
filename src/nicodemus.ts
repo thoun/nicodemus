@@ -245,7 +245,7 @@ class Nicodemus implements NicodemusGame {
             this.crystalCounters[playerId] = crystalCounter;
 
             if (player.playerNo == 1) {
-                dojo.place(`<div class="player-icon first-player"></div>`, `player_board_${player.id}`);
+                dojo.place(`<div id="player-icon-${player.id}" class="player-icon first-player"></div>`, `player_board_${player.id}`);
             }
         });
 
@@ -363,8 +363,8 @@ class Nicodemus implements NicodemusGame {
         //log( 'notifications subscriptions setup' );
 
         const notifs = [
-            /*['factoriesFilled', ANIMATION_MS],
-            ['tilesSelected', ANIMATION_MS],
+            ['machinePlayed', ANIMATION_MS],
+            /*['tilesSelected', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
             ['placeTileOnWall', SCORE_MS],
             ['emptyFloorLine', SCORE_MS],
@@ -378,11 +378,12 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
-    /*notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
-        this.factories.fillFactories(notif.args.factories);
+    notif_machinePlayed(notif: Notif<NotifMachinePlayedArgs>) {
+        this.playerMachineHand.removeFromStockById(''+notif.args.machine.id);
+        this.table.machinePlayed(notif.args.playerId, notif.args.machine);
     }
 
-    notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
+    /*notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
         if (notif.args.fromFactory) {
             this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
         }

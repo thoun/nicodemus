@@ -114,4 +114,10 @@ class Table {
         markerDiv.style.top = `${points % 2 ? 40 : 52}px`;
         markerDiv.style.left = `${16 + points*46.2}px`;
     }
+
+    public machinePlayed(playerId: number, machine: Machine) {
+        const fromHandId = `my-machines_item_${machine.id}`;
+        const from = document.getElementById(fromHandId) ? fromHandId : `player-icon-${playerId}`;
+        this.machineStocks[machine.location_arg].addToStockWithId(getUniqueId(machine), ''+machine.id, from);
+    }
 }

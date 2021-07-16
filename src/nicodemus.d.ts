@@ -51,6 +51,7 @@ interface NicodemusGamedatas {
 }
 
 interface NicodemusGame extends Game {
+    getPlayerId(): number;
     repairMachine(id: number): void;
 }
 
@@ -63,6 +64,7 @@ interface ChooseProjectArgs {
     completeProjects: Project[];
 }
 
-/*interface NotifFirstPlayerTokenArgs {
+interface NotifMachinePlayedArgs {
     playerId: number;
-}*/
+    machine: Machine;
+}
