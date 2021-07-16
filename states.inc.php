@@ -89,12 +89,12 @@ $playerActionsGameStates = [
 
     ST_PLAYER_CHOOSE_ACTION => [
         "name" => "chooseAction",
-        "description" => clienttranslate('${actplayer} must play or fix a machine'),
-        "descriptionmyturn" => clienttranslate('${you} must play or fix a machine'),
+        "description" => clienttranslate('${actplayer} must play or repair a machine'),
+        "descriptionmyturn" => clienttranslate('${you} must play or repair a machine'),
         "type" => "activeplayer",
         "possibleactions" => [ 
             "playMachine",
-            "fixMachine",
+            "repairMachine",
         ],
         "transitions" => [
             "choosePlayAction" => ST_PLAYER_CHOOSE_PLAY_ACTION,

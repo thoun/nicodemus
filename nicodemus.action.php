@@ -44,12 +44,12 @@
         self::ajaxResponse();
     }
   	
-    public function fixMachine() {
+    public function repairMachine() {
         self::setAjaxMode();
 
         $id = self::getArg("id", AT_posint, true);
 
-        $this->game->fixMachine($id);
+        $this->game->repairMachine($id);
 
         self::ajaxResponse();
     }

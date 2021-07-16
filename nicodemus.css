@@ -9,6 +9,9 @@
   display: flex;
   align-items: center;
 }
+.counters .icon {
+  margin-right: 5px;
+}
 
 html {
   /*background: url('img/background.jpg') #00587a;
@@ -32,11 +35,11 @@ html {
   background-position: 0% 0%;
 }
 .icon.wood {
-  background-position: 33.33% 0%;
+  background-position: 25% 0%;
 }
 .icon.copper {
-  background-position: 66.66% 0%;
+  background-position: 50% 0%;
 }
 .icon.crystal {
-  background-position: 100% 0%;
+  background-position: 75% 0%;
 }

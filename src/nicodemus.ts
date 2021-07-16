@@ -369,12 +369,12 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
-    public fixMachine(id: number) {
-        if(!(this as any).checkAction('fixMachine')) {
+    public repairMachine(id: number) {
+        if(!(this as any).checkAction('repairMachine')) {
             return;
         }
 
-        this.takeAction('fixMachine', {
+        this.takeAction('repairMachine', {
             id
         });
     }

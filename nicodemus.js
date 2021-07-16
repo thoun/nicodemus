@@ -399,11 +399,11 @@ var Nicodemus = /** @class */ (function () {
             id: id
         });
     };
-    Nicodemus.prototype.fixMachine = function (id) {
-        if (!this.checkAction('fixMachine')) {
+    Nicodemus.prototype.repairMachine = function (id) {
+        if (!this.checkAction('repairMachine')) {
             return;
         }
-        this.takeAction('fixMachine', {
+        this.takeAction('repairMachine', {
             id: id
         });
     };

@@ -62,14 +62,14 @@ trait ActionTrait {
         $this->gamestate->nextState('choosePlayAction');
     }
   	
-    public function fixMachine(int $id) {
-        self::checkAction('fixMachine'); 
+    public function repairMachine(int $id) {
+        self::checkAction('repairMachine'); 
         
         $playerId = self::getActivePlayerId();
 
         $this->machines->moveCard($id, 'player', $playerId);
 
-        self::notifyAllPlayers('machineFixed', clienttranslate('${player_name} fixes ${card_name}'), [
+        self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${card_name}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'machine' => $this->getMachineFromDb($this->machines->getCard($id)),
