@@ -166,6 +166,14 @@ trait UtilTrait {
         $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($playerResources, 0, min($number, count($playerResources)))), 'table');
     }
 
+    function incPlayerScore(int $playerId, int $incScore) {
+        self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+
+        if ($this->getMaxPlayerScore() >= 20) {
+            self::setGameStateValue(LAST_TURN, 1);
+        }
+    }
+
     function getColorName(int $type) {
         $colorName = null;
         switch ($type) {

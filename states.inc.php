@@ -116,7 +116,7 @@ $playerActionsGameStates = [
             "applyEffect",
         ],
         "transitions" => [
-            "nextPlayer" => ST_NEXT_PLAYER,
+            "refillHand" => ST_REFILL_HAND,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -138,5 +138,18 @@ $playerActionsGameStates = [
 
 
 ];
+
+
+$gameGameStates = [
+    ST_REFILL_HAND => [
+        "name" => "refillHand",
+        "description" => "",
+        "type" => "game",
+        "action" => "stRefillHand",
+        "transitions" => [ 
+            "next" => ST_NEXT_PLAYER,
+        ],
+    ],
+];
  
-$machinestates = $basicGameStates + $playerActionsGameStates;
+$machinestates = $basicGameStates + $playerActionsGameStates + $gameGameStates;

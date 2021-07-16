@@ -69,7 +69,7 @@ trait ActionTrait {
         $this->addCharcoalium($playerId, $machine->points);
         // TODO notif
 
-        $this->gamestate->nextState('nextPlayer');
+        $this->gamestate->nextState('refillHand');
     }
   	
     public function getResource(int $resource) {
@@ -83,9 +83,14 @@ trait ActionTrait {
             throw new Error("Machine doesn't produce this resource");
         }
 
-        // TODO getResource
+        if ($resource == 0) {
+            $this->addCharcoalium($playerId, 1);
+        } else {
+            $this->addResource($playerId, 1, $resource);
+        }
+        // TODO notif
 
-        $this->gamestate->nextState('nextPlayer');
+        $this->gamestate->nextState('refillHand');
     }
   	
     public function applyEffect() {
@@ -97,7 +102,7 @@ trait ActionTrait {
 
         // TODO applyEffect
 
-        $this->gamestate->nextState('nextPlayer');
+        $this->gamestate->nextState('refillHand');
     }
 
     public function selectProjects(array $ids) {

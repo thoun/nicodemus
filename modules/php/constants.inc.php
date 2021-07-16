@@ -11,6 +11,8 @@ define('ST_PLAYER_CHOOSE_PLAY_ACTION', 20);
 
 define('ST_PLAYER_CHOOSE_PROJECT', 30);
 
+define('ST_REFILL_HAND', 85);
+
 define('ST_NEXT_PLAYER', 90);
 
 define('ST_END_GAME', 99);
