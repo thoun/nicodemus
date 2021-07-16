@@ -9,10 +9,12 @@
 
 <div id="playerstables"></div>
 
-<div id="table">
-    <div class="projects">
-        <div id="project-deck"></div>
-        <div id="table-projects"></div>
+<div id="table-wrapper">
+    <div id="table">
+        <div class="projects">
+            <div id="project-deck" class="stockitem"></div>
+            <div id="table-projects"></div>
+        </div>
     </div>
 </div>
 

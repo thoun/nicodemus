@@ -123,11 +123,33 @@ trait UtilTrait {
     }
 
     function addCharcoalium(int $playerId, int $number) {
-        // TODO
+        $availableOnTable = intval($this->charcoaliums->countCardInLocation('table'));
+        
+        if ($availableOnTable >= $number) {
+            $this->charcoaliums->pickCardsForLocation($number, 'table', 'player', $playerId);
+        } else {
+            $this->charcoaliums->pickCardsForLocation($availableOnTable, 'table', 'player', $playerId);
+            $takeOnOpponent = $number - $availableOnTable;
+            $opponentId = $this->getOpponentId($playerId);
+            $opponentCharcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('player', $opponentId));
+            $this->charcoaliums->moveCards(array_map(function ($r) { return $r->id; }, array_slice($opponentCharcoaliums, 0, min($takeOnOpponent, count($opponentCharcoaliums)))), 'player', $playerId);
+        }
     }
 
     function addResource(int $playerId, int $number, int $type) {
-        // TODO
+        $tableResources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'table'));
+        $availableOnTable = count($tableResources);
+        
+        if ($availableOnTable >= $number) {
+            $resources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'table'));
+            $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($tableResources, 0, $number)), 'player', $playerId);
+        } else {
+            $this->resources->moveCards(array_map(function ($r) { return $r->id; }, $tableResources), 'player', $playerId);
+            $takeOnOpponent = $number - $availableOnTable;
+            $opponentId = $this->getOpponentId($playerId);
+            $opponentResources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'player', $opponentId));
+            $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($opponentResources, 0, min($takeOnOpponent, count($opponentResources)))), 'player', $playerId);
+        }
     }
 
     function removeCharcoalium(int $playerId, int $number) {

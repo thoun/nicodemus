@@ -53,7 +53,7 @@ class Table {
             const top = firstRow ? 0 : 210;
             html += `<div id="table-machine-spot-${i}" class="machine-spot" style="left: ${left}px; top: ${top}px"></div>`;
         }
-        html += `</div>`;
+        html += `<div id="machine-deck" class="stockitem"></div></div>`;
 
         dojo.place(html, 'table');
 

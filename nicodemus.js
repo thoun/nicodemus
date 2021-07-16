@@ -243,7 +243,7 @@ var Table = /** @class */ (function () {
             var top_1 = firstRow ? 0 : 210;
             html += "<div id=\"table-machine-spot-" + i + "\" class=\"machine-spot\" style=\"left: " + left + "px; top: " + top_1 + "px\"></div>";
         }
-        html += "</div>";
+        html += "<div id=\"machine-deck\" class=\"stockitem\"></div></div>";
         dojo.place(html, 'table');
         var _loop_2 = function (i) {
             this_1.machineStocks[i] = new ebg.stock();
