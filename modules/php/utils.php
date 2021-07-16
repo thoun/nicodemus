@@ -223,4 +223,40 @@ trait UtilTrait {
         
         // TODO notif
     }
+
+    function removeEmptySpaceFromTable() {
+        $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+        usort(function ($a, $b){
+            if ($a->location_arg == $b->location_arg) {
+                return 0;
+            }
+            return ($a->location_arg < $b->location_arg) ? -1 : 1;
+        }, $machines);
+
+        $lastSpot = 0;
+        foreach($machines as &$machine) {
+            if ($machine->location_arg > $lastSpot+1) {
+                $machine->location_arg--;
+                $this->machines->moveCard($machine->id, 'table', $machine->location_arg);
+            }
+            $lastSpot = $machine->location_arg;
+        }
+        // TODO notif
+    }
+
+    function checkPlayerWorkshopMachinesLimit() {
+        $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
+
+        if (count($machines) <= 3) {
+            return;
+        }
+
+        $lastMachineId = intval(self::getGameStateValue(PLAYED_MACHINE));
+        foreach($machines as $machine) {
+            if ($machine->id != $lastMachineId) {
+                $this->machines->moveCard($machine->id, 'discard');
+            }
+        }
+        // TODO notif
+    }
 }
