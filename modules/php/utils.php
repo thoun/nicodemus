@@ -193,8 +193,34 @@ trait UtilTrait {
         if (intval($this->machines->countCardInLocation('table')) < 10) {
             return;
         }
+
+        $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+
+        $row1machines = [];
+        $row2machines = [];
+        $removedCharcoaliums = [];
+
+        foreach($machines as $machine) {
+            if ($machine->location_arg > 5) {
+                $row2machines[] = $machine;
+            } else {
+                $row1machines[] = $machine;
+            }
+        }
+
+        foreach($row1machines as &$machine) {
+            //$charcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('machine', $machine->id);
+            $charcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->moveAllCardsInLocation('machine', 'table', $machine->id));
+            $removedCharcoaliums = $removedCharcoaliums + $charcoaliums;
+        }
+
+        foreach($row1machines as &$machine) {
+            $this->charcoaliums->moveCard($machine->id, 'discard');
+        }
+        foreach($row2machines as &$machine) {
+            $this->charcoaliums->moveCard($machine->id, 'table', $machine->location_arg - 5);
+        }
         
-        // TODO
         // TODO notif
     }
 }
