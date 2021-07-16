@@ -4,17 +4,17 @@ class ProjectCard {
     public /*int*/ $points;
     public /*int*/ $colors;
     public /*int*/ $machinePoints;
-    public /*int*/ $carbonium;
+    public /*int*/ $charcoalium;
     public /*int*/ $wood;
     public /*int*/ $copper;
     public /*int*/ $crystal;
   
   
-    public function __construct(int $points, $colors = null, $machinePoints = null, $carbonium = null, $wood = null, $copper = null, $crystal = null) {
+    public function __construct(int $points, $colors = null, $machinePoints = null, $charcoalium = null, $wood = null, $copper = null, $crystal = null) {
         $this->points = $points;
         $this->colors = $colors;
         $this->machinePoints = $machinePoints;
-        $this->carbonium = $carbonium;
+        $this->charcoalium = $charcoalium;
         $this->wood = $wood;
         $this->copper = $copper;
         $this->crystal = $crystal;
@@ -42,7 +42,7 @@ class Project extends ProjectCard {
         $this->points = $projectCard->points;
         $this->colors = $projectCard->colors;
         $this->machinePoints = $projectCard->machinePoints;   
-        $this->carbonium = $projectCard->carbonium;   
+        $this->charcoalium = $projectCard->charcoalium;   
         $this->wood = $projectCard->wood;   
         $this->copper = $projectCard->copper;   
         $this->crystal = $projectCard->crystal;   

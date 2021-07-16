@@ -22,10 +22,14 @@ require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
 require_once('modules/php/constants.inc.php');
 require_once('modules/php/utils.php');
 require_once('modules/php/actions.php');
+require_once('modules/php/states.php');
+require_once('modules/php/args.php');
 
 class Nicodemus extends Table {
     use UtilTrait;
     use ActionTrait;
+    use StateTrait;
+    use ArgsTrait;
 
 	function __construct() {
         // Your global variables labels:
@@ -39,23 +43,20 @@ class Nicodemus extends Table {
         self::initGameStateLabels([
             FIRST_PLAYER => 10,
             PLAYED_MACHINE => 11,
+            LAST_TURN => 12,
         ]); 
 
         $this->machines = self::getNew("module.common.deck");
         $this->machines->init("machine");
-        $this->machines->autoreshuffle = true;
 
         $this->projects = self::getNew("module.common.deck");
         $this->projects->init("project");
-        $this->projects->autoreshuffle = true;
 
-        $this->carboniums = self::getNew("module.common.deck");
-        $this->carboniums->init("carbonium");
-        $this->carboniums->autoreshuffle = true;
+        $this->charcoaliums = self::getNew("module.common.deck");
+        $this->charcoaliums->init("charcoalium");
 
         $this->resources = self::getNew("module.common.deck");
         $this->resources->init("resource");
-        $this->resources->autoreshuffle = true;
 	}
 	
     protected function getGameName() {
@@ -81,12 +82,12 @@ class Nicodemus extends Table {
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
         $values = [];
-        foreach($players as $player_id => $player) {
+        foreach($players as $playerId => $player) {
             $color = array_shift($default_colors);
-            $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
+            $values[] = "('".$playerId."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
 
-            if (self::getGameStateValue(FIRST_PLAYER) == 0) {
-                self::setGameStateValue(FIRST_PLAYER, $player_id);
+            if ($this->getFirstPlayerId() == 0) {
+                self::setGameStateValue(FIRST_PLAYER, $playerId);
             }
         }
         $sql .= implode($values, ',');
@@ -97,7 +98,7 @@ class Nicodemus extends Table {
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
+        self::setGameStateInitialValue(LAST_TURN, 0);
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -138,7 +139,7 @@ class Nicodemus extends Table {
                 $player['handMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $playerId));
             }
             $player['machines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
-            $player['carbonium'] = intval($this->carboniums->countCardInLocation('player', $playerId));
+            $player['charcoalium'] = intval($this->charcoaliums->countCardInLocation('player', $playerId));
             $player['wood'] = count($this->resources->getCardsOfTypeInLocation(1, null, 'player', $playerId));
             $player['copper'] = count($this->resources->getCardsOfTypeInLocation(2, null, 'player', $playerId));
             $player['crystal'] = count($this->resources->getCardsOfTypeInLocation(3, null, 'player', $playerId));
@@ -146,7 +147,7 @@ class Nicodemus extends Table {
 
         $result['tableMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
         $result['tableProjects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('table'));
-        $result['carbonium'] = intval($this->carboniums->countCardInLocation('table'));
+        $result['charcoalium'] = intval($this->charcoaliums->countCardInLocation('table'));
         $result['wood'] = count($this->resources->getCardsOfTypeInLocation(1, null, 'table'));
         $result['copper'] = count($this->resources->getCardsOfTypeInLocation(2, null, 'table'));
         $result['crystal'] = count($this->resources->getCardsOfTypeInLocation(3, null, 'table'));
@@ -167,56 +168,6 @@ class Nicodemus extends Table {
     function getGameProgression() {
         return $this->getMaxPlayerScore() * 5;
     }
-
-    
-//////////////////////////////////////////////////////////////////////////////
-//////////// Game state arguments
-////////////
-
-    /*
-        Here, you can create methods defined as "game state arguments" (see "args" property in states.inc.php).
-        These methods function is to return some additional information that is specific to the current
-        game state.
-    */
-
-    /*
-    
-    Example for game state "MyGameState":
-    
-    function argMyGameState()
-    {
-        // Get some values from the current game situation in database...
-    
-        // return values:
-        return array(
-            'variable1' => $value1,
-            'variable2' => $value2,
-            ...
-        );
-    }    
-    */
-
-//////////////////////////////////////////////////////////////////////////////
-//////////// Game state actions
-////////////
-
-    /*
-        Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
-        The action method of state X is called everytime the current game state is set to X.
-    */
-    
-    /*
-    
-    Example for game state "MyGameState":
-
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
-    }    
-    */
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

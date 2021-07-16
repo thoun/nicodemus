@@ -4,7 +4,7 @@
   align-items: center;
   margin: 5px 0;
 }
-.counters .carbonium-counter, .counters .wood-counter, .counters .copper-counter, .counters .crystal-counter {
+.counters .charcoalium-counter, .counters .wood-counter, .counters .copper-counter, .counters .crystal-counter {
   flex: 1;
   display: flex;
   align-items: center;
@@ -28,7 +28,7 @@ html {
   background-image: url("img/icons.png");
   background-size: auto 100%;
 }
-.icon.carbonium {
+.icon.charcoalium {
   background-position: 0% 0%;
 }
 .icon.wood {

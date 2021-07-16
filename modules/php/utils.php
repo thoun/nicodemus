@@ -2,7 +2,7 @@
 
 require_once(__DIR__.'/objects/machine.php');
 require_once(__DIR__.'/objects/project.php');
-require_once(__DIR__.'/objects/carbonium.php');
+require_once(__DIR__.'/objects/charcoalium.php');
 require_once(__DIR__.'/objects/resource.php');
 
 trait UtilTrait {
@@ -13,6 +13,13 @@ trait UtilTrait {
 
     function getMaxPlayerScore() {
         return intval(self::getUniqueValueFromDB("SELECT max(player_score) FROM player"));
+    }
+
+    function getFirstPlayerId() {
+        return intval(self::getGameStateValue(FIRST_PLAYER));
+    }
+    function getOpponentId(int $playerId) {
+        return intval(self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_id <> $playerId"));
     }
 
     function setupCards() {
@@ -33,11 +40,11 @@ trait UtilTrait {
         $this->projects->createCards($projects, 'deck');
         $this->projects->shuffle('deck');
 
-        //12 carboniums       
-        $carboniums = [
+        //12 charcoaliums       
+        $charcoaliums = [
             [ 'type' => 0, 'type_arg' => null, 'nbr' => 12 ],
         ];
-        $this->carboniums->createCards($carboniums, 'table');
+        $this->charcoaliums->createCards($charcoaliums, 'table');
 
         //24 resources : 8 wood, 8 copper, 8 crystal        
         $resources = [
@@ -60,10 +67,10 @@ trait UtilTrait {
 
         // set initial resources
         foreach($players as $playerId => $player) {
-            if (self::getGameStateValue(FIRST_PLAYER) == $playerId) {
-                $this->addCarbonium($playerId, 2);
+            if ($this->getFirstPlayerId() == $playerId) {
+                $this->addCharcoalium($playerId, 2);
             } else {
-                $this->addCarbonium($playerId, 1);
+                $this->addCharcoalium($playerId, 1);
                 $this->addResource($playerId, 1, 1);
             }
         }
@@ -91,15 +98,15 @@ trait UtilTrait {
         return array_map(function($dbObject) { return $this->getProjectFromDb($dbObject); }, array_values($dbObjects));
     }
 
-    function getCarboniumFromDb($dbObject) {
+    function getCharcoaliumFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
-            throw new Error("carbonium doesn't exists ".json_encode($dbObject));
+            throw new Error("charcoalium doesn't exists ".json_encode($dbObject));
         }
-        return new Carbonium($dbObject);
+        return new Charcoalium($dbObject);
     }
 
-    function getCarboniumsFromDb(array $dbObjects) {
-        return array_map(function($dbObject) { return $this->getCarboniumFromDb($dbObject); }, array_values($dbObjects));
+    function getCharcoaliumsFromDb(array $dbObjects) {
+        return array_map(function($dbObject) { return $this->getCharcoaliumFromDb($dbObject); }, array_values($dbObjects));
     }
 
     function getResourceFromDb($dbObject) {
@@ -113,7 +120,7 @@ trait UtilTrait {
         return array_map(function($dbObject) { return $this->getResourceFromDb($dbObject); }, array_values($dbObjects));
     }
 
-    function addCarbonium(int $playerId, int $number) {
+    function addCharcoalium(int $playerId, int $number) {
         // TODO
     }
 
@@ -121,7 +128,7 @@ trait UtilTrait {
         // TODO
     }
 
-    function removeCarbonium(int $playerId, int $number) {
+    function removeCharcoalium(int $playerId, int $number) {
         // TODO
     }
 

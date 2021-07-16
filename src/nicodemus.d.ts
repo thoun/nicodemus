@@ -18,7 +18,7 @@ interface NicodemusPlayer extends Player {
     machines: Machine[];
     handMachines: Machine[];
     projects: Project[];
-    carbonium: number;
+    charcoalium: number;
     wood: number;
     copper: number;
     crystal: number;
@@ -43,7 +43,7 @@ interface NicodemusGamedatas {
     // Add here variables you set up in getAllDatas
     tableMachines: Machine[];
     tableProjects: Project[];
-    carbonium: number;
+    charcoalium: number;
     wood: number;
     copper: number;
     crystal: number;

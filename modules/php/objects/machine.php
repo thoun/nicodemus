@@ -2,7 +2,7 @@
 
 class MachineCard {
     public /*int*/ $points;
-    public /*int*/ $produce; // 0 = carbonium, 1 = wood, 2 = copper, 3 = crystal, 9 = *
+    public /*int*/ $produce; // 0 = charcoalium, 1 = wood, 2 = copper, 3 = crystal, 9 = *
     public /*array*/ $cost;
   
     public function __construct(int $points, int $produce, array $cost) {

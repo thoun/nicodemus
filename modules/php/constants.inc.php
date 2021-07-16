@@ -25,5 +25,6 @@ define('END_SCORE', 100);
  */
 define('FIRST_PLAYER', 'FIRST_PLAYER');
 define('PLAYED_MACHINE', 'PLAYED_MACHINE');
+define('LAST_TURN', 'LAST_TURN');
 
 ?>

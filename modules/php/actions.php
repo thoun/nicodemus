@@ -2,7 +2,7 @@
 
 require_once(__DIR__.'/objects/machine.php');
 require_once(__DIR__.'/objects/project.php');
-require_once(__DIR__.'/objects/carbonium.php');
+require_once(__DIR__.'/objects/charcoalium.php');
 require_once(__DIR__.'/objects/resource.php');
 
 trait ActionTrait {
@@ -80,14 +80,14 @@ trait ActionTrait {
         $this->gamestate->nextState(true ? 'chooseProject' : 'nextPlayer');
     }
 
-    public function getCarbonium() {
-        self::checkAction('getCarbonium'); 
+    public function getCharcoalium() {
+        self::checkAction('getCharcoalium'); 
         
         $playerId = self::getActivePlayerId();
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
-        $this->addCarbonium($playerId, $machine->points);
+        $this->addCharcoalium($playerId, $machine->points);
         // TODO notif
 
         $this->gamestate->nextState('nextPlayer');

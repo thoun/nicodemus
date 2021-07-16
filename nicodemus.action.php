@@ -54,10 +54,10 @@
         self::ajaxResponse();
     }
   	
-    public function getCarbonium() {
+    public function getCharcoalium() {
         self::setAjaxMode();
 
-        $this->game->getCarbonium();
+        $this->game->getCharcoalium();
 
         self::ajaxResponse();
     }

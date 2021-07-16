@@ -1,6 +1,6 @@
 <?php
 
-class Carbonium {
+class Charcoalium {
     public $id;
     public $location;
     public $location_arg;

@@ -19,7 +19,7 @@ const log = isDebug ? console.log.bind(window.console) : function () { };
 
 class Nicodemus implements NicodemusGame {
     private gamedatas: NicodemusGamedatas;
-    private carboniumCounters: Counter[] = [];
+    private charcoaliumCounters: Counter[] = [];
     private woodCounters: Counter[] = [];
     private copperCounters: Counter[] = [];
     private crystalCounters: Counter[] = [];
@@ -284,11 +284,11 @@ class Nicodemus implements NicodemusGame {
                 dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper"></div>`, `player_board_${player.id}`);
             }*/
 
-            // carbonium & resources counters
+            // charcoalium & resources counters
             dojo.place(`<div class="counters">
-                <div id="carbonium-counter-wrapper-${player.id}" class="carbonium-counter">
-                    <div class="icon carbonium"></div> 
-                    <span id="carbonium-counter-${player.id}"></span>
+                <div id="charcoalium-counter-wrapper-${player.id}" class="charcoalium-counter">
+                    <div class="icon charcoalium"></div> 
+                    <span id="charcoalium-counter-${player.id}"></span>
                 </div>
             </div>
             <div class="counters">
@@ -306,10 +306,10 @@ class Nicodemus implements NicodemusGame {
                 </div>
             </div>`, `player_board_${player.id}`);
 
-            const carboniumCounter = new ebg.counter();
-            carboniumCounter.create(`carbonium-counter-${playerId}`);
-            carboniumCounter.setValue(player.carbonium);
-            this.carboniumCounters[playerId] = carboniumCounter;
+            const charcoaliumCounter = new ebg.counter();
+            charcoaliumCounter.create(`charcoalium-counter-${playerId}`);
+            charcoaliumCounter.setValue(player.charcoalium);
+            this.charcoaliumCounters[playerId] = charcoaliumCounter;
 
             const woodCounter = new ebg.counter();
             woodCounter.create(`wood-counter-${playerId}`);
@@ -327,7 +327,7 @@ class Nicodemus implements NicodemusGame {
             this.crystalCounters[playerId] = crystalCounter;
         });
 
-        (this as any).addTooltipHtmlToClass('carbonium-counter', _("Carbonium"));
+        (this as any).addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
         (this as any).addTooltipHtmlToClass('wood-counter', _("Wood"));
         (this as any).addTooltipHtmlToClass('copper-counter', _("Copper"));
         (this as any).addTooltipHtmlToClass('crystal-counter', _("Crystal"));
@@ -379,12 +379,12 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
-    public getCarbonium() {
-        if(!(this as any).checkAction('getCarbonium')) {
+    public getCharcoalium() {
+        if(!(this as any).checkAction('getCharcoalium')) {
             return;
         }
 
-        this.takeAction('getCarbonium');
+        this.takeAction('getCharcoalium');
     }
 
     public getResource() {

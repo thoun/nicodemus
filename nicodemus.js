@@ -109,7 +109,7 @@ var isDebug = window.location.host == 'studio.boardgamearena.com';
 var log = isDebug ? console.log.bind(window.console) : function () { };
 var Nicodemus = /** @class */ (function () {
     function Nicodemus() {
-        this.carboniumCounters = [];
+        this.charcoaliumCounters = [];
         this.woodCounters = [];
         this.copperCounters = [];
         this.crystalCounters = [];
@@ -342,12 +342,12 @@ var Nicodemus = /** @class */ (function () {
             /*if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper"></div>`, `player_board_${player.id}`);
             }*/
-            // carbonium & resources counters
-            dojo.place("<div class=\"counters\">\n                <div id=\"carbonium-counter-wrapper-" + player.id + "\" class=\"carbonium-counter\">\n                    <div class=\"icon carbonium\"></div> \n                    <span id=\"carbonium-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            <div class=\"counters\">\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
-            var carboniumCounter = new ebg.counter();
-            carboniumCounter.create("carbonium-counter-" + playerId);
-            carboniumCounter.setValue(player.carbonium);
-            _this.carboniumCounters[playerId] = carboniumCounter;
+            // charcoalium & resources counters
+            dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-" + player.id + "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            <div class=\"counters\">\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
+            var charcoaliumCounter = new ebg.counter();
+            charcoaliumCounter.create("charcoalium-counter-" + playerId);
+            charcoaliumCounter.setValue(player.charcoalium);
+            _this.charcoaliumCounters[playerId] = charcoaliumCounter;
             var woodCounter = new ebg.counter();
             woodCounter.create("wood-counter-" + playerId);
             woodCounter.setValue(player.wood);
@@ -361,7 +361,7 @@ var Nicodemus = /** @class */ (function () {
             crystalCounter.setValue(player.crystal);
             _this.crystalCounters[playerId] = crystalCounter;
         });
-        this.addTooltipHtmlToClass('carbonium-counter', _("Carbonium"));
+        this.addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
         this.addTooltipHtmlToClass('wood-counter', _("Wood"));
         this.addTooltipHtmlToClass('copper-counter', _("Copper"));
         this.addTooltipHtmlToClass('crystal-counter', _("Crystal"));
@@ -407,11 +407,11 @@ var Nicodemus = /** @class */ (function () {
             id: id
         });
     };
-    Nicodemus.prototype.getCarbonium = function () {
-        if (!this.checkAction('getCarbonium')) {
+    Nicodemus.prototype.getCharcoalium = function () {
+        if (!this.checkAction('getCharcoalium')) {
             return;
         }
-        this.takeAction('getCarbonium');
+        this.takeAction('getCharcoalium');
     };
     Nicodemus.prototype.getResource = function () {
         if (!this.checkAction('getResource')) {
