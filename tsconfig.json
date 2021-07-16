@@ -13,6 +13,8 @@
         "src/stock.d.ts",
         "src/nicodemus.d.ts",
         "src/slide-utils.ts",
+        "src/stock-utils.ts",
+        "src/text-icons-formatter.ts",
         "src/table/table.ts",
         "src/players-tables/player-table.ts",
         "src/nicodemus.ts",

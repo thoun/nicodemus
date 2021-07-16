@@ -11,37 +11,10 @@ trait ActionTrait {
     //////////// Player actions
     //////////// 
     
-        /*
-            Each time a player is doing some game action, one of the methods below is called.
-            (note: each method below must match an input method in nicodemus.action.php)
-        */
-    
-        /*
-        
-        Example:
-    
-        function playCard( $card_id )
-        {
-            // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-            self::checkAction( 'playCard' ); 
-            
-            $player_id = self::getActivePlayerId();
-            
-            // Add your game logic to play a card there 
-            ...
-            
-            // Notify all players about the card played
-            self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-                'player_id' => $player_id,
-                'player_name' => self::getActivePlayerName(),
-                'card_name' => $card_name,
-                'card_id' => $card_id
-            ) );
-              
-        }
-        
-        */
-
+    /*
+        Each time a player is doing some game action, one of the methods below is called.
+        (note: each method below must match an input method in nicodemus.action.php)
+    */
     
     public function playMachine(int $id) {
         self::checkAction('playMachine'); 
@@ -53,10 +26,11 @@ trait ActionTrait {
 
         self::setGameStateValue(PLAYED_MACHINE, $id);
 
-        self::notifyAllPlayers('machinePlayed', clienttranslate('${player_name} plays ${card_name}'), [
+        self::notifyAllPlayers('machinePlayed', clienttranslate('${player_name} plays ${machine_name}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'machine' => $this->getMachineFromDb($this->machines->getCard($id)),
+            'machine_name' => 'TODO',
         ]);
 
         $this->gamestate->nextState('choosePlayAction');
@@ -69,10 +43,11 @@ trait ActionTrait {
 
         $this->machines->moveCard($id, 'player', $playerId);
 
-        self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${card_name}'), [
+        self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${machine_name}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'machine' => $this->getMachineFromDb($this->machines->getCard($id)),
+            'machine_name' => 'TODO',
         ]);
         
         // TODO
@@ -93,12 +68,16 @@ trait ActionTrait {
         $this->gamestate->nextState('nextPlayer');
     }
   	
-    public function getResource() {
+    public function getResource(int $resource) {
         self::checkAction('getResource'); 
         
         $playerId = self::getActivePlayerId();
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        if (($machine->produce == 9 && ($resource < 1 || $resource > 3)) || ($machine->produce != 9 && $machine->produce != $resource)) {
+            throw new Error("Machine doesn't produce this resource");
+        }
 
         // TODO getResource
 
@@ -113,6 +92,12 @@ trait ActionTrait {
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
         // TODO applyEffect
+
+        $this->gamestate->nextState('nextPlayer');
+    }
+
+    public function selectProjects(array $ids) {
+        // TODO
 
         $this->gamestate->nextState('nextPlayer');
     }

@@ -28,32 +28,227 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
         object.addEventListener('transitionend', transitionend);
     });
 }
-var Table = /** @class */ (function () {
-    function Table(game) {
-        this.game = game;
-        /*const factoriesDiv = document.getElementById('factories');
+/*declare const define;
+declare const ebg;
+declare const $;
+declare const dojo: Dojo;
+declare const _;
+declare const g_gamethemeurl;
 
-        const radius = 175 + factoryNumber*25;
-        const halfSize = radius + FACTORY_RADIUS;
-        const size = `${halfSize*2}px`;
-        factoriesDiv.style.width = size;
-        factoriesDiv.style.height = size;
-
-        let html = `<div>`;
-        html += `<div id="factory0" class="factory-center"></div>`;
-        for (let i=1; i<=factoryNumber; i++) {
-            const angle = (i-1)*Math.PI*2/factoryNumber; // in radians
-            const left = radius*Math.sin(angle);
-            const top = radius*Math.cos(angle);
-            
-            html += `<div id="factory${i}" class="factory" style="left: ${halfSize-FACTORY_RADIUS+left}px; top: ${halfSize-FACTORY_RADIUS-top}px;"></div>`;
-        }
-        html += `</div>`;
-
-        dojo.place(html, 'factories');
-
-        this.fillFactories(factories);*/
+declare const board: HTMLDivElement;*/
+var MACHINES_IDS = [
+    // blue
+    11,
+    12,
+    13,
+    14,
+    15,
+    // purple
+    21,
+    22,
+    23,
+    24,
+    25,
+    // red
+    31,
+    32,
+    33,
+    34,
+    // yellow
+    41,
+    42,
+];
+var LOCATIONS_UNIQUE_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+var LOCATIONS_GUILDS_IDS = [100, 101];
+var MACHINE_WIDTH = 190;
+var MACHINE_HEIGHT = 190;
+var LOCATION_WIDTH = 186.24;
+var LOCATION_HEIGHT = 124;
+function getUniqueId(object) {
+    return object.type * 10 + object.subType;
+}
+function setupMachineCards(machineStocks) {
+    var cardsurl = g_gamethemeurl + "img/cards.jpg";
+    machineStocks.forEach(function (lordStock) {
+        return MACHINES_IDS.forEach(function (lordType, index) {
+            return lordStock.addItemType(lordType, 0, cardsurl, index);
+        });
+    });
+}
+function setupLocationCards(locationStocks) {
+    var cardsurl = g_gamethemeurl + "img/locations.jpg";
+    locationStocks.forEach(function (locationStock) {
+        LOCATIONS_UNIQUE_IDS.forEach(function (id, index) {
+            return locationStock.addItemType(id, 0, cardsurl, 1 + index);
+        });
+    });
+}
+function getGuildName(guild) {
+    var guildName = null;
+    switch (guild) {
+        case 1:
+            guildName = _('Farmer');
+            break;
+        case 2:
+            guildName = _('Military');
+            break;
+        case 3:
+            guildName = _('Merchant');
+            break;
+        case 4:
+            guildName = _('Politician');
+            break;
+        case 5:
+            guildName = _('Mage');
+            break;
     }
+    return guildName;
+}
+function getLocationTooltip(typeWithGuild) {
+    var type = Math.floor(typeWithGuild / 10);
+    var guild = typeWithGuild % 10;
+    var message = null;
+    switch (type) {
+        case 1:
+            message = _("At the end of the game, this Location is worth 7 IP.");
+            break;
+        case 2:
+            message = _("Immediately gain 1 Pearl. At the end of the game, this Location is worth 5 IP.");
+            break;
+        case 3:
+            message = _("Immediately gain 2 Pearls. At the end of the game, this Location is worth 4 IP.");
+            break;
+        case 4:
+            message = _("Immediately gain 3 Pearls. At the end of the game, this Location is worth 3 IP.");
+            break;
+        case 5:
+            message = _("At the end of the game, this Location is worth 1 IP per silver key held in your Senate Chamber, regardless of whether or not it has been used to take control of a Location.");
+            break;
+        case 6:
+            message = _("At the end of the game, this Location is worth 2 IP per gold key held in your Senate Chamber, regardless of whether or not it has been used to take control of a Location.");
+            break;
+        case 7:
+            message = _("At the end of the game, this Location is worth 1 IP per pair of Pearls in your possession.");
+            break;
+        case 8:
+            message = _("At the end of the game, this Location is worth 2 IP per Location in your control.");
+            break;
+        case 9:
+            message = _("Until your next turn, each opponent MUST only increase the size of their Senate Chamber by taking the first Lord from the deck. At the end of the game, this Location is worth 3 IP.");
+            break;
+        case 10:
+            message = _("Until your next turn, each opponent MUST only increase the size of their Senate Chamber by taking first 2 Lords from the deck. Adding one to their Senate Chamber and discarding the other. At the end of the game, this Location is worth 3 IP.");
+            break;
+        case 11:
+            message = _("Immediately replace all the discarded Lords in to the Lord deck and reshuffle. At the end of the game, this Location is worth 3 IP.");
+            break;
+        case 12:
+            message = _("Immediately replace all the available Locations to the Location deck and reshuffle. At the end of the game, this Location is worth 3 IP.");
+            break;
+        case 13:
+            message = _("Until the end of the game, to take control of a Location, only 2 keys are needed, irrespective of their type. At the end of the game, this Location is worth 3 IP.");
+            break;
+        case 14:
+            message = _("Until the end of the game, when you take control of a Location, you choose this location from the Location deck (No longer from the available Locations). The deck is then reshuffled. At the end of the game, this Location is worth 3 IP.");
+            break;
+        case 100:
+            message = guild ?
+                dojo.string.substitute(_("At the end of the game, this Location is worth as many IP as your most influential ${guild_name} Lord."), { guild_name: getGuildName(guild) }) :
+                _("At the end of the game, this Location is worth as many IP as your most influential Lord of the indicated color.");
+            break;
+        case 101:
+            message = guild ?
+                dojo.string.substitute(_("At the end of the game, this Location is worth 1 IP + a bonus of 1 IP per ${guild_name} Lord present in your Senate Chamber."), { guild_name: getGuildName(guild) }) :
+                _("At the end of the game, this Location is worth 1 IP + a bonus of 1 IP per Lord of the indicated color present in your Senate Chamber.");
+            break;
+    }
+    return message;
+}
+function getLordTooltip(typeWithGuild) {
+    var type = Math.floor(typeWithGuild / 10);
+    var guild = typeWithGuild % 10;
+    var message = null;
+    switch (type) {
+        case 1:
+            message = _("When this Lord is placed in the Senate Chamber, two Lords in this Chamber (including this one) can be swapped places, except those with keys.");
+            break;
+        case 2:
+            message = _("This Lord gives you 1 silver key.");
+            break;
+        case 3:
+            message = _("This Lord gives you 1 gold key.");
+            break;
+        case 4:
+            message = _("This Lord gives you 2 Pearls.");
+            break;
+        case 5:
+            message = _("This Lord gives you 1 Pearl.");
+            break;
+        case 6:
+            message = _("When this Lord is placed in the Senate Chamber, the top Lord card is taken from the Lord deck and placed in the corresponding discard pile.");
+            break;
+    }
+    if (message) {
+        message += "<br/><br/>" + dojo.string.substitute(_("Guild : ${guild_name}"), { guild_name: getGuildName(guild) });
+    }
+    return message;
+}
+function moveToAnotherStock(sourceStock, destinationStock, uniqueId, cardId) {
+    if (sourceStock === destinationStock) {
+        return;
+    }
+    var sourceStockItemId = sourceStock.container_div.id + "_item_" + cardId;
+    if (document.getElementById(sourceStockItemId)) {
+        destinationStock.addToStockWithId(uniqueId, cardId, sourceStockItemId);
+        sourceStock.removeFromStockById(cardId);
+    }
+    else {
+        console.warn(sourceStockItemId + " not found in ", sourceStock);
+        destinationStock.addToStockWithId(uniqueId, cardId, sourceStock.container_div.id);
+    }
+}
+function formatTextIcons(rawText) {
+    return rawText
+        .replace(/\[resource0\]/ig, '<span class="icon charcoalium"></span>')
+        .replace(/\[resource1\]/ig, '<span class="icon wood"></span>')
+        .replace(/\[resource2\]/ig, '<span class="icon copper"></span>')
+        .replace(/\[resource3\]/ig, '<span class="icon crystal"></span>')
+        .replace(/\[resource9\]/ig, '<span class="icon joker"></span>');
+}
+var Table = /** @class */ (function () {
+    function Table(game, machines) {
+        var _this = this;
+        this.game = game;
+        this.stocks = [];
+        var html = "<div>";
+        for (var i = 0; i < 2; i++) {
+            html += "<div id=\"row" + i + "\" class=\"row\"></div>";
+        }
+        html += "</div>";
+        dojo.place(html, 'table');
+        var _loop_1 = function (i) {
+            this_1.stocks[i] = new ebg.stock();
+            this_1.stocks[i].setSelectionAppearance('class');
+            this_1.stocks[i].selectionClass = 'no-visible-selection';
+            this_1.stocks[i].create(this_1.game, $("row" + i), MACHINE_WIDTH, MACHINE_HEIGHT);
+            this_1.stocks[i].setSelectionMode(1);
+            //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+            dojo.connect(this_1.stocks[i], 'onChangeSelection', this_1, function () { return _this.onMachineSelectionChanged(_this.stocks[i].getSelectedItems()); });
+        };
+        var this_1 = this;
+        for (var i = 0; i < 2; i++) {
+            _loop_1(i);
+        }
+        setupMachineCards(this.stocks);
+        machines.forEach(function (machine) { return _this.stocks[0].addToStockWithId(getUniqueId(machine), '' + machine.id); });
+        console.log(machines, this.stocks[0]);
+    }
+    Table.prototype.onMachineSelectionChanged = function (items) {
+        if (items.length == 1) {
+            var card = items[0];
+            this.game.repairMachine(card.id);
+        }
+    };
     return Table;
 }());
 var PlayerTable = /** @class */ (function () {
@@ -142,8 +337,9 @@ var Nicodemus = /** @class */ (function () {
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
         this.createPlayerPanels(gamedatas);
-        /*this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories);
-        this.createPlayerTables(gamedatas);*/
+        this.setHand(gamedatas.handMachines);
+        this.table = new Table(this, gamedatas.tableMachines);
+        //this.createPlayerTables(gamedatas);
         this.setupNotifications();
         /*document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
         document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
@@ -229,10 +425,29 @@ var Nicodemus = /** @class */ (function () {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     Nicodemus.prototype.onUpdateActionButtons = function (stateName, args) {
+        var _this = this;
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
-                case 'chooseColumn': // for multiplayer states we have to do it here
-                    /*this.onEnteringChooseColumn(args);*/
+                case 'choosePlayAction':
+                    var choosePlayActionArgs_1 = args;
+                    this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.charcoalium + " [resource0])"), function () { return _this.getCharcoalium(); });
+                    if (choosePlayActionArgs_1.resource == 9) {
+                        var _loop_2 = function (i) {
+                            this_2.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
+                        };
+                        var this_2 = this;
+                        for (var i = 1; i <= 3; i++) {
+                            _loop_2(i);
+                        }
+                    }
+                    else {
+                        this.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + choosePlayActionArgs_1.resource + "])"), function () { return _this.getResource(choosePlayActionArgs_1.resource); });
+                    }
+                    this.addActionButton('applyEffect-button', _('Apply effect'), function () { return _this.applyEffect(); });
+                    break;
+                case 'chooseProject':
+                    this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects([]); });
+                    this.addActionButton('skipProjects-button', _('Skip'), function () { return _this.selectProjects([]); }, null, null, 'red');
                     break;
             }
         }
@@ -240,6 +455,25 @@ var Nicodemus = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Nicodemus.prototype.setHand = function (machines) {
+        var _this = this;
+        this.playerMachineHand = new ebg.stock();
+        this.playerMachineHand.create(this, $('mymachines'), MACHINE_WIDTH, MACHINE_HEIGHT);
+        this.playerMachineHand.setSelectionMode(1);
+        this.playerMachineHand.setSelectionAppearance('class');
+        this.playerMachineHand.selectionClass = 'selected';
+        this.playerMachineHand.centerItems = true;
+        //this.playerMachineHand.onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.mowCards.setupNewCard(this, card_div, card_type_id); 
+        dojo.connect(this.playerMachineHand, 'onChangeSelection', this, function () { return _this.onPlayerMachineHandSelectionChanged(_this.playerMachineHand.getSelectedItems()); });
+        setupMachineCards([this.playerMachineHand]);
+        machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id); });
+    };
+    Nicodemus.prototype.onPlayerMachineHandSelectionChanged = function (items) {
+        if (items.length == 1) {
+            var card = items[0];
+            this.playMachine(card.id);
+        }
+    };
     /*public getZoom() {
         return this.zoom;
     }
@@ -413,17 +647,27 @@ var Nicodemus = /** @class */ (function () {
         }
         this.takeAction('getCharcoalium');
     };
-    Nicodemus.prototype.getResource = function () {
+    Nicodemus.prototype.getResource = function (resource) {
         if (!this.checkAction('getResource')) {
             return;
         }
-        this.takeAction('getResource');
+        this.takeAction('getResource', {
+            resource: resource
+        });
     };
     Nicodemus.prototype.applyEffect = function () {
         if (!this.checkAction('applyEffect')) {
             return;
         }
         this.takeAction('applyEffect');
+    };
+    Nicodemus.prototype.selectProjects = function (ids) {
+        if (!this.checkAction('selectProjects')) {
+            return;
+        }
+        this.takeAction('selectProjects', {
+            ids: ids.join(',')
+        });
     };
     Nicodemus.prototype.takeAction = function (action, data) {
         data = data || {};

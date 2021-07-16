@@ -135,9 +135,6 @@ class Nicodemus extends Table {
 
         foreach($result['players'] as $playerId => &$player) {
             $player['projects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('player', $playerId));
-            if ($playerId == $current_player_id) {
-                $player['handMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $playerId));
-            }
             $player['machines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
             $player['charcoalium'] = intval($this->charcoaliums->countCardInLocation('player', $playerId));
             $player['wood'] = count($this->resources->getCardsOfTypeInLocation(1, null, 'player', $playerId));
@@ -145,6 +142,7 @@ class Nicodemus extends Table {
             $player['crystal'] = count($this->resources->getCardsOfTypeInLocation(3, null, 'player', $playerId));
         }
 
+        $result['handMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $current_player_id));
         $result['tableMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
         $result['tableProjects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('table'));
         $result['charcoalium'] = intval($this->charcoaliums->countCardInLocation('table'));

@@ -39,4 +39,28 @@ html {
   &.crystal {
     background-position: 75% 0%;
   }
+
+  &.joker {
+    background-position: 100% 0%;
+  }
+}
+
+#page-title {
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .icon {
+    margin: -5px 0;
+  }
+}
+
+#mymachines .stockitem, #table .stockitem {
+  border-radius: 10px;
+  margin: 5px;
+
+  &.selected {
+    box-shadow: 0 0 5px 2px white;
+  }
 }

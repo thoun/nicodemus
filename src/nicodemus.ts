@@ -24,7 +24,8 @@ class Nicodemus implements NicodemusGame {
     private copperCounters: Counter[] = [];
     private crystalCounters: Counter[] = [];
 
-    private factories: Table;
+    private playerMachineHand: Stock;
+    private table: Table;
     private playersTables: PlayerTable[] = [];
 
     public zoom: number = 1;
@@ -62,8 +63,9 @@ class Nicodemus implements NicodemusGame {
         log('gamedatas', gamedatas);
 
         this.createPlayerPanels(gamedatas);
-        /*this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories);
-        this.createPlayerTables(gamedatas);*/
+        this.setHand(gamedatas.handMachines);
+        this.table = new Table(this, gamedatas.tableMachines);
+        //this.createPlayerTables(gamedatas);
 
         this.setupNotifications();
 
@@ -165,19 +167,53 @@ class Nicodemus implements NicodemusGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         if((this as any).isCurrentPlayerActive()) {
             switch (stateName) {                
-                case 'chooseColumn': // for multiplayer states we have to do it here
-                    /*this.onEnteringChooseColumn(args);*/
+                case 'choosePlayAction': 
+                    const choosePlayActionArgs = args as ChoosePlayActionArgs;
+                    (this as any).addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(` (${choosePlayActionArgs.charcoalium} [resource0])`), () => this.getCharcoalium());
+                    if (choosePlayActionArgs.resource == 9) {
+                        for (let i=1; i<=3; i++) {
+                            (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${i}])`), () => this.getResource(i));
+                        }
+                    } else {
+                        (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.resource}])`), () => this.getResource(choosePlayActionArgs.resource));
+                    }
+                    (this as any).addActionButton('applyEffect-button', _('Apply effect'), () => this.applyEffect());
+                    break;
+                case 'chooseProject':
+                    (this as any).addActionButton('selectProjects-button', _('Complete projects'), () => this.selectProjects([]));
+                    (this as any).addActionButton('skipProjects-button', _('Skip'), () => this.selectProjects([]), null, null, 'red');
                     break;
             }
         }
-    } 
-    
+    }    
 
     ///////////////////////////////////////////////////
     //// Utility methods
 
 
     ///////////////////////////////////////////////////
+
+    public setHand(machines: Machine[]) {
+        this.playerMachineHand = new ebg.stock() as Stock;
+        this.playerMachineHand.create(this, $('mymachines'), MACHINE_WIDTH, MACHINE_HEIGHT);
+        this.playerMachineHand.setSelectionMode(1);            
+        this.playerMachineHand.setSelectionAppearance('class');
+        this.playerMachineHand.selectionClass = 'selected';
+        this.playerMachineHand.centerItems = true;
+        //this.playerMachineHand.onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.mowCards.setupNewCard(this, card_div, card_type_id); 
+        dojo.connect(this.playerMachineHand, 'onChangeSelection', this, () => this.onPlayerMachineHandSelectionChanged(this.playerMachineHand.getSelectedItems()));
+
+        setupMachineCards([this.playerMachineHand]);
+
+        machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id));
+    }
+
+    public onPlayerMachineHandSelectionChanged(items: any) {
+        if (items.length == 1) {
+            const card = items[0];
+            this.playMachine(card.id);
+        }
+    }
 
     /*public getZoom() {
         return this.zoom;
@@ -387,12 +423,14 @@ class Nicodemus implements NicodemusGame {
         this.takeAction('getCharcoalium');
     }
 
-    public getResource() {
+    public getResource(resource: number) {
         if(!(this as any).checkAction('getResource')) {
             return;
         }
 
-        this.takeAction('getResource');
+        this.takeAction('getResource', {
+            resource
+        });
     }
 
     public applyEffect() {
@@ -401,6 +439,16 @@ class Nicodemus implements NicodemusGame {
         }
 
         this.takeAction('applyEffect');
+    }
+
+    public selectProjects(ids: number[]) {
+        if(!(this as any).checkAction('selectProjects')) {
+            return;
+        }
+
+        this.takeAction('selectProjects', { 
+            ids: ids.join(',')
+        });
     }
 
     public takeAction(action: string, data?: any) {

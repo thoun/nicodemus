@@ -1,29 +1,37 @@
 class Table {
+    private stocks: Stock[] = [];
 
     constructor(
         private game: NicodemusGame, 
+        machines: Machine[],
     ) {
-        /*const factoriesDiv = document.getElementById('factories');
-
-        const radius = 175 + factoryNumber*25;
-        const halfSize = radius + FACTORY_RADIUS;
-        const size = `${halfSize*2}px`;
-        factoriesDiv.style.width = size;
-        factoriesDiv.style.height = size;
-
         let html = `<div>`;
-        html += `<div id="factory0" class="factory-center"></div>`;
-        for (let i=1; i<=factoryNumber; i++) {
-            const angle = (i-1)*Math.PI*2/factoryNumber; // in radians
-            const left = radius*Math.sin(angle);
-            const top = radius*Math.cos(angle);
-            
-            html += `<div id="factory${i}" class="factory" style="left: ${halfSize-FACTORY_RADIUS+left}px; top: ${halfSize-FACTORY_RADIUS-top}px;"></div>`;
+        for (let i=0; i<2; i++) {
+            html += `<div id="row${i}" class="row"></div>`;
         }
         html += `</div>`;
 
-        dojo.place(html, 'factories');
+        dojo.place(html, 'table');
 
-        this.fillFactories(factories);*/
+        for (let i=0; i<2; i++) {
+            this.stocks[i] = new ebg.stock() as Stock;
+            this.stocks[i].setSelectionAppearance('class');
+            this.stocks[i].selectionClass = 'no-visible-selection';
+            this.stocks[i].create(this.game, $(`row${i}`), MACHINE_WIDTH, MACHINE_HEIGHT);
+            this.stocks[i].setSelectionMode(1);
+            //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+            dojo.connect(this.stocks[i], 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.stocks[i].getSelectedItems()));
+        }
+        setupMachineCards(this.stocks);
+
+        machines.forEach(machine => this.stocks[0].addToStockWithId(getUniqueId(machine), ''+machine.id));
+        console.log(machines, this.stocks[0]);
+    }
+
+    public onMachineSelectionChanged(items: any) {
+        if (items.length == 1) {
+            const card = items[0];
+            this.game.repairMachine(card.id);
+        }
     }
 }

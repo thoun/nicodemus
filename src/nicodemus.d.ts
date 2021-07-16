@@ -16,7 +16,6 @@ interface Project {
 
 interface NicodemusPlayer extends Player {
     machines: Machine[];
-    handMachines: Machine[];
     projects: Project[];
     charcoalium: number;
     wood: number;
@@ -41,6 +40,7 @@ interface NicodemusGamedatas {
     tablespeed: string;
 
     // Add here variables you set up in getAllDatas
+    handMachines: Machine[];
     tableMachines: Machine[];
     tableProjects: Project[];
     charcoalium: number;
@@ -50,18 +50,12 @@ interface NicodemusGamedatas {
 }
 
 interface NicodemusGame extends Game {
-    /*getZoom(): number;
-    isVariant(): boolean;
-    takeTiles(id: number): void;
-    selectLine(line: number): void;
-    selectColumn(column: number): void;
-    removeTile(tile: Tile): void;
-    removeTiles(tiles: Tile[]): void;
-    placeTile(tile: Tile, destinationId: string, left: number, top: number, zIndex?: number): Promise<boolean>;*/
+    repairMachine(id: number): void;
 }
 
-interface EnteringChooseLineArgs {
-    lines: number[];
+interface ChoosePlayActionArgs {
+    charcoalium: number;
+    resource: number;
 }
 
 interface EnteringChooseColumnArgs {

@@ -1,0 +1,25 @@
+#table {
+  position: relative;
+  width: 1230px;
+  height: 539px;
+  background-image: url('img/board.jpg');
+
+  .row {
+    height: 190px;
+    width: 1005px;
+
+    border: 1px solid red;
+  }
+
+  #row0 {
+      position: absolute;
+      top: 106px;
+      left: 214px;
+  }
+
+  #row1 {
+      position: absolute;
+      top: 316px;
+      left: 10px;
+  }
+}

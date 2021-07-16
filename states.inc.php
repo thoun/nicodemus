@@ -107,7 +107,8 @@ $playerActionsGameStates = [
         "name" => "choosePlayAction",
         "description" => clienttranslate('${actplayer} must choose action for played card'),
         "descriptionmyturn" => clienttranslate('${you} must choose action for played card'),
-        "type" => "activeplayer",
+        "type" => "activeplayer",        
+        "args" => "argChoosePlayAction",
         "possibleactions" => [ 
             "getCharcoalium",
             "getResource",
@@ -125,9 +126,7 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} can select project(s)'),
         "type" => "activeplayer",
         "possibleactions" => [ 
-            "getCharcoalium",
-            "getResource",
-            "applyEffect",
+            "selectProjects",
         ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER,

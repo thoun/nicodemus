@@ -65,7 +65,9 @@
     public function getResource() {
         self::setAjaxMode();
 
-        $this->game->getResource();
+        $recource = self::getArg("recource", AT_posint, true);
+
+        $this->game->getResource($recource);
 
         self::ajaxResponse();
     }
@@ -76,6 +78,15 @@
         $this->game->applyEffect();
 
         self::ajaxResponse();
+    }
+
+    public function selectProjects() {
+        self::setAjaxMode();     
+
+        $projectsIds = self::getArg( "ids", AT_numberlist, true );
+        $this->game->selectProjects(array_map(function($idStr) { return intval($idStr); }, explode(',', $projectsIds)));
+
+        self::ajaxResponse( );
     }
 
   }

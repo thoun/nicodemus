@@ -11,21 +11,14 @@ trait ArgsTrait {
         These methods function is to return some additional information that is specific to the current
         game state.
     */
+    
+    function argChoosePlayAction() {
 
-    /*
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
     
-    Example for game state "MyGameState":
-    
-    function argMyGameState()
-    {
-        // Get some values from the current game situation in database...
-    
-        // return values:
-        return array(
-            'variable1' => $value1,
-            'variable2' => $value2,
-            ...
-        );
-    }    
-    */
+        return [
+            'charcoalium' => $machine->points,
+            'resource' => $machine->produce,
+        ];
+    }  
 }

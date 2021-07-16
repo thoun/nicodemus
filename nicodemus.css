@@ -1,4 +1,26 @@
 @import url(../../../css/csslayer.css);
+#table {
+  position: relative;
+  width: 1230px;
+  height: 539px;
+  background-image: url("img/board.jpg");
+}
+#table .row {
+  height: 190px;
+  width: 1005px;
+  border: 1px solid red;
+}
+#table #row0 {
+  position: absolute;
+  top: 106px;
+  left: 214px;
+}
+#table #row1 {
+  position: absolute;
+  top: 316px;
+  left: 10px;
+}
+
 .counters {
   display: flex;
   align-items: center;
@@ -42,4 +64,23 @@ html {
 }
 .icon.crystal {
   background-position: 75% 0%;
+}
+.icon.joker {
+  background-position: 100% 0%;
+}
+
+#page-title .icon {
+  width: 20px;
+  height: 20px;
+}
+#page-title .icon {
+  margin: -5px 0;
+}
+
+#mymachines .stockitem, #table .stockitem {
+  border-radius: 10px;
+  margin: 5px;
+}
+#mymachines .stockitem.selected, #table .stockitem.selected {
+  box-shadow: 0 0 5px 2px white;
 }
