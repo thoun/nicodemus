@@ -226,17 +226,18 @@ trait UtilTrait {
 
     function removeEmptySpaceFromTable() {
         $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
-        usort(function ($a, $b){
+        /*usort(function($a, $b) {
             if ($a->location_arg == $b->location_arg) {
                 return 0;
             }
-            return ($a->location_arg < $b->location_arg) ? -1 : 1;
-        }, $machines);
+            return $b->location_arg - $a->location_arg;
+        }, $machines);*/
+        //die('test '.json_encode($machines));
 
         $lastSpot = 0;
         foreach($machines as &$machine) {
-            if ($machine->location_arg > $lastSpot+1) {
-                $machine->location_arg--;
+            if ($machine->location_arg > $lastSpot + 1) {
+                $machine->location_arg = $lastSpot + 1;
                 $this->machines->moveCard($machine->id, 'table', $machine->location_arg);
             }
             $lastSpot = $machine->location_arg;
@@ -244,7 +245,7 @@ trait UtilTrait {
         // TODO notif
     }
 
-    function checkPlayerWorkshopMachinesLimit() {
+    function checkPlayerWorkshopMachinesLimit(int $playerId) {
         $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
 
         if (count($machines) <= 3) {

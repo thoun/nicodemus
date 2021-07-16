@@ -147,7 +147,7 @@ $gameGameStates = [
         "type" => "game",
         "action" => "stRefillHand",
         "transitions" => [ 
-            "next" => ST_NEXT_PLAYER,
+            "nextPlayer" => ST_NEXT_PLAYER,
         ],
     ],
 ];

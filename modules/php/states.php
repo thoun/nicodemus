@@ -12,6 +12,8 @@ trait StateTrait {
     */
 
     function stRefillHand() {
+        $playerId = self::getActivePlayerId();
+
         if (intval($this->machines->countCardInLocation('deck')) > 0) {
             $machine = $this->getMachineFromDb($this->machines->pickCard('deck', $playerId));
             // TODO notif
@@ -19,6 +21,8 @@ trait StateTrait {
             // no more cards in deck, end turn
             self::setGameStateValue(LAST_TURN, 1);
         }
+
+        $this->gamestate->nextState('nextPlayer');
     }
 
     function stNextPlayer() {

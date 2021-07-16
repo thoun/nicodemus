@@ -46,7 +46,7 @@ trait ActionTrait {
         $this->machines->moveCard($id, 'player', $playerId);
 
         $machine = $this->getMachineFromDb($this->machines->getCard($id));
-        $this->incScore($playerId, $machine->points);
+        $this->incPlayerScore($playerId, $machine->points);
 
         self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${machine_name} machine'), [
             'playerId' => $playerId,
@@ -57,7 +57,7 @@ trait ActionTrait {
         
         $this->removeEmptySpaceFromTable();
         
-        $this->checkPlayerWorkshopMachinesLimit();
+        $this->checkPlayerWorkshopMachinesLimit($playerId);
 
         $this->gamestate->nextState(count($this->getCompleteProjects($machine)) > 0 ? 'chooseProject' : 'nextPlayer');
     }
@@ -113,7 +113,7 @@ trait ActionTrait {
         $projects = $this->getProjectsFromDb($this->projects->getCards($ids));
 
         foreach ($projects as $project) {
-            $this->incScore($playerId, $project->points);
+            $this->incPlayerScore($playerId, $project->points);
 
             // TODO remove project
             // TODO remove associated machines
