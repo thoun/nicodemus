@@ -1,47 +1,39 @@
 class PlayerTable {
     public playerId: number;
+    private machineStock: Stock;
 
     constructor(
         private game: NicodemusGame, 
-        player: NicodemusPlayer) {
+        player: NicodemusPlayer,
+        side: 'left' | 'right') {
 
         this.playerId = Number(player.id);
 
-        /*let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
-        <div id="player-table-${this.playerId}" class="player-table" style="border-color: #${player.color};">`;
-        for (let i=1; i<=5; i++) {
-            html += `<div id="player-table-${this.playerId}-line${i}" class="line" style="top: ${10 + 70*(i-1)}px; width: ${69*i - 5}px;"></div>`;
-        }
-        html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
-        html += `<div id="player-table-${this.playerId}-wall" class="wall ${this.game.isVariant() ? 'grayed-side' : 'colored-side'}"></div>`;
-        if (this.game.isVariant()) {
-            for (let i=1; i<=5; i++) {
-                html += `<div id="player-table-${this.playerId}-column${i}" class="column" style="left: ${384 + 69*(i-1)}px; width: ${64}px;"></div>`;
-            }
-            html += `<div id="player-table-${this.playerId}-column0" class="floor column"></div>`;
-        }
-        html += `    </div>
-        
-            <div class="player-name" style="color: #${player.color};">${player.name}</div>
-            <div class="player-name dark">${player.name}</div>
+        const color = player.color.startsWith('00') ? 'blue' : 'red';
+
+        let html = `
+        <div id="player-table-${this.playerId}" class="player-table whiteblock ${side}">
+            <div class="name-column ${color} ${side}">
+                <div class="player-name">${player.name}</div>
+                <div class="player-icon ${color}"></div>
+            </div>
+            <div class="gradient ${color} ${side}"></div>
+            <div id="player-table-${this.playerId}-machines" class="machines"></div>
         </div>`;
 
-        dojo.place(html, 'table');
+        dojo.place(html, 'playerstables');
 
-        for (let i=0; i<=5; i++) {
-            document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
-        }
-        if (this.game.isVariant()) {
-            for (let i=0; i<=5; i++) {
-                document.getElementById(`player-table-${this.playerId}-column${i}`).addEventListener('click', () => this.game.selectColumn(i));
-            }
-        }
+        this.machineStock = new ebg.stock() as Stock;
+        this.machineStock.setSelectionAppearance('class');
+        this.machineStock.selectionClass = 'selected';
+        this.machineStock.create(this.game, $(`player-table-${this.playerId}-machines`), MACHINE_WIDTH, MACHINE_HEIGHT);
+        this.machineStock.setSelectionMode(0);
+        //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+        //dojo.connect(this.machineStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
+        setupMachineCards([this.machineStock]);
+    }
 
-        for (let i=0; i<=5; i++) {
-            const tiles = player.lines.filter(tile => tile.line === i);
-            this.placeTilesOnLine(tiles, i);
-        }
-
-        this.placeTilesOnWall(player.wall);*/
+    public setCharcoalium(charcoalium: number) {
+        // TODO
     }
 }

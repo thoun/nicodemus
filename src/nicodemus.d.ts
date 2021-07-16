@@ -15,6 +15,7 @@ interface Project {
 }
 
 interface NicodemusPlayer extends Player {
+    playerNo: number;
     machines: Machine[];
     projects: Project[];
     charcoalium: number;

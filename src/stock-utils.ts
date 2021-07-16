@@ -33,14 +33,36 @@ const MACHINES_IDS = [
   42,
 ];
 
-const LOCATIONS_UNIQUE_IDS = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
-const LOCATIONS_GUILDS_IDS = [100,101];
+const PROJECTS_IDS = [
+  // colors
+  10,
+  11,
+  12,
+  13,
+  14,
+
+  // points
+  20,
+  21,
+  22,
+  23,
+
+  // resources
+  31,
+  32,
+  33,
+  34,
+  35,
+  36,
+  37,
+  38,
+];
 
 const MACHINE_WIDTH = 190;
 const MACHINE_HEIGHT = 190;
 
-const LOCATION_WIDTH = 186.24;
-const LOCATION_HEIGHT = 124;
+const PROJECT_WIDTH = 134;
+const PROJECT_HEIGHT = 93;
 
 function getUniqueId(object: { type: number, subType: number }): number {
     return object.type * 10 + object.subType;
@@ -49,10 +71,10 @@ function getUniqueId(object: { type: number, subType: number }): number {
 function setupMachineCards(machineStocks: Stock[]) {
     const cardsurl = `${g_gamethemeurl}img/cards.jpg`;
 
-    machineStocks.forEach(lordStock => 
-            MACHINES_IDS.forEach((lordType, index) =>
-                lordStock.addItemType(
-                    lordType, 
+    machineStocks.forEach(machineStock => 
+            MACHINES_IDS.forEach((cardId, index) =>
+                machineStock.addItemType(
+                    cardId, 
                     0, 
                     cardsurl, 
                     index
@@ -61,32 +83,20 @@ function setupMachineCards(machineStocks: Stock[]) {
     );
 }
 
-function setupLocationCards(locationStocks: Stock[]) {
-    const cardsurl = `${g_gamethemeurl}img/locations.jpg`;
+function setupProjectCards(projectStocks: Stock[]) {
+    const cardsurl = `${g_gamethemeurl}img/projects.jpg`;
 
-    locationStocks.forEach(locationStock => {
+    projectStocks.forEach(projectStock => {
 
-        LOCATIONS_UNIQUE_IDS.forEach((id, index) =>
-            locationStock.addItemType(
-                id, 
+        PROJECTS_IDS.forEach((cardId, index) =>
+            projectStock.addItemType(
+                cardId, 
                 0, 
                 cardsurl, 
-                1 + index
+                index
             )
         );
     });
-}
-
-function getGuildName(guild: number) {
-    let guildName = null;
-    switch (guild) {
-        case 1: guildName = _('Farmer'); break;
-        case 2: guildName = _('Military'); break;
-        case 3: guildName = _('Merchant'); break;
-        case 4: guildName = _('Politician'); break;
-        case 5: guildName = _('Mage'); break;
-    }
-    return guildName;
 }
 
 function getLocationTooltip(typeWithGuild: number) {
@@ -108,20 +118,12 @@ function getLocationTooltip(typeWithGuild: number) {
         case 12: message = _("Immediately replace all the available Locations to the Location deck and reshuffle. At the end of the game, this Location is worth 3 IP."); break;
         case 13: message = _("Until the end of the game, to take control of a Location, only 2 keys are needed, irrespective of their type. At the end of the game, this Location is worth 3 IP."); break;
         case 14: message = _("Until the end of the game, when you take control of a Location, you choose this location from the Location deck (No longer from the available Locations). The deck is then reshuffled. At the end of the game, this Location is worth 3 IP."); break;
-
-        case 100: message = guild ?
-            dojo.string.substitute(_("At the end of the game, this Location is worth as many IP as your most influential ${guild_name} Lord."), { guild_name: getGuildName(guild) }) : 
-            _("At the end of the game, this Location is worth as many IP as your most influential Lord of the indicated color."); break;
-        case 101: message = guild ?
-        dojo.string.substitute(_("At the end of the game, this Location is worth 1 IP + a bonus of 1 IP per ${guild_name} Lord present in your Senate Chamber."), { guild_name: getGuildName(guild) }) :
-        _("At the end of the game, this Location is worth 1 IP + a bonus of 1 IP per Lord of the indicated color present in your Senate Chamber."); break;
     }
     return message;
 }
 
 function getLordTooltip(typeWithGuild: number) {
     const type = Math.floor(typeWithGuild / 10);
-    const guild = typeWithGuild % 10;
     let message = null;
     switch (type) {
         case 1: message = _("When this Lord is placed in the Senate Chamber, two Lords in this Chamber (including this one) can be swapped places, except those with keys."); break;
@@ -130,9 +132,6 @@ function getLordTooltip(typeWithGuild: number) {
         case 4: message = _("This Lord gives you 2 Pearls."); break;
         case 5: message = _("This Lord gives you 1 Pearl."); break;
         case 6: message = _("When this Lord is placed in the Senate Chamber, the top Lord card is taken from the Lord deck and placed in the corresponding discard pile."); break;
-    }
-    if (message) {
-        message += `<br/><br/>${dojo.string.substitute(_("Guild : ${guild_name}"), { guild_name: getGuildName(guild) })}`
     }
     return message;
 }

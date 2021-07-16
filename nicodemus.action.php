@@ -65,9 +65,9 @@
     public function getResource() {
         self::setAjaxMode();
 
-        $recource = self::getArg("recource", AT_posint, true);
+        $resource = self::getArg("resource", AT_posint, true);
 
-        $this->game->getResource($recource);
+        $this->game->getResource($resource);
 
         self::ajaxResponse();
     }

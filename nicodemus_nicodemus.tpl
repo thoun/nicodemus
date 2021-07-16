@@ -1,17 +1,19 @@
 {OVERALL_GAME_HEADER}
 
-<div id="playerstables">
-    <div id="myhand-wrap" class="whiteblock">
-        <h3>{MY_HAND}</h3>
-            <div id="mymachines"></div>
-            <div id="myprojects"></div>
-        </div>
+<div id="myhand-wrap" class="whiteblock">
+    <h3>{MY_HAND}</h3>
+        <div id="my-machines"></div>
+        <div id="my-projects"></div>
     </div>
-
-    <div id="player1"></div>
-    <div id="player2"></div>
 </div>
+
+<div id="playerstables"></div>
+
 <div id="table">
+    <div class="projects">
+        <div id="project-deck"></div>
+        <div id="table-projects"></div>
+    </div>
 </div>
 
 {OVERALL_GAME_FOOTER}

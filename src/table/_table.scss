@@ -3,23 +3,45 @@
   width: 1230px;
   height: 539px;
   background-image: url('img/board.jpg');
+  margin-top: 70px;
 
-  .row {
-    height: 190px;
-    width: 1005px;
-
-    border: 1px solid red;
+  .point-marker {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    box-shadow: 1px 1px 2px 2px black;
+    border-radius: 50%;
+    background-image: url('img/points.png');
+    background-size: auto 100%;    
+  
+    &.blue {
+      background-position: 0% 0%;
+    }
+  
+    &.red {
+      background-position: 100% 0%;
+    }
   }
 
-  #row0 {
-      position: absolute;
-      top: 106px;
-      left: 214px;
+  .projects {
+    position: absolute;
+    top: -65px;
+    left: 0;
+
+    #table-projects {
+        position: absolute;
+        left: 176px;
+
+        .table-project-stock {
+            position: absolute;
+            top: 0px;
+        }
+    }
   }
 
-  #row1 {
-      position: absolute;
-      top: 316px;
-      left: 10px;
+  .machines {
+    position: absolute;
+    left: 6px;
+    top: 102px;
   }
 }

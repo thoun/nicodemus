@@ -2,7 +2,9 @@
 
 @import 'table/table';
 @import 'players-tables/players-tables';
-@import 'playerboards';
+.player-board {
+  @import 'playerboards';
+}
 
 html {
     /*background: url('img/background.jpg') #00587a;
@@ -13,8 +15,6 @@ html {
     /*background: url('img/background.jpg') #00587a;
     background-repeat: repeat;*/
 }
-
-
 
 .icon {
   display: inline-block;
@@ -56,11 +56,33 @@ html {
   }
 }
 
-#mymachines .stockitem, #table .stockitem {
+
+.player-icon {
+  display: inline-block;
+  position: relative;
+  width: 150px;
+  height: 150px;
+  background-image: url('img/players.png');
+  background-size: auto 100%;
+
+  &.blue {
+    background-position: 0% 0%;
+  }
+
+  &.red {
+    background-position: 50% 0%;
+  }
+
+  &.first-player {
+    background-position: 100% 0%;
+  }
+}
+
+.stockitem {
   border-radius: 10px;
   margin: 5px;
 
   &.selected {
-    box-shadow: 0 0 5px 2px white;
+    box-shadow: 0 0 5px 6px white;
   }
 }

@@ -58,51 +58,50 @@ var MACHINES_IDS = [
     41,
     42,
 ];
-var LOCATIONS_UNIQUE_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-var LOCATIONS_GUILDS_IDS = [100, 101];
+var PROJECTS_IDS = [
+    // colors
+    10,
+    11,
+    12,
+    13,
+    14,
+    // points
+    20,
+    21,
+    22,
+    23,
+    // resources
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+];
 var MACHINE_WIDTH = 190;
 var MACHINE_HEIGHT = 190;
-var LOCATION_WIDTH = 186.24;
-var LOCATION_HEIGHT = 124;
+var PROJECT_WIDTH = 134;
+var PROJECT_HEIGHT = 93;
 function getUniqueId(object) {
     return object.type * 10 + object.subType;
 }
 function setupMachineCards(machineStocks) {
     var cardsurl = g_gamethemeurl + "img/cards.jpg";
-    machineStocks.forEach(function (lordStock) {
-        return MACHINES_IDS.forEach(function (lordType, index) {
-            return lordStock.addItemType(lordType, 0, cardsurl, index);
+    machineStocks.forEach(function (machineStock) {
+        return MACHINES_IDS.forEach(function (cardId, index) {
+            return machineStock.addItemType(cardId, 0, cardsurl, index);
         });
     });
 }
-function setupLocationCards(locationStocks) {
-    var cardsurl = g_gamethemeurl + "img/locations.jpg";
-    locationStocks.forEach(function (locationStock) {
-        LOCATIONS_UNIQUE_IDS.forEach(function (id, index) {
-            return locationStock.addItemType(id, 0, cardsurl, 1 + index);
+function setupProjectCards(projectStocks) {
+    var cardsurl = g_gamethemeurl + "img/projects.jpg";
+    projectStocks.forEach(function (projectStock) {
+        PROJECTS_IDS.forEach(function (cardId, index) {
+            return projectStock.addItemType(cardId, 0, cardsurl, index);
         });
     });
-}
-function getGuildName(guild) {
-    var guildName = null;
-    switch (guild) {
-        case 1:
-            guildName = _('Farmer');
-            break;
-        case 2:
-            guildName = _('Military');
-            break;
-        case 3:
-            guildName = _('Merchant');
-            break;
-        case 4:
-            guildName = _('Politician');
-            break;
-        case 5:
-            guildName = _('Mage');
-            break;
-    }
-    return guildName;
 }
 function getLocationTooltip(typeWithGuild) {
     var type = Math.floor(typeWithGuild / 10);
@@ -151,22 +150,11 @@ function getLocationTooltip(typeWithGuild) {
         case 14:
             message = _("Until the end of the game, when you take control of a Location, you choose this location from the Location deck (No longer from the available Locations). The deck is then reshuffled. At the end of the game, this Location is worth 3 IP.");
             break;
-        case 100:
-            message = guild ?
-                dojo.string.substitute(_("At the end of the game, this Location is worth as many IP as your most influential ${guild_name} Lord."), { guild_name: getGuildName(guild) }) :
-                _("At the end of the game, this Location is worth as many IP as your most influential Lord of the indicated color.");
-            break;
-        case 101:
-            message = guild ?
-                dojo.string.substitute(_("At the end of the game, this Location is worth 1 IP + a bonus of 1 IP per ${guild_name} Lord present in your Senate Chamber."), { guild_name: getGuildName(guild) }) :
-                _("At the end of the game, this Location is worth 1 IP + a bonus of 1 IP per Lord of the indicated color present in your Senate Chamber.");
-            break;
     }
     return message;
 }
 function getLordTooltip(typeWithGuild) {
     var type = Math.floor(typeWithGuild / 10);
-    var guild = typeWithGuild % 10;
     var message = null;
     switch (type) {
         case 1:
@@ -187,9 +175,6 @@ function getLordTooltip(typeWithGuild) {
         case 6:
             message = _("When this Lord is placed in the Senate Chamber, the top Lord card is taken from the Lord deck and placed in the corresponding discard pile.");
             break;
-    }
-    if (message) {
-        message += "<br/><br/>" + dojo.string.substitute(_("Guild : ${guild_name}"), { guild_name: getGuildName(guild) });
     }
     return message;
 }
@@ -216,84 +201,133 @@ function formatTextIcons(rawText) {
         .replace(/\[resource9\]/ig, '<span class="icon joker"></span>');
 }
 var Table = /** @class */ (function () {
-    function Table(game, machines) {
+    function Table(game, players, projects, machines) {
         var _this = this;
         this.game = game;
-        this.stocks = [];
-        var html = "<div>";
-        for (var i = 0; i < 2; i++) {
-            html += "<div id=\"row" + i + "\" class=\"row\"></div>";
+        this.projectStocks = [];
+        this.machineStocks = [];
+        var html = '';
+        // points
+        players.forEach(function (player) {
+            return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker " + (player.color.startsWith('00') ? 'blue' : 'red') + "\"></div>";
+        });
+        dojo.place(html, 'table');
+        players.forEach(function (player) { return _this.setPoints(Number(player.id), Number(player.score)); });
+        // projects
+        html = '';
+        for (var i = 1; i <= 6; i++) {
+            html += "<div id=\"table-project-" + i + "\" class=\"table-project-stock\" style=\"left: " + 181 * (i - 1) + "px\"></div>";
+        }
+        dojo.place(html, 'table-projects');
+        for (var i = 1; i <= 6; i++) {
+            this.projectStocks[i] = new ebg.stock();
+            this.projectStocks[i].setSelectionAppearance('class');
+            this.projectStocks[i].selectionClass = 'selected';
+            this.projectStocks[i].create(this.game, $("table-project-" + i), PROJECT_WIDTH, PROJECT_HEIGHT);
+            this.projectStocks[i].setSelectionMode(0);
+            //this.projectStocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+            dojo.connect(this.projectStocks[i], 'onChangeSelection', this, function () { return _this._onProjectSelectionChanged(); });
+        }
+        setupProjectCards(this.projectStocks);
+        var _loop_1 = function (i) {
+            projects.filter(function (project) { return project.location_arg == i; }).forEach(function (project) { return _this.projectStocks[i].addToStockWithId(getUniqueId(project), '' + project.id); });
+        };
+        for (var i = 1; i <= 6; i++) {
+            _loop_1(i);
+        }
+        // machines
+        html = "<div class=\"machines\">";
+        for (var i = 1; i <= 10; i++) {
+            var firstRow = i <= 5;
+            var left = (firstRow ? 204 : 0) + (i - 1) * 200;
+            var top_1 = firstRow ? 0 : 210;
+            html += "<div id=\"table-machine-spot-" + i + "\" class=\"machine-spot\" style=\"left: " + left + "px; top: " + top_1 + "px\"></div>";
         }
         html += "</div>";
         dojo.place(html, 'table');
-        var _loop_1 = function (i) {
-            this_1.stocks[i] = new ebg.stock();
-            this_1.stocks[i].setSelectionAppearance('class');
-            this_1.stocks[i].selectionClass = 'no-visible-selection';
-            this_1.stocks[i].create(this_1.game, $("row" + i), MACHINE_WIDTH, MACHINE_HEIGHT);
-            this_1.stocks[i].setSelectionMode(1);
+        var _loop_2 = function (i) {
+            this_1.machineStocks[i] = new ebg.stock();
+            this_1.machineStocks[i].setSelectionAppearance('class');
+            this_1.machineStocks[i].selectionClass = 'selected';
+            this_1.machineStocks[i].create(this_1.game, $("table-machine-spot-" + i), MACHINE_WIDTH, MACHINE_HEIGHT);
+            this_1.machineStocks[i].setSelectionMode(0);
             //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
-            dojo.connect(this_1.stocks[i], 'onChangeSelection', this_1, function () { return _this.onMachineSelectionChanged(_this.stocks[i].getSelectedItems()); });
+            dojo.connect(this_1.machineStocks[i], 'onChangeSelection', this_1, function () { return _this.onMachineSelectionChanged(_this.machineStocks[i].getSelectedItems()); });
         };
         var this_1 = this;
-        for (var i = 0; i < 2; i++) {
-            _loop_1(i);
+        for (var i = 1; i <= 10; i++) {
+            _loop_2(i);
         }
-        setupMachineCards(this.stocks);
-        machines.forEach(function (machine) { return _this.stocks[0].addToStockWithId(getUniqueId(machine), '' + machine.id); });
-        console.log(machines, this.stocks[0]);
+        setupMachineCards(this.machineStocks);
+        var _loop_3 = function (i) {
+            machines.filter(function (machine) { return machine.location_arg == i; }).forEach(function (machine) { return _this.machineStocks[i].addToStockWithId(getUniqueId(machine), '' + machine.id); });
+        };
+        for (var i = 1; i <= 10; i++) {
+            _loop_3(i);
+        }
     }
+    Table.prototype.getSelectedProjectsIds = function () {
+        var selectedIds = [];
+        for (var i = 1; i <= 6; i++) {
+            selectedIds.push.apply(selectedIds, this.projectStocks[i].getSelectedItems().map(function (item) { return Number(item.id); }));
+        }
+        return selectedIds;
+    };
+    Table.prototype._onProjectSelectionChanged = function () {
+        var _a;
+        (_a = this.onProjectSelectionChanged) === null || _a === void 0 ? void 0 : _a.call(this, this.getSelectedProjectsIds());
+    };
     Table.prototype.onMachineSelectionChanged = function (items) {
         if (items.length == 1) {
             var card = items[0];
             this.game.repairMachine(card.id);
         }
     };
+    Table.prototype.setProjectSelectable = function (selectable) {
+        this.projectStocks.forEach(function (stock) { return stock.setSelectionMode(selectable ? 2 : 0); });
+        if (!selectable) {
+            this.projectStocks.forEach(function (stock) { return stock.unselectAll(); });
+        }
+    };
+    Table.prototype.setMachineSelectable = function (selectable) {
+        this.machineStocks.forEach(function (stock) { return stock.setSelectionMode(selectable ? 1 : 0); });
+        if (!selectable) {
+            this.machineStocks.forEach(function (stock) { return stock.unselectAll(); });
+        }
+    };
+    Table.prototype.setPoints = function (playerId, points) {
+        var markerDiv = document.getElementById("player-" + playerId + "-point-marker");
+        markerDiv.style.top = (points % 2 ? 40 : 52) + "px";
+        markerDiv.style.left = 16 + points * 46.2 + "px";
+    };
     return Table;
 }());
 var PlayerTable = /** @class */ (function () {
-    function PlayerTable(game, player) {
+    function PlayerTable(game, player, side) {
         this.game = game;
         this.playerId = Number(player.id);
-        /*let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
-        <div id="player-table-${this.playerId}" class="player-table" style="border-color: #${player.color};">`;
-        for (let i=1; i<=5; i++) {
-            html += `<div id="player-table-${this.playerId}-line${i}" class="line" style="top: ${10 + 70*(i-1)}px; width: ${69*i - 5}px;"></div>`;
-        }
-        html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
-        html += `<div id="player-table-${this.playerId}-wall" class="wall ${this.game.isVariant() ? 'grayed-side' : 'colored-side'}"></div>`;
-        if (this.game.isVariant()) {
-            for (let i=1; i<=5; i++) {
-                html += `<div id="player-table-${this.playerId}-column${i}" class="column" style="left: ${384 + 69*(i-1)}px; width: ${64}px;"></div>`;
-            }
-            html += `<div id="player-table-${this.playerId}-column0" class="floor column"></div>`;
-        }
-        html += `    </div>
-        
-            <div class="player-name" style="color: #${player.color};">${player.name}</div>
-            <div class="player-name dark">${player.name}</div>
-        </div>`;
-
-        dojo.place(html, 'table');
-
-        for (let i=0; i<=5; i++) {
-            document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
-        }
-        if (this.game.isVariant()) {
-            for (let i=0; i<=5; i++) {
-                document.getElementById(`player-table-${this.playerId}-column${i}`).addEventListener('click', () => this.game.selectColumn(i));
-            }
-        }
-
-        for (let i=0; i<=5; i++) {
-            const tiles = player.lines.filter(tile => tile.line === i);
-            this.placeTilesOnLine(tiles, i);
-        }
-
-        this.placeTilesOnWall(player.wall);*/
+        var color = player.color.startsWith('00') ? 'blue' : 'red';
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div class=\"player-icon " + color + "\"></div>\n            </div>\n            <div class=\"gradient " + color + " " + side + "\"></div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n        </div>";
+        dojo.place(html, 'playerstables');
+        this.machineStock = new ebg.stock();
+        this.machineStock.setSelectionAppearance('class');
+        this.machineStock.selectionClass = 'selected';
+        this.machineStock.create(this.game, $("player-table-" + this.playerId + "-machines"), MACHINE_WIDTH, MACHINE_HEIGHT);
+        this.machineStock.setSelectionMode(0);
+        //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+        //dojo.connect(this.machineStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
+        setupMachineCards([this.machineStock]);
     }
+    PlayerTable.prototype.setCharcoalium = function (charcoalium) {
+        // TODO
+    };
     return PlayerTable;
 }());
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
+};
 var ANIMATION_MS = 500;
 /*const SCORE_MS = 1500;
 
@@ -338,8 +372,12 @@ var Nicodemus = /** @class */ (function () {
         log('gamedatas', gamedatas);
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
-        this.table = new Table(this, gamedatas.tableMachines);
-        //this.createPlayerTables(gamedatas);
+        this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines);
+        this.table.onProjectSelectionChanged = function (selectProjectsIds) {
+            dojo.toggleClass('selectProjects-button', 'disabled', !selectProjectsIds.length);
+            dojo.toggleClass('skipProjects-button', 'disabled', !!selectProjectsIds.length);
+        };
+        this.createPlayerTables(gamedatas);
         this.setupNotifications();
         /*document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
         document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
@@ -357,70 +395,27 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.onEnteringState = function (stateName, args) {
         log('Entering state: ' + stateName, args.args);
         switch (stateName) {
-            case 'chooseTile':
-                this.onEnteringChooseTile();
+            case 'chooseProject':
+                if (this.isCurrentPlayerActive()) {
+                    this.table.setProjectSelectable(true);
+                }
                 break;
-            /*case 'chooseLine':
-                this.onEnteringChooseLine(args.args);
-                break;*/
         }
     };
-    /*private setGamestateDescription(property: string = '') {
-        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
-        this.gamedatas.gamestate.description = `${originalState['description' + property]}`;
-        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`;
-        (this as any).updatePageTitle();
-    }*/
-    Nicodemus.prototype.onEnteringChooseTile = function () {
-        if (this.isCurrentPlayerActive()) {
-            dojo.addClass('factories', 'selectable');
-        }
-    };
-    /*onEnteringChooseLine(args: EnteringChooseLineArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
-            args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
-        }
-    }
-
-    onEnteringChooseColumn(args: EnteringChooseColumnArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
-            const playerId = this.getPlayerId();
-            this.getPlayerTable(playerId).setColumnTop(args.line);
-            args.columns[playerId].forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-column${i}`, 'selectable'));
-        }
-    }*/
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
     Nicodemus.prototype.onLeavingState = function (stateName) {
         log('Leaving state: ' + stateName);
         switch (stateName) {
-            case 'chooseTile':
-                this.onLeavingChooseTile();
+            case 'chooseProject':
+                this.table.setProjectSelectable(false);
                 break;
-            /*case 'chooseLine':
-                this.onLeavingChooseLine();
-                break;
-            case 'chooseColumn':
-                this.onLeavingChooseColumn();
-                break;*/
         }
     };
     Nicodemus.prototype.onLeavingChooseTile = function () {
         dojo.removeClass('factories', 'selectable');
     };
-    /*onLeavingChooseLine() {
-        for (let i=0; i<=5; i++) {
-            dojo.removeClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
-        }
-    }
-
-    onLeavingChooseColumn() {
-        for (let i=1; i<=5; i++) {
-            dojo.removeClass(`player-table-${this.getPlayerId()}-column${i}`, 'selectable');
-        }
-        dojo.removeClass(`player-table-${this.getPlayerId()}-line0`, 'selectable');
-    }*/
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
@@ -432,12 +427,12 @@ var Nicodemus = /** @class */ (function () {
                     var choosePlayActionArgs_1 = args;
                     this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.charcoalium + " [resource0])"), function () { return _this.getCharcoalium(); });
                     if (choosePlayActionArgs_1.resource == 9) {
-                        var _loop_2 = function (i) {
+                        var _loop_4 = function (i) {
                             this_2.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
                         };
                         var this_2 = this;
                         for (var i = 1; i <= 3; i++) {
-                            _loop_2(i);
+                            _loop_4(i);
                         }
                     }
                     else {
@@ -446,8 +441,10 @@ var Nicodemus = /** @class */ (function () {
                     this.addActionButton('applyEffect-button', _('Apply effect'), function () { return _this.applyEffect(); });
                     break;
                 case 'chooseProject':
-                    this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects([]); });
+                    this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects(_this.table.getSelectedProjectsIds()); });
                     this.addActionButton('skipProjects-button', _('Skip'), function () { return _this.selectProjects([]); }, null, null, 'red');
+                    dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
+                    dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);
                     break;
             }
         }
@@ -458,7 +455,7 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.setHand = function (machines) {
         var _this = this;
         this.playerMachineHand = new ebg.stock();
-        this.playerMachineHand.create(this, $('mymachines'), MACHINE_WIDTH, MACHINE_HEIGHT);
+        this.playerMachineHand.create(this, $('my-machines'), MACHINE_WIDTH, MACHINE_HEIGHT);
         this.playerMachineHand.setSelectionMode(1);
         this.playerMachineHand.setSelectionAppearance('class');
         this.playerMachineHand.selectionClass = 'selected';
@@ -474,108 +471,16 @@ var Nicodemus = /** @class */ (function () {
             this.playMachine(card.id);
         }
     };
-    /*public getZoom() {
-        return this.zoom;
-    }
-
-    public setAutoZoom() {
-        const zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
-        const factoryWidth = this.factories.getWidth();
-        let newZoom = this.zoom;
-        while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth/newZoom < factoryWidth) {
-            newZoom = ZOOM_LEVELS[ZOOM_LEVELS.indexOf(newZoom) - 1];
-        }
-        // zoom will also place player tables. we call setZoom even if this method didn't change it because it might have been changed by localStorage zoom
-        this.setZoom(newZoom);
-    }
-
-    private setZoom(zoom: number = 1) {
-        this.zoom = zoom;
-        localStorage.setItem(LOCAL_STORAGE_ZOOM_KEY, ''+this.zoom);
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom);
-        dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
-        dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
-
-        const div = document.getElementById('table');
-        const hands: HTMLDivElement[] = Array.from(document.getElementsByClassName('hand')) as HTMLDivElement[];
-        if (zoom === 1) {
-            div.style.transform = '';
-            div.style.margin = '';
-            hands.forEach(hand => {
-                hand.style.transform = '';
-                hand.style.margin = '';
-            });
-        } else {
-            div.style.transform = `scale(${zoom})`;
-            div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
-            hands.forEach(hand => {
-                hand.style.transform = `scale(${zoom})`;
-                hand.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% 0 0`;
-            });
-        }
-
-        document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
-    }
-
-    public zoomIn() {
-        if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
-            return;
-        }
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) + 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
-    }
-
-    public zoomOut() {
-        if (this.zoom === ZOOM_LEVELS[0]) {
-            return;
-        }
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
-    }
-
-    public isVariant(): boolean {
-        return this.gamedatas.variant;
-    }
-
-    public getPlayerId(): number {
-        return Number((this as any).player_id);
-    }
-
-    private getPlayerColor(playerId: number): string {
-        return this.gamedatas.players[playerId].color;
-    }
-
-    private getPlayerTable(playerId: number): PlayerTable {
-        return this.playersTables.find(playerTable => playerTable.playerId === playerId);
-    }
-
-    private incScore(playerId: number, incScore: number) {
-        (this as any).scoreCtrl[playerId]?.incValue(incScore);
-    }
-
-    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, zIndex?: number): Promise<boolean> {
-        //this.removeTile(tile);
-        //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
-        const tileDiv = document.getElementById(`tile${tile.id}`);
-        if (tileDiv) {
-            if (zIndex) {
-                tileDiv.style.zIndex = ''+zIndex;
-            }
-            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
-        } else {
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${zIndex ? `z-index: ${zIndex}px;` : ''}"></div>`, destinationId);
-            return Promise.resolve(true);
-        }
-        
-    }*/
+    Nicodemus.prototype.getPlayerId = function () {
+        return Number(this.player_id);
+    };
+    Nicodemus.prototype.getPlayerTable = function (playerId) {
+        return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
+    };
     Nicodemus.prototype.createPlayerPanels = function (gamedatas) {
         var _this = this;
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
-            // first player token
-            /*if (gamedatas.firstPlayerTokenPlayerId === playerId) {
-                dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper"></div>`, `player_board_${player.id}`);
-            }*/
             // charcoalium & resources counters
             dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-" + player.id + "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            <div class=\"counters\">\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
             var charcoaliumCounter = new ebg.counter();
@@ -594,37 +499,27 @@ var Nicodemus = /** @class */ (function () {
             crystalCounter.create("crystal-counter-" + playerId);
             crystalCounter.setValue(player.crystal);
             _this.crystalCounters[playerId] = crystalCounter;
+            if (player.playerNo == 1) {
+                dojo.place("<div class=\"player-icon first-player\"></div>", "player_board_" + player.id);
+            }
         });
         this.addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
         this.addTooltipHtmlToClass('wood-counter', _("Wood"));
         this.addTooltipHtmlToClass('copper-counter', _("Copper"));
         this.addTooltipHtmlToClass('crystal-counter', _("Crystal"));
     };
-    /*private createPlayerTables(gamedatas: NicodemusGamedatas) {
-        const players = Object.values(gamedatas.players).sort((a, b) => a.playerNo - b.playerNo);
-        const playerIndex = players.findIndex(player => Number(player.id) === Number((this as any).player_id));
-        const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
-
-        orderedPlayers.forEach(player =>
-            this.createPlayerTable(gamedatas, Number(player.id))
-        );
-    }
-
-    private createPlayerTable(gamedatas: NicodemusGamedatas, playerId: number) {
-        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId]/_*, gamedatas.playersTables[playerId]*_/));
-    }
-
-    public removeTile(tile: Tile, fadeOut?: boolean) {
-        if (document.getElementById(`tile${tile.id}`)) {
-            fadeOut ?
-                (this as any).fadeOutAndDestroy(`tile${tile.id}`) :
-                dojo.destroy(`tile${tile.id}`);
-        }
-    }
-
-    public removeTiles(tiles: Tile[], fadeOut?: boolean) {
-        tiles.forEach(tile => this.removeTile(tile, fadeOut));
-    }*/
+    Nicodemus.prototype.createPlayerTables = function (gamedatas) {
+        var _this = this;
+        var players = Object.values(gamedatas.players).sort(function (a, b) { return a.playerNo - b.playerNo; });
+        var playerIndex = players.findIndex(function (player) { return Number(player.id) === Number(_this.player_id); });
+        var orderedPlayers = playerIndex > 0 ? __spreadArray(__spreadArray([], players.slice(playerIndex)), players.slice(0, playerIndex)) : players;
+        orderedPlayers.forEach(function (player, index) {
+            return _this.createPlayerTable(gamedatas, Number(player.id), index ? 'right' : 'left');
+        });
+    };
+    Nicodemus.prototype.createPlayerTable = function (gamedatas, playerId, side) {
+        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId], side));
+    };
     Nicodemus.prototype.playMachine = function (id) {
         if (!this.checkAction('playMachine')) {
             return;
@@ -674,23 +569,15 @@ var Nicodemus = /** @class */ (function () {
         data.lock = true;
         this.ajaxcall("/nicodemus/nicodemus/" + action + ".html", data, this, function () { });
     };
-    /*placeFirstPlayerToken(playerId: number) {
-        const firstPlayerToken = document.getElementById('firstPlayerToken');
-        if (firstPlayerToken) {
-            slideToObjectAndAttach(this, firstPlayerToken, `player_board_${playerId}_firstPlayerWrapper`);
-        } else {
-            dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);
-
-            (this as any).addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
-        }
-    }
-
-    
-    private setHandHeight(playerId: number) {
-        const playerHandDiv = document.getElementById(`player-hand-${playerId}`);
-        playerHandDiv.style.height = `unset`;
-        playerHandDiv.style.height = `${playerHandDiv.getBoundingClientRect().height}px`;
-    }*/
+    Nicodemus.prototype.setPoints = function (playerId, points) {
+        var _a;
+        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
+        this.table.setPoints(playerId, points);
+    };
+    Nicodemus.prototype.setCharcoalium = function (playerId, charcoalium) {
+        this.charcoaliumCounters[playerId].toValue(charcoalium);
+        this.getPlayerTable(playerId).setCharcoalium(charcoalium);
+    };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
     /*

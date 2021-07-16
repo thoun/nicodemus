@@ -63,7 +63,9 @@ trait UtilTrait {
         }
 
         // set table projects
-        $this->projects->pickCardsForLocation(6, 'deck', 'table');
+        for ($i=1; $i<=6; $i++) {
+            $this->projects->pickCardForLocation('deck', 'table', $i);
+        }
 
         // set initial resources
         foreach($players as $playerId => $player) {

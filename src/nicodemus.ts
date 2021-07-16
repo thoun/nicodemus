@@ -64,8 +64,12 @@ class Nicodemus implements NicodemusGame {
 
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
-        this.table = new Table(this, gamedatas.tableMachines);
-        //this.createPlayerTables(gamedatas);
+        this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines);
+        this.table.onProjectSelectionChanged = selectProjectsIds => {
+            dojo.toggleClass('selectProjects-button', 'disabled', !selectProjectsIds.length);
+            dojo.toggleClass('skipProjects-button', 'disabled', !!selectProjectsIds.length);
+        };
+        this.createPlayerTables(gamedatas);
 
         this.setupNotifications();
 
@@ -89,41 +93,13 @@ class Nicodemus implements NicodemusGame {
         log( 'Entering state: '+stateName , args.args );
 
         switch (stateName) {
-            case 'chooseTile':
-                this.onEnteringChooseTile();
+            case 'chooseProject':
+                if((this as any).isCurrentPlayerActive()) {
+                    this.table.setProjectSelectable(true);
+                }
                 break;
-            /*case 'chooseLine':
-                this.onEnteringChooseLine(args.args);
-                break;*/
         }
     }
-    
-    /*private setGamestateDescription(property: string = '') {
-        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
-        this.gamedatas.gamestate.description = `${originalState['description' + property]}`; 
-        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`; 
-        (this as any).updatePageTitle();        
-    }*/
-
-    onEnteringChooseTile() {
-        if ((this as any).isCurrentPlayerActive()) {
-            dojo.addClass('factories', 'selectable');
-        }
-    }
-
-    /*onEnteringChooseLine(args: EnteringChooseLineArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
-            args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
-        }
-    }
-
-    onEnteringChooseColumn(args: EnteringChooseColumnArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
-            const playerId = this.getPlayerId();
-            this.getPlayerTable(playerId).setColumnTop(args.line);
-            args.columns[playerId].forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-column${i}`, 'selectable'));
-        }
-    }*/
 
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
@@ -132,34 +108,15 @@ class Nicodemus implements NicodemusGame {
         log( 'Leaving state: '+stateName );
 
         switch (stateName) {
-            case 'chooseTile':
-                this.onLeavingChooseTile();
+            case 'chooseProject':
+                this.table.setProjectSelectable(false);
                 break;
-            /*case 'chooseLine':
-                this.onLeavingChooseLine();
-                break;
-            case 'chooseColumn':
-                this.onLeavingChooseColumn();
-                break;*/
         }
     }
 
     onLeavingChooseTile() {
         dojo.removeClass('factories', 'selectable');
     }
-
-    /*onLeavingChooseLine() {
-        for (let i=0; i<=5; i++) {
-            dojo.removeClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
-        }
-    }
-
-    onLeavingChooseColumn() {
-        for (let i=1; i<=5; i++) {
-            dojo.removeClass(`player-table-${this.getPlayerId()}-column${i}`, 'selectable');
-        }
-        dojo.removeClass(`player-table-${this.getPlayerId()}-line0`, 'selectable');
-    }*/
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -179,9 +136,12 @@ class Nicodemus implements NicodemusGame {
                     }
                     (this as any).addActionButton('applyEffect-button', _('Apply effect'), () => this.applyEffect());
                     break;
+
                 case 'chooseProject':
-                    (this as any).addActionButton('selectProjects-button', _('Complete projects'), () => this.selectProjects([]));
+                    (this as any).addActionButton('selectProjects-button', _('Complete projects'), () => this.selectProjects(this.table.getSelectedProjectsIds()));
                     (this as any).addActionButton('skipProjects-button', _('Skip'), () => this.selectProjects([]), null, null, 'red');
+                    dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
+                    dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);
                     break;
             }
         }
@@ -195,7 +155,7 @@ class Nicodemus implements NicodemusGame {
 
     public setHand(machines: Machine[]) {
         this.playerMachineHand = new ebg.stock() as Stock;
-        this.playerMachineHand.create(this, $('mymachines'), MACHINE_WIDTH, MACHINE_HEIGHT);
+        this.playerMachineHand.create(this, $('my-machines'), MACHINE_WIDTH, MACHINE_HEIGHT);
         this.playerMachineHand.setSelectionMode(1);            
         this.playerMachineHand.setSelectionAppearance('class');
         this.playerMachineHand.selectionClass = 'selected';
@@ -215,110 +175,18 @@ class Nicodemus implements NicodemusGame {
         }
     }
 
-    /*public getZoom() {
-        return this.zoom;
-    }
-
-    public setAutoZoom() {
-        const zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
-        const factoryWidth = this.factories.getWidth();
-        let newZoom = this.zoom;
-        while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth/newZoom < factoryWidth) {
-            newZoom = ZOOM_LEVELS[ZOOM_LEVELS.indexOf(newZoom) - 1];
-        }
-        // zoom will also place player tables. we call setZoom even if this method didn't change it because it might have been changed by localStorage zoom
-        this.setZoom(newZoom);
-    }    
-
-    private setZoom(zoom: number = 1) {
-        this.zoom = zoom;
-        localStorage.setItem(LOCAL_STORAGE_ZOOM_KEY, ''+this.zoom);
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom);
-        dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
-        dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
-
-        const div = document.getElementById('table');
-        const hands: HTMLDivElement[] = Array.from(document.getElementsByClassName('hand')) as HTMLDivElement[];
-        if (zoom === 1) {
-            div.style.transform = '';
-            div.style.margin = '';
-            hands.forEach(hand => {
-                hand.style.transform = '';
-                hand.style.margin = '';
-            });
-        } else {
-            div.style.transform = `scale(${zoom})`;
-            div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
-            hands.forEach(hand => {
-                hand.style.transform = `scale(${zoom})`;
-                hand.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% 0 0`;
-            });
-        }
-
-        document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
-    }
-
-    public zoomIn() {
-        if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
-            return;
-        }
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) + 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
-    }
-
-    public zoomOut() {
-        if (this.zoom === ZOOM_LEVELS[0]) {
-            return;
-        }
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
-    }
-
-    public isVariant(): boolean {
-        return this.gamedatas.variant;
-    }
-
     public getPlayerId(): number {
         return Number((this as any).player_id);
-    }
-
-    private getPlayerColor(playerId: number): string {
-        return this.gamedatas.players[playerId].color;
     }
 
     private getPlayerTable(playerId: number): PlayerTable {
         return this.playersTables.find(playerTable => playerTable.playerId === playerId);
     }
 
-    private incScore(playerId: number, incScore: number) {
-        (this as any).scoreCtrl[playerId]?.incValue(incScore);
-    }
-
-    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, zIndex?: number): Promise<boolean> {
-        //this.removeTile(tile);
-        //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
-        const tileDiv = document.getElementById(`tile${tile.id}`);
-        if (tileDiv) {
-            if (zIndex) {
-                tileDiv.style.zIndex = ''+zIndex;
-            }
-            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
-        } else {
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${zIndex ? `z-index: ${zIndex}px;` : ''}"></div>`, destinationId);
-            return Promise.resolve(true);
-        }
-        
-    }*/
-
     private createPlayerPanels(gamedatas: NicodemusGamedatas) {
 
         Object.values(gamedatas.players).forEach(player => {
             const playerId = Number(player.id);     
-
-            // first player token
-            /*if (gamedatas.firstPlayerTokenPlayerId === playerId) {
-                dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper"></div>`, `player_board_${player.id}`);
-            }*/
 
             // charcoalium & resources counters
             dojo.place(`<div class="counters">
@@ -361,6 +229,10 @@ class Nicodemus implements NicodemusGame {
             crystalCounter.create(`crystal-counter-${playerId}`);
             crystalCounter.setValue(player.crystal);
             this.crystalCounters[playerId] = crystalCounter;
+
+            if (player.playerNo == 1) {
+                dojo.place(`<div class="player-icon first-player"></div>`, `player_board_${player.id}`);
+            }
         });
 
         (this as any).addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
@@ -369,31 +241,19 @@ class Nicodemus implements NicodemusGame {
         (this as any).addTooltipHtmlToClass('crystal-counter', _("Crystal"));
     }
 
-    /*private createPlayerTables(gamedatas: NicodemusGamedatas) {
+    private createPlayerTables(gamedatas: NicodemusGamedatas) {
         const players = Object.values(gamedatas.players).sort((a, b) => a.playerNo - b.playerNo);
         const playerIndex = players.findIndex(player => Number(player.id) === Number((this as any).player_id));
         const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
 
-        orderedPlayers.forEach(player => 
-            this.createPlayerTable(gamedatas, Number(player.id))
+        orderedPlayers.forEach((player, index) => 
+            this.createPlayerTable(gamedatas, Number(player.id), index ? 'right' : 'left')
         );
     }
 
-    private createPlayerTable(gamedatas: NicodemusGamedatas, playerId: number) {
-        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId]/_*, gamedatas.playersTables[playerId]*_/));
+    private createPlayerTable(gamedatas: NicodemusGamedatas, playerId: number, side: 'left' | 'right') {
+        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId], side));
     }
-
-    public removeTile(tile: Tile, fadeOut?: boolean) {
-        if (document.getElementById(`tile${tile.id}`)) {
-            fadeOut ?
-                (this as any).fadeOutAndDestroy(`tile${tile.id}`) :
-                dojo.destroy(`tile${tile.id}`);
-        }
-    }
-
-    public removeTiles(tiles: Tile[], fadeOut?: boolean) {
-        tiles.forEach(tile => this.removeTile(tile, fadeOut));
-    }*/
 
     public playMachine(id: number) {
         if(!(this as any).checkAction('playMachine')) {
@@ -456,24 +316,16 @@ class Nicodemus implements NicodemusGame {
         data.lock = true;
         (this as any).ajaxcall(`/nicodemus/nicodemus/${action}.html`, data, this, () => {});
     }
-
-    /*placeFirstPlayerToken(playerId: number) {
-        const firstPlayerToken = document.getElementById('firstPlayerToken');
-        if (firstPlayerToken) {
-            slideToObjectAndAttach(this, firstPlayerToken, `player_board_${playerId}_firstPlayerWrapper`);
-        } else {
-            dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);
-
-            (this as any).addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
-        }
-    }
-
     
-    private setHandHeight(playerId: number) {
-        const playerHandDiv = document.getElementById(`player-hand-${playerId}`);
-        playerHandDiv.style.height = `unset`;
-        playerHandDiv.style.height = `${playerHandDiv.getBoundingClientRect().height}px`;
-    }*/
+    private setPoints(playerId: number, points: number) {
+        (this as any).scoreCtrl[playerId]?.toValue(points);
+        this.table.setPoints(playerId, points);
+    }
+    
+    private setCharcoalium(playerId: number, charcoalium: number) {
+        this.charcoaliumCounters[playerId].toValue(charcoalium);
+        this.getPlayerTable(playerId).setCharcoalium(charcoalium)
+    }
 
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications

@@ -130,10 +130,11 @@ class Nicodemus extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
 
         foreach($result['players'] as $playerId => &$player) {
+            $player['playerNo'] = intval($player['playerNo']);
             $player['projects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('player', $playerId));
             $player['machines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
             $player['charcoalium'] = intval($this->charcoaliums->countCardInLocation('player', $playerId));
