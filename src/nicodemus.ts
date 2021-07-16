@@ -341,14 +341,22 @@ class Nicodemus implements NicodemusGame {
     }
     
     private setCharcoalium(playerId: number, number: number) {
-        this.charcoaliumCounters[playerId].toValue(number);
-        this.getPlayerTable(playerId).setCharcoalium(number);
+        if (playerId == 0) {
+
+        } else {
+            this.charcoaliumCounters[playerId].toValue(number);
+            this.getPlayerTable(playerId).setCharcoalium(number);
+        }
     }
     
     private setResource(playerId: number, resource: number, number: number) {
-        const counters = [null, this.woodCounters, this.copperCounters, this.crystalCounters];
-        counters[resource][playerId].toValue(number);
-        this.getPlayerTable(playerId).setResource(resource, number);
+        if (playerId == 0) {
+
+        } else {
+            const counters = [null, this.woodCounters, this.copperCounters, this.crystalCounters];
+            counters[resource][playerId].toValue(number);
+            this.getPlayerTable(playerId).setResource(resource, number);
+        }
     }
 
     ///////////////////////////////////////////////////
@@ -368,12 +376,9 @@ class Nicodemus implements NicodemusGame {
 
         const notifs = [
             ['machinePlayed', ANIMATION_MS],
-            /*['tilesSelected', ANIMATION_MS],
-            ['tilesPlacedOnLine', ANIMATION_MS],
-            ['placeTileOnWall', SCORE_MS],
-            ['emptyFloorLine', SCORE_MS],
-            ['endScore', SCORE_MS],
-            ['firstPlayerToken', 1],*/
+            ['points', 1],
+            ['charcoaliums', 1],
+            ['resources', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -387,63 +392,18 @@ class Nicodemus implements NicodemusGame {
         this.table.machinePlayed(notif.args.playerId, notif.args.machine);
     }
 
-    /*notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
-        if (notif.args.fromFactory) {
-            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
-        }
-        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId).then(
-            () => this.setHandHeight(notif.args.playerId)
-        );
+    notif_points(notif: Notif<NotifPointsArgs>) {
+        this.setPoints(notif.args.playerId, notif.args.points);
     }
 
-    notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(
-            () => this.setHandHeight(notif.args.playerId)
-        );
+    notif_charcoaliums(notif: Notif<NotifCharcoaliumsArgs>) {
+        Object.keys(notif.args.charcoaliums).forEach(key => this.setCharcoalium(Number(key), notif.args.charcoaliums[key].length));
     }
 
-    notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
-        Object.keys(notif.args.completeLines).forEach(playerId => {
-            const completeLine: PlacedTileOnWall = notif.args.completeLines[playerId];
-            
-            this.getPlayerTable(Number(playerId)).placeTilesOnWall([completeLine.placedTile]);
-
-            completeLine.pointsDetail.columnTiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
-            setTimeout(() => completeLine.pointsDetail.columnTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
-
-            this.removeTiles(completeLine.discardedTiles, true);
-            (this as any).displayScoring(`tile${completeLine.placedTile.id}`, this.getPlayerColor(Number(playerId)), completeLine.pointsDetail.points, SCORE_MS);
-            this.incScore(Number(playerId), completeLine.pointsDetail.points);
-        });
+    notif_resources(notif: Notif<NotifResourcesArgs>) {
+        Object.keys(notif.args.resources).forEach(key => this.setResource(Number(key), notif.args.resourceType, notif.args.resources[key].length));
     }
-
-    notif_emptyFloorLine(notif: Notif<NotifEmptyFloorLineArgs>) {
-        Object.keys(notif.args.floorLines).forEach(playerId => {
-            const floorLine: FloorLine = notif.args.floorLines[playerId];
-            
-            this.removeTiles(floorLine.tiles, true);
-            (this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
-            this.incScore(Number(playerId), floorLine.points);
-        });
-    }
-
-    notif_endScore(notif: Notif<NotifEndScoreArgs>) {
-        Object.keys(notif.args.scores).forEach(playerId => {
-            const endScore: EndScoreTiles = notif.args.scores[playerId];
-
-            endScore.tiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
-            setTimeout(() => endScore.tiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
-
-            (this as any).displayScoring(`tile${endScore.tiles[2].id}`, this.getPlayerColor(Number(playerId)), endScore.points, SCORE_MS);
-            this.incScore(Number(playerId), endScore.points);
-        });
-    }
-
-    notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
-        this.placeFirstPlayerToken(notif.args.playerId);
-    }*/
-
+    
     private getMachineColor(color: number) {
         switch (color) {
             case 1: return '#006fa1';

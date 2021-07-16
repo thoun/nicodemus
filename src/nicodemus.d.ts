@@ -14,6 +14,19 @@ interface Project {
     location_arg: number;
 }
 
+interface Charcoalium {
+    id: number;
+    location: string;
+    location_arg: number;
+}
+
+interface Resource {
+    id: number;
+    type: number;
+    location: string;
+    location_arg: number;
+}
+
 interface NicodemusPlayer extends Player {
     playerNo: number;
     machines: Machine[];
@@ -67,4 +80,18 @@ interface ChooseProjectArgs {
 interface NotifMachinePlayedArgs {
     playerId: number;
     machine: Machine;
+}
+
+interface NotifPointsArgs {
+    playerId: number;
+    points: number;
+}
+
+interface NotifCharcoaliumsArgs {
+    charcoaliums: { [playerId: number]: Charcoalium[] };
+}
+
+interface NotifResourcesArgs {
+    resourceType: number;
+    resources: { [playerId: number]: Resource[] };
 }

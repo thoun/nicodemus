@@ -126,6 +126,33 @@ trait UtilTrait {
         return intval($this->machines->countCardInLocation('table')) + 1;
     }
 
+    function getCharcoaliums() {
+        $result = [
+            0 => $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('table')),
+        ];
+
+        $players = $this->loadPlayersBasicInfos();
+        foreach(array_keys($players) as $playerId) {
+            $result[$playerId] = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('player', $playerId));
+        }
+
+        return $result;
+    }
+
+
+    function getResources(int $type) {
+        $result = [
+            0 => $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'table')),
+        ];
+
+        $players = $this->loadPlayersBasicInfos();
+        foreach(array_keys($players) as $playerId) {
+            $result[$playerId] = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'player', $playerId));
+        }
+
+        return $result;
+    }
+    
     function addCharcoalium(int $playerId, int $number) {
         $availableOnTable = intval($this->charcoaliums->countCardInLocation('table'));
         
@@ -138,6 +165,10 @@ trait UtilTrait {
             $opponentCharcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('player', $opponentId));
             $this->charcoaliums->moveCards(array_map(function ($r) { return $r->id; }, array_slice($opponentCharcoaliums, 0, min($takeOnOpponent, count($opponentCharcoaliums)))), 'player', $playerId);
         }
+
+        self::notifyAllPlayers('charcoaliums', '', [
+            'charcoaliums' => $this->getCharcoaliums(),
+        ]);
     }
 
     function addResource(int $playerId, int $number, int $type) {
@@ -154,16 +185,34 @@ trait UtilTrait {
             $opponentResources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'player', $opponentId));
             $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($opponentResources, 0, min($takeOnOpponent, count($opponentResources)))), 'player', $playerId);
         }
+
+        self::notifyAllPlayers('resources', '', [
+            'resourceType' => $type,
+            'resources' => $this->getResources($type),
+        ]);
     }
 
     function removeCharcoalium(int $playerId, int $number) {
         $playerCharcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('player', $playerId));
         $this->charcoaliums->moveCards(array_map(function ($r) { return $r->id; }, array_slice($playerCharcoaliums, 0, min($number, count($playerCharcoaliums)))), 'table');
+
+        self::notifyAllPlayers('charcoaliums', '', [
+            'charcoaliums' => $this->getCharcoaliums(),
+        ]);
     }
 
     function removeResource(int $playerId, int $number, int $type) {
         $playerResources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'player', $playerId));
         $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($playerResources, 0, min($number, count($playerResources)))), 'table');
+
+        self::notifyAllPlayers('resources', '', [
+            'resourceType' => $type,
+            'resources' => $this->getResources($type),
+        ]);
+    }
+
+    function getPlayerScore(int $playerId) {
+        return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
     }
 
     function incPlayerScore(int $playerId, int $incScore) {
@@ -172,6 +221,11 @@ trait UtilTrait {
         if ($this->getMaxPlayerScore() >= 20) {
             self::setGameStateValue(LAST_TURN, 1);
         }
+
+        self::notifyAllPlayers('points', '', [
+            'playerId' => $playerId,
+            'points' => $this->getPlayerScore($playerId),
+        ]);
     }
 
     function getColorName(int $type) {
