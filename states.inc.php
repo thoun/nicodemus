@@ -92,6 +92,7 @@ $playerActionsGameStates = [
         "description" => clienttranslate('${actplayer} must play or repair a machine'),
         "descriptionmyturn" => clienttranslate('${you} must play or repair a machine'),
         "type" => "activeplayer",
+        "args" => "argChooseAction",
         "possibleactions" => [ 
             "playMachine",
             "repairMachine",

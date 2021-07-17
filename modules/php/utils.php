@@ -263,4 +263,73 @@ trait UtilTrait {
         }
         // TODO notif
     }
+
+    function getProducedResources(int $playerId) {
+        $produced = [0, 0, 0, 0];
+
+        $playerMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
+
+        foreach($playerMachines as $machine) {
+            if (array_key_exists($machine->produce, $produced)) {
+                $produced[$machine->produce] += 1;
+            } else {
+                $produced[$machine->produce] = 1;
+            }
+        }
+
+        return $produced;
+    }
+
+    function getMachineCost(object $machine, array $tableMachines) {
+        $machinesAfter = 0;
+
+        foreach($tableMachines as $tableMachine) {
+            if ($tableMachine->location_arg > $machine->location_arg) {
+                $machinesAfter++;
+            }
+        }
+
+        $cost = [$machinesAfter, 0, 0, 0];
+
+        for ($i=1; $i<=3; $i++) {
+            if (array_key_exists($i, $machine->cost)) {
+                $cost[$i] = $machine->cost[$i];
+            }
+        }
+
+        return $cost;
+    }
+    
+    function canPay($canSpend, $cost) {
+        $remainingCost = $cost; // shallow copy
+        for ($i=0; $i<=3; $i++) {
+            if ($remainingCost[$i] > $canSpend[$i]) {
+                $remainingCost[$i] -= $canSpend[$i];
+            } else {
+                $remainingCost[$i] = 0;
+            }
+        }
+
+        if ($remainingCost[0] > 0) {
+            return false;
+        }
+
+        // joker
+        $jokers = array_key_exists(9, $canSpend) ? $canSpend[9] : 0;
+        for ($i=1; $i<=3; $i++) {
+            if ($remainingCost[$i] > 0 && $jokers > 0) {
+                $spentJokers = min($jokers, $remainingCost[$i]);
+                $remainingCost[$i] -= $spentJokers;
+                $jokers -= $spentJokers;
+            }
+        }
+
+        for ($i=1; $i<=3; $i++) {
+            if ($remainingCost[$i] > 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
