@@ -340,20 +340,11 @@ class Nicodemus implements NicodemusGame {
         this.table.setPoints(playerId, points);
     }
     
-    private setCharcoalium(playerId: number, number: number) {
-        if (playerId == 0) {
-
-        } else {
-            this.charcoaliumCounters[playerId].toValue(number);
-            this.getPlayerTable(playerId).setCharcoalium(number);
-        }
-    }
-    
     private setResource(playerId: number, resource: number, number: number) {
         if (playerId == 0) {
 
         } else {
-            const counters = [null, this.woodCounters, this.copperCounters, this.crystalCounters];
+            const counters = [this.charcoaliumCounters, this.woodCounters, this.copperCounters, this.crystalCounters];
             counters[resource][playerId].toValue(number);
             this.getPlayerTable(playerId).setResource(resource, number);
         }
@@ -377,7 +368,6 @@ class Nicodemus implements NicodemusGame {
         const notifs = [
             ['machinePlayed', ANIMATION_MS],
             ['points', 1],
-            ['charcoaliums', 1],
             ['resources', 1],
         ];
 
@@ -394,10 +384,6 @@ class Nicodemus implements NicodemusGame {
 
     notif_points(notif: Notif<NotifPointsArgs>) {
         this.setPoints(notif.args.playerId, notif.args.points);
-    }
-
-    notif_charcoaliums(notif: Notif<NotifCharcoaliumsArgs>) {
-        Object.keys(notif.args.charcoaliums).forEach(key => this.setCharcoalium(Number(key), notif.args.charcoaliums[key].length));
     }
 
     notif_resources(notif: Notif<NotifResourcesArgs>) {

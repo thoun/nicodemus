@@ -36,10 +36,6 @@ class PlayerTable {
         player.machines.forEach(machine => this.machineStock.addToStockWithId(getUniqueId(machine), ''+machine.id));
     }
 
-    public setCharcoalium(number: number) {
-        // TODO
-    }
-
     public setResource(type: number, number: number) {
         // TODO
     }

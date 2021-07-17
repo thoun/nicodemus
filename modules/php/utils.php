@@ -2,7 +2,6 @@
 
 require_once(__DIR__.'/objects/machine.php');
 require_once(__DIR__.'/objects/project.php');
-require_once(__DIR__.'/objects/charcoalium.php');
 require_once(__DIR__.'/objects/resource.php');
 
 trait UtilTrait {
@@ -40,14 +39,9 @@ trait UtilTrait {
         $this->projects->createCards($projects, 'deck');
         $this->projects->shuffle('deck');
 
-        //12 charcoaliums       
-        $charcoaliums = [
-            [ 'type' => 0, 'type_arg' => null, 'nbr' => 12 ],
-        ];
-        $this->charcoaliums->createCards($charcoaliums, 'table');
-
-        //24 resources : 8 wood, 8 copper, 8 crystal        
+        //12 charcoaliums & 24 resources : 8 wood, 8 copper, 8 crystal        
         $resources = [
+            [ 'type' => 0, 'type_arg' => null, 'nbr' => 12 ],
             [ 'type' => 1, 'type_arg' => null, 'nbr' => 8 ],
             [ 'type' => 2, 'type_arg' => null, 'nbr' => 8 ],
             [ 'type' => 3, 'type_arg' => null, 'nbr' => 8 ],
@@ -70,9 +64,9 @@ trait UtilTrait {
         // set initial resources
         foreach($players as $playerId => $player) {
             if ($this->getFirstPlayerId() == $playerId) {
-                $this->addCharcoalium($playerId, 2);
+                $this->addResource($playerId, 2, 0);
             } else {
-                $this->addCharcoalium($playerId, 1);
+                $this->addResource($playerId, 1, 0);
                 $this->addResource($playerId, 1, 1);
             }
         }
@@ -100,17 +94,6 @@ trait UtilTrait {
         return array_map(function($dbObject) { return $this->getProjectFromDb($dbObject); }, array_values($dbObjects));
     }
 
-    function getCharcoaliumFromDb($dbObject) {
-        if (!$dbObject || !array_key_exists('id', $dbObject)) {
-            throw new Error("charcoalium doesn't exists ".json_encode($dbObject));
-        }
-        return new Charcoalium($dbObject);
-    }
-
-    function getCharcoaliumsFromDb(array $dbObjects) {
-        return array_map(function($dbObject) { return $this->getCharcoaliumFromDb($dbObject); }, array_values($dbObjects));
-    }
-
     function getResourceFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new Error("resource doesn't exists ".json_encode($dbObject));
@@ -126,53 +109,29 @@ trait UtilTrait {
         return intval($this->machines->countCardInLocation('table')) + 1;
     }
 
-    function getCharcoaliums() {
-        $result = [
-            0 => $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('table')),
-        ];
-
-        $players = $this->loadPlayersBasicInfos();
-        foreach(array_keys($players) as $playerId) {
-            $result[$playerId] = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('player', $playerId));
-        }
-
-        return $result;
-    }
-
-
-    function getResources(int $type) {
-        $result = [
-            0 => $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'table')),
-        ];
-
-        $players = $this->loadPlayersBasicInfos();
-        foreach(array_keys($players) as $playerId) {
-            $result[$playerId] = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'player', $playerId));
-        }
-
-        return $result;
-    }
-    
-    function addCharcoalium(int $playerId, int $number) {
-        $availableOnTable = intval($this->charcoaliums->countCardInLocation('table'));
-        
-        if ($availableOnTable >= $number) {
-            $this->charcoaliums->pickCardsForLocation($number, 'table', 'player', $playerId);
+    function getResources(int $type, int $playerId) { // or 0 for table
+        if ($playerId == 0) {
+            return $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'table'));
         } else {
-            $this->charcoaliums->pickCardsForLocation($availableOnTable, 'table', 'player', $playerId);
-            $takeOnOpponent = $number - $availableOnTable;
-            $opponentId = $this->getOpponentId($playerId);
-            $opponentCharcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('player', $opponentId));
-            $this->charcoaliums->moveCards(array_map(function ($r) { return $r->id; }, array_slice($opponentCharcoaliums, 0, min($takeOnOpponent, count($opponentCharcoaliums)))), 'player', $playerId);
+            return $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'player', $playerId));
+        }
+    }
+
+    function getAllResources(int $type) {
+        $result = [
+            0 => $this->getResources($type, 0),
+        ];
+
+        $players = $this->loadPlayersBasicInfos();
+        foreach(array_keys($players) as $playerId) {
+            $result[$playerId] = $this->getResources($type, $playerId);
         }
 
-        self::notifyAllPlayers('charcoaliums', '', [
-            'charcoaliums' => $this->getCharcoaliums(),
-        ]);
+        return $result;
     }
 
     function addResource(int $playerId, int $number, int $type) {
-        $tableResources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'table'));
+        $tableResources = $this->getResources($type, 0);
         $availableOnTable = count($tableResources);
         
         if ($availableOnTable >= $number) {
@@ -182,32 +141,23 @@ trait UtilTrait {
             $this->resources->moveCards(array_map(function ($r) { return $r->id; }, $tableResources), 'player', $playerId);
             $takeOnOpponent = $number - $availableOnTable;
             $opponentId = $this->getOpponentId($playerId);
-            $opponentResources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'player', $opponentId));
+            $opponentResources = $this->getResources($type, $opponentId);
             $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($opponentResources, 0, min($takeOnOpponent, count($opponentResources)))), 'player', $playerId);
         }
 
         self::notifyAllPlayers('resources', '', [
             'resourceType' => $type,
-            'resources' => $this->getResources($type),
-        ]);
-    }
-
-    function removeCharcoalium(int $playerId, int $number) {
-        $playerCharcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('player', $playerId));
-        $this->charcoaliums->moveCards(array_map(function ($r) { return $r->id; }, array_slice($playerCharcoaliums, 0, min($number, count($playerCharcoaliums)))), 'table');
-
-        self::notifyAllPlayers('charcoaliums', '', [
-            'charcoaliums' => $this->getCharcoaliums(),
+            'resources' => $this->getAllResources($type),
         ]);
     }
 
     function removeResource(int $playerId, int $number, int $type) {
-        $playerResources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'player', $playerId));
+        $playerResources = $this->getResources($this->resources->getCardsOfTypeInLocation($type, null, 'player', $playerId));
         $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($playerResources, 0, min($number, count($playerResources)))), 'table');
 
         self::notifyAllPlayers('resources', '', [
             'resourceType' => $type,
-            'resources' => $this->getResources($type),
+            'resources' => $this->getAllResources($type),
         ]);
     }
 
@@ -263,16 +213,15 @@ trait UtilTrait {
         }
 
         foreach($row1machines as &$machine) {
-            //$charcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->getCardsInLocation('machine', $machine->id);
-            $charcoaliums = $this->getCharcoaliumsFromDb($this->charcoaliums->moveAllCardsInLocation('machine', 'table', $machine->id));
+            $charcoaliums = $this->getResourcesFromDb($this->resources->moveAllCardsInLocation('machine', 'table', $machine->id));
             $removedCharcoaliums = $removedCharcoaliums + $charcoaliums;
         }
 
         foreach($row1machines as &$machine) {
-            $this->charcoaliums->moveCard($machine->id, 'discard');
+            $this->machines->moveCard($machine->id, 'discard');
         }
         foreach($row2machines as &$machine) {
-            $this->charcoaliums->moveCard($machine->id, 'table', $machine->location_arg - 5);
+            $this->machines->moveCard($machine->id, 'table', $machine->location_arg - 5);
         }
         
         // TODO notif

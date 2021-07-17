@@ -52,9 +52,6 @@ class Nicodemus extends Table {
         $this->projects = self::getNew("module.common.deck");
         $this->projects->init("project");
 
-        $this->charcoaliums = self::getNew("module.common.deck");
-        $this->charcoaliums->init("charcoalium");
-
         $this->resources = self::getNew("module.common.deck");
         $this->resources->init("resource");
 	}
@@ -137,7 +134,7 @@ class Nicodemus extends Table {
             $player['playerNo'] = intval($player['playerNo']);
             $player['projects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('player', $playerId));
             $player['machines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
-            $player['charcoalium'] = intval($this->charcoaliums->countCardInLocation('player', $playerId));
+            $player['charcoalium'] = count($this->resources->getCardsOfTypeInLocation(0, null, 'player', $playerId));
             $player['wood'] = count($this->resources->getCardsOfTypeInLocation(1, null, 'player', $playerId));
             $player['copper'] = count($this->resources->getCardsOfTypeInLocation(2, null, 'player', $playerId));
             $player['crystal'] = count($this->resources->getCardsOfTypeInLocation(3, null, 'player', $playerId));
@@ -146,7 +143,7 @@ class Nicodemus extends Table {
         $result['handMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $current_player_id));
         $result['tableMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
         $result['tableProjects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('table'));
-        $result['charcoalium'] = intval($this->charcoaliums->countCardInLocation('table'));
+        $result['charcoalium'] = count($this->resources->getCardsOfTypeInLocation(0, null, 'table'));
         $result['wood'] = count($this->resources->getCardsOfTypeInLocation(1, null, 'table'));
         $result['copper'] = count($this->resources->getCardsOfTypeInLocation(2, null, 'table'));
         $result['crystal'] = count($this->resources->getCardsOfTypeInLocation(3, null, 'table'));

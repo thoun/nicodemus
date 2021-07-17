@@ -326,9 +326,6 @@ var PlayerTable = /** @class */ (function () {
         setupMachineCards([this.machineStock]);
         player.machines.forEach(function (machine) { return _this.machineStock.addToStockWithId(getUniqueId(machine), '' + machine.id); });
     }
-    PlayerTable.prototype.setCharcoalium = function (number) {
-        // TODO
-    };
     PlayerTable.prototype.setResource = function (type, number) {
         // TODO
     };
@@ -602,19 +599,11 @@ var Nicodemus = /** @class */ (function () {
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
         this.table.setPoints(playerId, points);
     };
-    Nicodemus.prototype.setCharcoalium = function (playerId, number) {
-        if (playerId == 0) {
-        }
-        else {
-            this.charcoaliumCounters[playerId].toValue(number);
-            this.getPlayerTable(playerId).setCharcoalium(number);
-        }
-    };
     Nicodemus.prototype.setResource = function (playerId, resource, number) {
         if (playerId == 0) {
         }
         else {
-            var counters = [null, this.woodCounters, this.copperCounters, this.crystalCounters];
+            var counters = [this.charcoaliumCounters, this.woodCounters, this.copperCounters, this.crystalCounters];
             counters[resource][playerId].toValue(number);
             this.getPlayerTable(playerId).setResource(resource, number);
         }
@@ -636,7 +625,6 @@ var Nicodemus = /** @class */ (function () {
         var notifs = [
             ['machinePlayed', ANIMATION_MS],
             ['points', 1],
-            ['charcoaliums', 1],
             ['resources', 1],
         ];
         notifs.forEach(function (notif) {
@@ -650,10 +638,6 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.points);
-    };
-    Nicodemus.prototype.notif_charcoaliums = function (notif) {
-        var _this = this;
-        Object.keys(notif.args.charcoaliums).forEach(function (key) { return _this.setCharcoalium(Number(key), notif.args.charcoaliums[key].length); });
     };
     Nicodemus.prototype.notif_resources = function (notif) {
         var _this = this;

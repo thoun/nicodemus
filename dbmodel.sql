@@ -38,15 +38,6 @@ CREATE TABLE IF NOT EXISTS `project` (
    PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `charcoalium` (
-   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-   `card_type` int(1) NOT NULL,
-   `card_type_arg` int(1),
-   `card_location` varchar(20) NOT NULL,
-   `card_location_arg` int(11),
-   PRIMARY KEY (`card_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS `resource` (
    `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
    `card_type` int(1) NOT NULL,

@@ -2,7 +2,6 @@
 
 require_once(__DIR__.'/objects/machine.php');
 require_once(__DIR__.'/objects/project.php');
-require_once(__DIR__.'/objects/charcoalium.php');
 require_once(__DIR__.'/objects/resource.php');
 
 trait ActionTrait {
@@ -69,7 +68,7 @@ trait ActionTrait {
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
-        $this->addCharcoalium($playerId, $machine->points);
+        $this->addResource($playerId, $machine->points, 0);
         // TODO notif
 
         $this->gamestate->nextState('refillHand');
@@ -86,11 +85,7 @@ trait ActionTrait {
             throw new Error("Machine doesn't produce this resource");
         }
 
-        if ($resource == 0) {
-            $this->addCharcoalium($playerId, 1);
-        } else {
-            $this->addResource($playerId, 1, $resource);
-        }
+        $this->addResource($playerId, 1, $resource);
         // TODO notif
 
         $this->gamestate->nextState('refillHand');

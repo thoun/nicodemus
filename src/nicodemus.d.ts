@@ -14,12 +14,6 @@ interface Project {
     location_arg: number;
 }
 
-interface Charcoalium {
-    id: number;
-    location: string;
-    location_arg: number;
-}
-
 interface Resource {
     id: number;
     type: number;
@@ -85,10 +79,6 @@ interface NotifMachinePlayedArgs {
 interface NotifPointsArgs {
     playerId: number;
     points: number;
-}
-
-interface NotifCharcoaliumsArgs {
-    charcoaliums: { [playerId: number]: Charcoalium[] };
 }
 
 interface NotifResourcesArgs {
