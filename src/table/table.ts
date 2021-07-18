@@ -49,7 +49,7 @@ class Table {
         html = `<div class="machines">`;
         for (let i=1; i<=10; i++) {
             const firstRow = i<=5;
-            const left = (firstRow ? 204 : 0) + (i-1) * 204;
+            const left = (firstRow ? 204 : 0) + (i-(firstRow ? 1 : 6)) * 204;
             const top = firstRow ? 0 : 210;
             html += `<div id="table-machine-spot-${i}" class="machine-spot" style="left: ${left}px; top: ${top}px"></div>`;
         }

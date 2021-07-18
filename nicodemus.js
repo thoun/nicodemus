@@ -239,7 +239,7 @@ var Table = /** @class */ (function () {
         html = "<div class=\"machines\">";
         for (var i = 1; i <= 10; i++) {
             var firstRow = i <= 5;
-            var left = (firstRow ? 204 : 0) + (i - 1) * 204;
+            var left = (firstRow ? 204 : 0) + (i - (firstRow ? 1 : 6)) * 204;
             var top_1 = firstRow ? 0 : 210;
             html += "<div id=\"table-machine-spot-" + i + "\" class=\"machine-spot\" style=\"left: " + left + "px; top: " + top_1 + "px\"></div>";
         }
@@ -451,7 +451,7 @@ var Nicodemus = /** @class */ (function () {
                     this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.charcoalium + " [resource0])"), function () { return _this.getCharcoalium(); });
                     if (choosePlayActionArgs_1.resource == 9) {
                         var _loop_4 = function (i) {
-                            this_2.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
+                            this_2.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
                         };
                         var this_2 = this;
                         for (var i = 1; i <= 3; i++) {
@@ -630,6 +630,7 @@ var Nicodemus = /** @class */ (function () {
         var notifs = [
             ['machinePlayed', ANIMATION_MS],
             ['machineRepaired', ANIMATION_MS],
+            ['tableMove', ANIMATION_MS],
             ['points', 1],
             ['resources', 1],
         ];
@@ -643,8 +644,15 @@ var Nicodemus = /** @class */ (function () {
         this.table.machinePlayed(notif.args.playerId, notif.args.machine);
     };
     Nicodemus.prototype.notif_machineRepaired = function (notif) {
-        console.log(notif.args);
         moveToAnotherStock(this.table.machineStocks[notif.args.machineSpot], this.getPlayerTable(notif.args.playerId).machineStock, getUniqueId(notif.args.machine), '' + notif.args.machine.id);
+    };
+    Nicodemus.prototype.notif_tableMove = function (notif) {
+        var _this = this;
+        Object.keys(notif.args.moved).forEach(function (key) {
+            var originalSpot = Number(key);
+            var machine = notif.args.moved[key];
+            moveToAnotherStock(_this.table.machineStocks[originalSpot], _this.table.machineStocks[machine.location_arg], getUniqueId(machine), '' + machine.id);
+        });
     };
     Nicodemus.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.points);

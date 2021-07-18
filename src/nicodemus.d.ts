@@ -86,6 +86,10 @@ interface NotifMachineRepairedArgs {
     machineSpot: number;
 }
 
+interface NotifTableMoveArgs {
+    moved: { [originalSpot: number]: Machine };
+}
+
 interface NotifPointsArgs {
     playerId: number;
     points: number;

@@ -146,7 +146,7 @@ class Nicodemus implements NicodemusGame {
                     (this as any).addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(` (${choosePlayActionArgs.charcoalium} [resource0])`), () => this.getCharcoalium());
                     if (choosePlayActionArgs.resource == 9) {
                         for (let i=1; i<=3; i++) {
-                            (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${i}])`), () => this.getResource(i));
+                            (this as any).addActionButton(`getResource${i}-button`, _('Get resource') + formatTextIcons(` ([resource${i}])`), () => this.getResource(i));
                         }
                     } else {
                         (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.resource}])`), () => this.getResource(choosePlayActionArgs.resource));
@@ -375,6 +375,7 @@ class Nicodemus implements NicodemusGame {
         const notifs = [
             ['machinePlayed', ANIMATION_MS],
             ['machineRepaired', ANIMATION_MS],
+            ['tableMove', ANIMATION_MS],
             ['points', 1],
             ['resources', 1],
         ];
@@ -391,13 +392,26 @@ class Nicodemus implements NicodemusGame {
     }
 
     notif_machineRepaired(notif: Notif<NotifMachineRepairedArgs>) {
-        console.log(notif.args);
         moveToAnotherStock(
             this.table.machineStocks[notif.args.machineSpot], 
             this.getPlayerTable(notif.args.playerId).machineStock, 
             getUniqueId(notif.args.machine), 
             ''+notif.args.machine.id
         );
+    }
+
+    notif_tableMove(notif: Notif<NotifTableMoveArgs>) {
+        Object.keys(notif.args.moved).forEach(key => {
+            const originalSpot = Number(key);
+            const machine = notif.args.moved[key];
+
+            moveToAnotherStock(
+                this.table.machineStocks[originalSpot], 
+                this.table.machineStocks[machine.location_arg], 
+                getUniqueId(machine), 
+                ''+machine.id
+            );
+        });
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {

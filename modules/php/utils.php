@@ -228,24 +228,29 @@ trait UtilTrait {
     }
 
     function removeEmptySpaceFromTable() {
-        $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+        $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table', null, 'location_arg'));
         /*usort(function($a, $b) {
             if ($a->location_arg == $b->location_arg) {
                 return 0;
             }
             return $b->location_arg - $a->location_arg;
         }, $machines);*/
-        //die('test '.json_encode($machines));
+
+        $moved = [];
 
         $lastSpot = 0;
         foreach($machines as &$machine) {
             if ($machine->location_arg > $lastSpot + 1) {
+                $moved[$machine->location_arg] = $machine;
                 $machine->location_arg = $lastSpot + 1;
                 $this->machines->moveCard($machine->id, 'table', $machine->location_arg);
             }
             $lastSpot = $machine->location_arg;
         }
-        // TODO notif
+
+        self::notifyAllPlayers('tableMove', '', [
+            'moved' => $moved,
+        ]);
     }
 
     function checkPlayerWorkshopMachinesLimit(int $playerId) {
