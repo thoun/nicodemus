@@ -1,6 +1,6 @@
 class Table {
     private projectStocks: Stock[] = [];
-    private machineStocks: Stock[] = [];
+    public machineStocks: Stock[] = [];
 
     public onProjectSelectionChanged: (selectedProjectsIds: number[]) => any;
 

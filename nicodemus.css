@@ -186,3 +186,8 @@ html {
 .stockitem.selected {
   box-shadow: 0 0 5px 6px white;
 }
+.stockitem.disabled {
+  filter: contrast(0.6);
+  cursor: not-allowed;
+  pointer-events: none;
+}

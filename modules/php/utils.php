@@ -280,6 +280,14 @@ trait UtilTrait {
         return $produced;
     }
 
+    function getCanSpend(int $playerId) {
+        $canSpend = $this->getProducedResources($playerId);
+        for ($i=0; $i<=3; $i++) {
+            $canSpend[$i] += count($this->getResources($i, $playerId));
+        }
+        return $canSpend;
+    }
+
     function getMachineCost(object $machine, array $tableMachines) {
         $machinesAfter = 0;
 

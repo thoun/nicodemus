@@ -15,25 +15,21 @@ trait ArgsTrait {
     function argChooseAction() {
         $playerId = self::getActivePlayerId();
 
-        $canSpend = $this->getProducedResources($playerId);
-        for ($i=0; $i<=3; $i++) {
-            $canSpend[$i] += count($this->getResources($i, $playerId));
-        }
+        $canSpend = $this->getCanSpend($playerId);
 
         $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
 
-        $disabledIds = [];
+        $disabledMachines = [];
 
         foreach($tableMachines as $machine) {
             $cost = $this->getMachineCost($machine, $tableMachines);
-            //die('canPay '.json_encode($this->canPay($canSpend, $cost)).' canSpend='.json_encode($canSpend).' cost='.json_encode($cost));
             if (!$this->canPay($canSpend, $cost)) {
-                $disabledIds[] = $machine->id;
+                $disabledMachines[] = $machine;
             }
         }
     
         return [
-            'disabledIds' => $disabledIds,
+            'disabledMachines' => $disabledMachines,
         ];
     }
 

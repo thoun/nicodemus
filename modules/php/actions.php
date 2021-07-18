@@ -18,7 +18,7 @@ trait ActionTrait {
     public function playMachine(int $id) {
         self::checkAction('playMachine'); 
         
-        $playerId = self::getActivePlayerId();
+        $playerId = intval(self::getActivePlayerId());
 
         $freeTableSpot = $this->getAvailableMachineSpot();
         $this->machines->moveCard($id, 'table', $freeTableSpot);
@@ -39,12 +39,26 @@ trait ActionTrait {
     public function repairMachine(int $id) {
         self::checkAction('repairMachine'); 
         
-        $playerId = self::getActivePlayerId();
+        $playerId = intval(self::getActivePlayerId());
+
+        $machine = $this->getMachineFromDb($this->machines->getCard($id));
+
+        $machineSpot = null;
+        $canSpend = $this->getCanSpend($playerId);
+        $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+        foreach($tableMachines as $tableMachine) {
+            if ($tableMachine->id == $machine->id) {
+                $machineSpot = $machine->location_arg;
+                $cost = $this->getMachineCost($tableMachine, $tableMachines);
+                if (!$this->canPay($canSpend, $cost)) {
+                    throw new Error('Not enough resources');
+                }
+            }
+        }
 
         self::setGameStateValue(PLAYED_MACHINE, $id);
         $this->machines->moveCard($id, 'player', $playerId);
 
-        $machine = $this->getMachineFromDb($this->machines->getCard($id));
         $this->incPlayerScore($playerId, $machine->points);
 
         self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${machine_name} machine'), [
@@ -52,6 +66,7 @@ trait ActionTrait {
             'player_name' => self::getActivePlayerName(),
             'machine' => $machine,
             'machine_name' => $this->getColorName($machine->type),
+            'machineSpot' => $machineSpot,
         ]);
         
         $this->removeEmptySpaceFromTable();
@@ -69,7 +84,6 @@ trait ActionTrait {
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
         $this->addResource($playerId, $machine->points, 0);
-        // TODO notif
 
         $this->gamestate->nextState('refillHand');
     }
@@ -86,7 +100,6 @@ trait ActionTrait {
         }
 
         $this->addResource($playerId, 1, $resource);
-        // TODO notif
 
         $this->gamestate->nextState('refillHand');
     }

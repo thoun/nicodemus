@@ -62,6 +62,10 @@ interface NicodemusGame extends Game {
     repairMachine(id: number): void;
 }
 
+interface ChooseActionArgs {
+    disabledMachines: Machine[];
+}
+
 interface ChoosePlayActionArgs {
     charcoalium: number;
     resource: number;
@@ -74,6 +78,12 @@ interface ChooseProjectArgs {
 interface NotifMachinePlayedArgs {
     playerId: number;
     machine: Machine;
+}
+
+interface NotifMachineRepairedArgs {
+    playerId: number;
+    machine: Machine;
+    machineSpot: number;
 }
 
 interface NotifPointsArgs {

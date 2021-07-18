@@ -94,16 +94,22 @@ class Nicodemus implements NicodemusGame {
 
         switch (stateName) {
             case 'chooseAction':
-                if((this as any).isCurrentPlayerActive()) {
-                    this.setHandSelectable(true);
-                    this.table.setMachineSelectable(true);
-                }
+                this.onEnteringStateChooseAction(args.args as ChooseActionArgs);
                 break;
             case 'chooseProject':
                 if((this as any).isCurrentPlayerActive()) {
                     this.table.setProjectSelectable(true);
                 }
                 break;
+        }
+    }
+
+    private onEnteringStateChooseAction(args: ChooseActionArgs) {
+        if((this as any).isCurrentPlayerActive()) {
+            this.setHandSelectable(true);
+            this.table.setMachineSelectable(true);
+
+            args.disabledMachines.forEach(machine => dojo.addClass(`table-machine-spot-${machine.location_arg}_item_${machine.id}`, 'disabled'));
         }
     }
 
@@ -115,8 +121,7 @@ class Nicodemus implements NicodemusGame {
 
         switch (stateName) {
             case 'chooseAction':
-                this.setHandSelectable(false);
-                this.table.setMachineSelectable(false);
+                this.onLeavingChooseAction();
                 break;
             case 'chooseProject':
                 this.table.setProjectSelectable(false);
@@ -124,8 +129,10 @@ class Nicodemus implements NicodemusGame {
         }
     }
 
-    onLeavingChooseTile() {
-        dojo.removeClass('factories', 'selectable');
+    onLeavingChooseAction() {
+        this.setHandSelectable(false);
+        this.table.setMachineSelectable(false);
+        dojo.query('.stockitem').removeClass('disabled');
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -367,6 +374,7 @@ class Nicodemus implements NicodemusGame {
 
         const notifs = [
             ['machinePlayed', ANIMATION_MS],
+            ['machineRepaired', ANIMATION_MS],
             ['points', 1],
             ['resources', 1],
         ];
@@ -377,9 +385,19 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
-    notif_machinePlayed(notif: Notif<NotifMachinePlayedArgs>) {
+    notif_machinePlayed(notif: Notif<NotifMachinePlayedArgs>) {        
         this.playerMachineHand.removeFromStockById(''+notif.args.machine.id);
         this.table.machinePlayed(notif.args.playerId, notif.args.machine);
+    }
+
+    notif_machineRepaired(notif: Notif<NotifMachineRepairedArgs>) {
+        console.log(notif.args);
+        moveToAnotherStock(
+            this.table.machineStocks[notif.args.machineSpot], 
+            this.getPlayerTable(notif.args.playerId).machineStock, 
+            getUniqueId(notif.args.machine), 
+            ''+notif.args.machine.id
+        );
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {

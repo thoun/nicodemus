@@ -404,16 +404,20 @@ var Nicodemus = /** @class */ (function () {
         log('Entering state: ' + stateName, args.args);
         switch (stateName) {
             case 'chooseAction':
-                if (this.isCurrentPlayerActive()) {
-                    this.setHandSelectable(true);
-                    this.table.setMachineSelectable(true);
-                }
+                this.onEnteringStateChooseAction(args.args);
                 break;
             case 'chooseProject':
                 if (this.isCurrentPlayerActive()) {
                     this.table.setProjectSelectable(true);
                 }
                 break;
+        }
+    };
+    Nicodemus.prototype.onEnteringStateChooseAction = function (args) {
+        if (this.isCurrentPlayerActive()) {
+            this.setHandSelectable(true);
+            this.table.setMachineSelectable(true);
+            args.disabledMachines.forEach(function (machine) { return dojo.addClass("table-machine-spot-" + machine.location_arg + "_item_" + machine.id, 'disabled'); });
         }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -423,16 +427,17 @@ var Nicodemus = /** @class */ (function () {
         log('Leaving state: ' + stateName);
         switch (stateName) {
             case 'chooseAction':
-                this.setHandSelectable(false);
-                this.table.setMachineSelectable(false);
+                this.onLeavingChooseAction();
                 break;
             case 'chooseProject':
                 this.table.setProjectSelectable(false);
                 break;
         }
     };
-    Nicodemus.prototype.onLeavingChooseTile = function () {
-        dojo.removeClass('factories', 'selectable');
+    Nicodemus.prototype.onLeavingChooseAction = function () {
+        this.setHandSelectable(false);
+        this.table.setMachineSelectable(false);
+        dojo.query('.stockitem').removeClass('disabled');
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -624,6 +629,7 @@ var Nicodemus = /** @class */ (function () {
         var _this = this;
         var notifs = [
             ['machinePlayed', ANIMATION_MS],
+            ['machineRepaired', ANIMATION_MS],
             ['points', 1],
             ['resources', 1],
         ];
@@ -635,6 +641,10 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.notif_machinePlayed = function (notif) {
         this.playerMachineHand.removeFromStockById('' + notif.args.machine.id);
         this.table.machinePlayed(notif.args.playerId, notif.args.machine);
+    };
+    Nicodemus.prototype.notif_machineRepaired = function (notif) {
+        console.log(notif.args);
+        moveToAnotherStock(this.table.machineStocks[notif.args.machineSpot], this.getPlayerTable(notif.args.playerId).machineStock, getUniqueId(notif.args.machine), '' + notif.args.machine.id);
     };
     Nicodemus.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.points);

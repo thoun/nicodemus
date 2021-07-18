@@ -1,6 +1,6 @@
 class PlayerTable {
     public playerId: number;
-    private machineStock: Stock;
+    public machineStock: Stock;
 
     constructor(
         private game: NicodemusGame, 
