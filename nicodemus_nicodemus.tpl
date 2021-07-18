@@ -16,6 +16,12 @@
             <div id="table-projects"></div>
         </div>
     </div>
+    <div id="table-resources">
+        <div id="table-resources0"></div>
+        <div id="table-resources1"></div>
+        <div id="table-resources2"></div>
+        <div id="table-resources3"></div>
+    </div>
 </div>
 
 {OVERALL_GAME_FOOTER}

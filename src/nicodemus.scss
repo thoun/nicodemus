@@ -92,3 +92,27 @@ html {
       pointer-events: none;
   }
 }
+
+.cube {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+
+  @for $i from 0 through 3 {
+    &.resource#{$i} {
+        background-image: url('img/resource#{$i}-cubes.png');
+    }
+  }
+
+  @for $i from 0 through 3 {
+    &.aspect#{$i} {
+        background-position: ($i * 100% / 3) 100%;
+    }
+  }
+  
+  @for $i from 0 through 7 {
+    &.resource0.aspect#{$i} {
+      background-position: ($i * 100% / 7) 100%;
+    }
+  }
+}

@@ -201,7 +201,7 @@ function formatTextIcons(rawText) {
         .replace(/\[resource9\]/ig, '<span class="icon joker"></span>');
 }
 var Table = /** @class */ (function () {
-    function Table(game, players, projects, machines) {
+    function Table(game, players, projects, machines, resources) {
         var _this = this;
         this.game = game;
         this.projectStocks = [];
@@ -264,6 +264,14 @@ var Table = /** @class */ (function () {
         };
         for (var i = 1; i <= 10; i++) {
             _loop_3(i);
+        }
+        var _loop_4 = function (i) {
+            var resourcesToPlace = resources[i];
+            resourcesToPlace.forEach(function (resource) { return dojo.place("<div id=\"resource" + i + "-" + resource.id + "\" class=\"cube resource" + i + " aspect" + resource.id % (i == 0 ? 8 : 4) + "\"></div>", "table-resources" + i); });
+        };
+        // resources
+        for (var i = 0; i <= 3; i++) {
+            _loop_4(i);
         }
     }
     Table.prototype.getSelectedProjectsIds = function () {
@@ -386,29 +394,18 @@ var Nicodemus = /** @class */ (function () {
         "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
     */
     Nicodemus.prototype.setup = function (gamedatas) {
-        // ignore loading of some pictures
-        /*(this as any).dontPreloadImage('eye-shadow.png');
-        (this as any).dontPreloadImage('publisher.png');
-        [1,2,3,4,5,6,7,8,9,10].filter(i => !Object.values(gamedatas.players).some(player => Number((player as any).mat) === i)).forEach(i => (this as any).dontPreloadImage(`playmat_${i}.jpg`));
-*/
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
-        this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines);
+        this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
         this.table.onProjectSelectionChanged = function (selectProjectsIds) {
             dojo.toggleClass('selectProjects-button', 'disabled', !selectProjectsIds.length);
             dojo.toggleClass('skipProjects-button', 'disabled', !!selectProjectsIds.length);
         };
         this.createPlayerTables(gamedatas);
         this.setupNotifications();
-        /*document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
-        document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
-
-        (this as any).onScreenWidthChange = () => this.setAutoZoom();
-
-        */
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -466,12 +463,12 @@ var Nicodemus = /** @class */ (function () {
                     var choosePlayActionArgs_1 = args;
                     this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.charcoalium + " [resource0])"), function () { return _this.getCharcoalium(); });
                     if (choosePlayActionArgs_1.resource == 9) {
-                        var _loop_4 = function (i) {
+                        var _loop_5 = function (i) {
                             this_2.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
                         };
                         var this_2 = this;
                         for (var i = 1; i <= 3; i++) {
-                            _loop_4(i);
+                            _loop_5(i);
                         }
                     }
                     else {

@@ -51,10 +51,7 @@ interface NicodemusGamedatas {
     handMachines: Machine[];
     tableMachines: Machine[];
     tableProjects: Project[];
-    charcoalium: number;
-    wood: number;
-    copper: number;
-    crystal: number;
+    resources: Resource[][];
 }
 
 interface NicodemusGame extends Game {

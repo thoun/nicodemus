@@ -9,6 +9,7 @@ class Table {
         players: NicodemusPlayer[],
         projects: Project[],
         machines: Machine[],
+        resources: Resource[][],
     ) {
         let html = '';
 
@@ -70,6 +71,16 @@ class Table {
 
         for (let i=1; i<=10; i++) {
             machines.filter(machine => machine.location_arg == i).forEach(machine => this.machineStocks[i].addToStockWithId(getUniqueId(machine), ''+machine.id));
+        }
+
+        // resources
+        for (let i=0; i<=3; i++) {
+            const resourcesToPlace = resources[i];
+
+            resourcesToPlace.forEach(resource => dojo.place(
+                `<div id="resource${i}-${resource.id}" class="cube resource${i} aspect${resource.id % (i == 0 ? 8 : 4)}"></div>`, 
+                `table-resources${i}`
+            ));
         }
     }
 

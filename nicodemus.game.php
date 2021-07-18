@@ -143,10 +143,10 @@ class Nicodemus extends Table {
         $result['handMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $current_player_id));
         $result['tableMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
         $result['tableProjects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('table'));
-        $result['charcoalium'] = count($this->resources->getCardsOfTypeInLocation(0, null, 'table'));
-        $result['wood'] = count($this->resources->getCardsOfTypeInLocation(1, null, 'table'));
-        $result['copper'] = count($this->resources->getCardsOfTypeInLocation(2, null, 'table'));
-        $result['crystal'] = count($this->resources->getCardsOfTypeInLocation(3, null, 'table'));
+        $result['resources'] = [];
+        for ($i=0;$i<=3;$i++) {
+            $result['resources'][$i] = $this->getResources($i, 0);
+        }
   
         return $result;
     }

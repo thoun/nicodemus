@@ -51,11 +51,6 @@ class Nicodemus implements NicodemusGame {
     */
 
     public setup(gamedatas: NicodemusGamedatas) {
-        // ignore loading of some pictures
-        /*(this as any).dontPreloadImage('eye-shadow.png');
-        (this as any).dontPreloadImage('publisher.png');
-        [1,2,3,4,5,6,7,8,9,10].filter(i => !Object.values(gamedatas.players).some(player => Number((player as any).mat) === i)).forEach(i => (this as any).dontPreloadImage(`playmat_${i}.jpg`));
-*/
         log( "Starting game setup" );
         
         this.gamedatas = gamedatas;
@@ -64,7 +59,7 @@ class Nicodemus implements NicodemusGame {
 
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
-        this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines);
+        this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
         this.table.onProjectSelectionChanged = selectProjectsIds => {
             dojo.toggleClass('selectProjects-button', 'disabled', !selectProjectsIds.length);
             dojo.toggleClass('skipProjects-button', 'disabled', !!selectProjectsIds.length);
@@ -72,13 +67,6 @@ class Nicodemus implements NicodemusGame {
         this.createPlayerTables(gamedatas);
 
         this.setupNotifications();
-
-        /*document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
-        document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
-
-        (this as any).onScreenWidthChange = () => this.setAutoZoom();
-
-        */
 
         log( "Ending game setup" );
     }

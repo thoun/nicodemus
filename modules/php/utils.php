@@ -248,9 +248,11 @@ trait UtilTrait {
             $lastSpot = $machine->location_arg;
         }
 
-        self::notifyAllPlayers('tableMove', '', [
-            'moved' => $moved,
-        ]);
+        if (count($moved) > 0) {
+            self::notifyAllPlayers('tableMove', '', [
+                'moved' => $moved,
+            ]);
+        }
     }
 
     function checkPlayerWorkshopMachinesLimit(int $playerId) {
