@@ -335,14 +335,9 @@ class Nicodemus implements NicodemusGame {
         this.table.setPoints(playerId, points);
     }
     
-    private setResource(playerId: number, resource: number, number: number) {
-        if (playerId == 0) {
-
-        } else {
-            const counters = [this.charcoaliumCounters, this.woodCounters, this.copperCounters, this.crystalCounters];
-            counters[resource][playerId].toValue(number);
-            this.getPlayerTable(playerId).setResource(resource, number);
-        }
+    private setResourceCount(playerId: number, resource: number, number: number) {
+        const counters = [this.charcoaliumCounters, this.woodCounters, this.copperCounters, this.crystalCounters];
+        counters[resource][playerId].toValue(number);
     }
 
     ///////////////////////////////////////////////////
@@ -365,7 +360,8 @@ class Nicodemus implements NicodemusGame {
             ['machineRepaired', ANIMATION_MS],
             ['tableMove', ANIMATION_MS],
             ['points', 1],
-            ['resources', 1],
+            ['addResources', ANIMATION_MS],
+            ['removeResources', ANIMATION_MS],
         ];
 
         notifs.forEach((notif) => {
@@ -406,8 +402,17 @@ class Nicodemus implements NicodemusGame {
         this.setPoints(notif.args.playerId, notif.args.points);
     }
 
-    notif_resources(notif: Notif<NotifResourcesArgs>) {
-        Object.keys(notif.args.resources).forEach(key => this.setResource(Number(key), notif.args.resourceType, notif.args.resources[key].length));
+    notif_addResources(notif: Notif<NotifResourcesArgs>) {
+        this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
+        this.setResourceCount(notif.args.opponentId, notif.args.resourceType, notif.args.opponentCount);
+
+        this.getPlayerTable(notif.args.playerId).addResources(notif.args.resourceType, notif.args.resources);
+    }
+
+    notif_removeResources(notif: Notif<NotifResourcesArgs>) {
+        this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
+
+        this.table.addResources(notif.args.resourceType, notif.args.resources);
     }
     
     private getMachineColor(color: number) {

@@ -117,47 +117,47 @@ trait UtilTrait {
         }
     }
 
-    function getAllResources(int $type) {
-        $result = [
-            0 => $this->getResources($type, 0),
-        ];
-
-        $players = $this->loadPlayersBasicInfos();
-        foreach(array_keys($players) as $playerId) {
-            $result[$playerId] = $this->getResources($type, $playerId);
-        }
-
-        return $result;
-    }
-
     function addResource(int $playerId, int $number, int $type) {
         $tableResources = $this->getResources($type, 0);
         $availableOnTable = count($tableResources);
-        
+
+        $opponentId = $this->getOpponentId($playerId);
+        $movedResources = null;
+
         if ($availableOnTable >= $number) {
-            $resources = $this->getResourcesFromDb($this->resources->getCardsOfTypeInLocation($type, null, 'table'));
-            $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($tableResources, 0, $number)), 'player', $playerId);
+            $resources = $this->getResources($type, 0);
+            $movedIds = array_map(function ($r) { return $r->id; }, array_slice($tableResources, 0, $number));
+            $this->resources->moveCards($movedIds, 'player', $playerId);
+            $movedResources = $this->getResourcesFromDb($this->resources->getCards($movedIds));
         } else {
-            $this->resources->moveCards(array_map(function ($r) { return $r->id; }, $tableResources), 'player', $playerId);
+            $movedFromTableIds = array_map(function ($r) { return $r->id; }, $tableResources);
+            $this->resources->moveCards($movedFromTableIds, 'player', $playerId);
             $takeOnOpponent = $number - $availableOnTable;
-            $opponentId = $this->getOpponentId($playerId);
             $opponentResources = $this->getResources($type, $opponentId);
-            $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($opponentResources, 0, min($takeOnOpponent, count($opponentResources)))), 'player', $playerId);
+            $movedFromOpponentIds = array_map(function ($r) { return $r->id; }, array_slice($opponentResources, 0, min($takeOnOpponent, count($opponentResources))));
+            $this->resources->moveCards($movedFromOpponentIds, 'player', $playerId);
+            $movedResources = $this->getResourcesFromDb($this->resources->getCards(array_merge($movedFromTableIds, $movedFromOpponentIds)));
         }
 
-        self::notifyAllPlayers('resources', '', [
+        self::notifyAllPlayers('addResources', '', [
+            'playerId' => $playerId,
             'resourceType' => $type,
-            'resources' => $this->getAllResources($type),
+            'resources' => $movedResources,
+            'count' => count($this->getResources($type, $playerId)),
+            'opponentId' => $opponentId,
+            'opponentCount' => count($this->getResources($type, $opponentId)),
         ]);
     }
 
     function removeResource(int $playerId, int $number, int $type) {
-        $playerResources = $this->getResources($this->resources->getCardsOfTypeInLocation($type, null, 'player', $playerId));
-        $this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($playerResources, 0, min($number, count($playerResources)))), 'table');
+        $playerResources = $this->getResources($type, $playerId);
+        $movedResources = $this->getResourcesFromDb($this->resources->moveCards(array_map(function ($r) { return $r->id; }, array_slice($playerResources, 0, min($number, count($playerResources)))), 'table'));
 
-        self::notifyAllPlayers('resources', '', [
+        self::notifyAllPlayers('removeResources', '', [
+            'playerId' => $playerId,
             'resourceType' => $type,
-            'resources' => $this->getAllResources($type),
+            'resources' => $movedResources,
+            'count' => count($this->getResources($type, $playerId)),
         ]);
     }
 

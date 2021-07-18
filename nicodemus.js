@@ -393,12 +393,12 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.getPlaceOnCard = function (placed) {
         var _this = this;
         var newPlace = {
-            x: Math.random() * 38 + 16,
+            x: Math.random() * 28 + 16,
             y: Math.random() * 178 + 16,
         };
         var protection = 0;
         while (protection < 1000 && placed.some(function (place) { return _this.getDistance(newPlace, place) < 32; })) {
-            newPlace.x = Math.random() * 38 + 16;
+            newPlace.x = Math.random() * 28 + 16;
             newPlace.y = Math.random() * 178 + 16;
             protection++;
         }
@@ -695,14 +695,9 @@ var Nicodemus = /** @class */ (function () {
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
         this.table.setPoints(playerId, points);
     };
-    Nicodemus.prototype.setResource = function (playerId, resource, number) {
-        if (playerId == 0) {
-        }
-        else {
-            var counters = [this.charcoaliumCounters, this.woodCounters, this.copperCounters, this.crystalCounters];
-            counters[resource][playerId].toValue(number);
-            this.getPlayerTable(playerId).setResource(resource, number);
-        }
+    Nicodemus.prototype.setResourceCount = function (playerId, resource, number) {
+        var counters = [this.charcoaliumCounters, this.woodCounters, this.copperCounters, this.crystalCounters];
+        counters[resource][playerId].toValue(number);
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
@@ -723,7 +718,8 @@ var Nicodemus = /** @class */ (function () {
             ['machineRepaired', ANIMATION_MS],
             ['tableMove', ANIMATION_MS],
             ['points', 1],
-            ['resources', 1],
+            ['addResources', ANIMATION_MS],
+            ['removeResources', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -748,9 +744,14 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.points);
     };
-    Nicodemus.prototype.notif_resources = function (notif) {
-        var _this = this;
-        Object.keys(notif.args.resources).forEach(function (key) { return _this.setResource(Number(key), notif.args.resourceType, notif.args.resources[key].length); });
+    Nicodemus.prototype.notif_addResources = function (notif) {
+        this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
+        this.setResourceCount(notif.args.opponentId, notif.args.resourceType, notif.args.opponentCount);
+        this.getPlayerTable(notif.args.playerId).addResources(notif.args.resourceType, notif.args.resources);
+    };
+    Nicodemus.prototype.notif_removeResources = function (notif) {
+        this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
+        this.table.addResources(notif.args.resourceType, notif.args.resources);
     };
     Nicodemus.prototype.getMachineColor = function (color) {
         switch (color) {

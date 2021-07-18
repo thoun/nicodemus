@@ -96,6 +96,10 @@ interface NotifPointsArgs {
 }
 
 interface NotifResourcesArgs {
+    playerId: number;
     resourceType: number;
-    resources: { [playerId: number]: Resource[] };
+    resources: Resource[];
+    count: number;
+    opponentId: number;
+    opponentCount: number;
 }

@@ -53,12 +53,12 @@ class PlayerTable {
 
     private getPlaceOnCard(placed: PlacedTokens[]): Partial<PlacedTokens> {
         const newPlace = {
-            x: Math.random() * 38 + 16,
+            x: Math.random() * 28 + 16,
             y: Math.random() * 178 + 16,
         };
         let protection = 0;
         while (protection < 1000 && placed.some(place => this.getDistance(newPlace, place) < 32)) {
-            newPlace.x = Math.random() * 38 + 16;
+            newPlace.x = Math.random() * 28 + 16;
             newPlace.y = Math.random() * 178 + 16;
             protection++;
         }
