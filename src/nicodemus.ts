@@ -169,7 +169,7 @@ class Nicodemus implements NicodemusGame {
         this.playerMachineHand.setSelectionAppearance('class');
         this.playerMachineHand.selectionClass = 'selected';
         this.playerMachineHand.centerItems = true;
-        //this.playerMachineHand.onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.mowCards.setupNewCard(this, card_div, card_type_id); 
+        this.playerMachineHand.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(this, cardDiv, type);
         dojo.connect(this.playerMachineHand, 'onChangeSelection', this, () => this.onPlayerMachineHandSelectionChanged(this.playerMachineHand.getSelectedItems()));
 
         setupMachineCards([this.playerMachineHand]);

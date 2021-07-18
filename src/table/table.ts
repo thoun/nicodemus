@@ -35,7 +35,7 @@ class Table {
             this.projectStocks[i].selectionClass = 'selected';
             this.projectStocks[i].create(this.game, $(`table-project-${i}`), PROJECT_WIDTH, PROJECT_HEIGHT);
             this.projectStocks[i].setSelectionMode(0);
-            //this.projectStocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+            this.projectStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
             dojo.connect(this.projectStocks[i], 'onChangeSelection', this, () => this._onProjectSelectionChanged());
         }
 
@@ -64,7 +64,7 @@ class Table {
             this.machineStocks[i].selectionClass = 'selected';
             this.machineStocks[i].create(this.game, $(`table-machine-spot-${i}`), MACHINE_WIDTH, MACHINE_HEIGHT);
             this.machineStocks[i].setSelectionMode(0);
-            //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+            this.machineStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(game, cardDiv, type);
             dojo.connect(this.machineStocks[i], 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
         }
         setupMachineCards(this.machineStocks);

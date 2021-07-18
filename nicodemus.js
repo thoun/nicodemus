@@ -103,80 +103,61 @@ function setupProjectCards(projectStocks) {
         });
     });
 }
-function getLocationTooltip(typeWithGuild) {
-    var type = Math.floor(typeWithGuild / 10);
-    var guild = typeWithGuild % 10;
-    var message = null;
+function getMachineTooltip(type) {
     switch (type) {
-        case 1:
-            message = _("At the end of the game, this Location is worth 7 IP.");
-            break;
-        case 2:
-            message = _("Immediately gain 1 Pearl. At the end of the game, this Location is worth 5 IP.");
-            break;
-        case 3:
-            message = _("Immediately gain 2 Pearls. At the end of the game, this Location is worth 4 IP.");
-            break;
-        case 4:
-            message = _("Immediately gain 3 Pearls. At the end of the game, this Location is worth 3 IP.");
-            break;
-        case 5:
-            message = _("At the end of the game, this Location is worth 1 IP per silver key held in your Senate Chamber, regardless of whether or not it has been used to take control of a Location.");
-            break;
-        case 6:
-            message = _("At the end of the game, this Location is worth 2 IP per gold key held in your Senate Chamber, regardless of whether or not it has been used to take control of a Location.");
-            break;
-        case 7:
-            message = _("At the end of the game, this Location is worth 1 IP per pair of Pearls in your possession.");
-            break;
-        case 8:
-            message = _("At the end of the game, this Location is worth 2 IP per Location in your control.");
-            break;
-        case 9:
-            message = _("Until your next turn, each opponent MUST only increase the size of their Senate Chamber by taking the first Lord from the deck. At the end of the game, this Location is worth 3 IP.");
-            break;
-        case 10:
-            message = _("Until your next turn, each opponent MUST only increase the size of their Senate Chamber by taking first 2 Lords from the deck. Adding one to their Senate Chamber and discarding the other. At the end of the game, this Location is worth 3 IP.");
-            break;
-        case 11:
-            message = _("Immediately replace all the discarded Lords in to the Lord deck and reshuffle. At the end of the game, this Location is worth 3 IP.");
-            break;
-        case 12:
-            message = _("Immediately replace all the available Locations to the Location deck and reshuffle. At the end of the game, this Location is worth 3 IP.");
-            break;
-        case 13:
-            message = _("Until the end of the game, to take control of a Location, only 2 keys are needed, irrespective of their type. At the end of the game, this Location is worth 3 IP.");
-            break;
-        case 14:
-            message = _("Until the end of the game, when you take control of a Location, you choose this location from the Location deck (No longer from the available Locations). The deck is then reshuffled. At the end of the game, this Location is worth 3 IP.");
-            break;
+        // blue
+        case 11: return _("Earn 1 wood for each machine on the Bric-a-brac with wood in its production zone, including this one.");
+        case 12: return _("Earn 1 charcoalium for each machine on the Bric-a-brac with charcoalium in its production zone, including this one.");
+        case 13: return _("Earn 1 copper for each machine on the Bric-a-brac with copper in its production zone, including this one.");
+        case 14: return _("Earn 1 crystal for each machine on the Bric-a-brac with crystal in its production zone, including this one.");
+        case 15: return formatTextIcons(_("Choose a type of resource ([resource1]|[resource2]|[resource3]). Earn 1 resource of this type for each machine on the Bric-a-brac with the [resource9] symbol in its production zone, including this one."));
+        // purple
+        case 21: return _("Discard a machine from your hand and earn 2 resources of your choice from those needed to repair it.");
+        case 22: return _("Discard 1 of the last 3 machines added to the Bric-a-brac before this one and earn 1 resource of your choice from those needed to repair it.");
+        case 23: return _("Discard 1 of the last 2 machines added to the Bric-a-brac before this one and earn 1 resource of your choice from those needed to repair it and 1 charcoalium.");
+        case 24: return _("You can exchange 1 charcoalium for 1 resource of your choice from the reserve and/or vice versa, up to three times total.");
+        case 25: return _("Discard the last machine added to the Bric-a-brac before this one and earn 2 resources of your choice from those needed to repair it.");
+        // red
+        case 31: return _("Steal from your opponent 1 charcoalium and 1 machine taken randomly from their hand.");
+        case 32: return _("Steal from your opponent 1 resource of your choice and 1 machine taken randomly from their hand.");
+        case 33: return _("Your opponent must randomly discard all but 2 machines from their hand and return 2 charcoalium to the reserve.");
+        case 34: return _("Your opponent must return 2 resources of your choice to the reserve.");
+        // yellow
+        case 41: return _("Draw 2 of the unused project tiles. Choose 1 to place face up in your workshop and return the other to the box. Only you can complete the project in your workshop.");
+        case 42: return _("Copy the effect of 1 machine from the Bric-a-brac of your choice.");
     }
-    return message;
+    return null;
 }
-function getLordTooltip(typeWithGuild) {
-    var type = Math.floor(typeWithGuild / 10);
-    var message = null;
+function setupMachineCard(game, cardDiv, type) {
+    game.addTooltipHtml(cardDiv.id, getMachineTooltip(type));
+}
+function getProjectTooltip(type) {
     switch (type) {
-        case 1:
-            message = _("When this Lord is placed in the Senate Chamber, two Lords in this Chamber (including this one) can be swapped places, except those with keys.");
-            break;
-        case 2:
-            message = _("This Lord gives you 1 silver key.");
-            break;
-        case 3:
-            message = _("This Lord gives you 1 gold key.");
-            break;
-        case 4:
-            message = _("This Lord gives you 2 Pearls.");
-            break;
-        case 5:
-            message = _("This Lord gives you 1 Pearl.");
-            break;
-        case 6:
-            message = _("When this Lord is placed in the Senate Chamber, the top Lord card is taken from the Lord deck and placed in the corresponding discard pile.");
-            break;
+        // colors
+        case 10:
+        case 11:
+        case 12:
+        case 13: return _("You must have at least 2 machines of the indicated color in your workshop.");
+        case 14: return _("You must have at least 1 machine of each color in your workshop.");
+        // points
+        case 20:
+        case 21:
+        case 22: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
+        case 23: return _("You must have at least 2 identical machines in your workshop.");
+        // resources
+        case 31:
+        case 32:
+        case 33:
+        case 34:
+        case 35:
+        case 36:
+        case 37:
+        case 38: return formatTextIcons(_("You must have machines in your workshop that have the indicated resources and/or charcoalium in their production zones. [resource9] resources do not count towards these objectives."));
     }
-    return message;
+    return null;
+}
+function setupProjectCard(game, cardDiv, type) {
+    game.addTooltipHtml(cardDiv.id, getProjectTooltip(type));
 }
 function moveToAnotherStock(sourceStock, destinationStock, uniqueId, cardId) {
     if (sourceStock === destinationStock) {
@@ -225,7 +206,7 @@ var Table = /** @class */ (function () {
             this.projectStocks[i].selectionClass = 'selected';
             this.projectStocks[i].create(this.game, $("table-project-" + i), PROJECT_WIDTH, PROJECT_HEIGHT);
             this.projectStocks[i].setSelectionMode(0);
-            //this.projectStocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+            this.projectStocks[i].onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
             dojo.connect(this.projectStocks[i], 'onChangeSelection', this, function () { return _this._onProjectSelectionChanged(); });
         }
         setupProjectCards(this.projectStocks);
@@ -251,7 +232,7 @@ var Table = /** @class */ (function () {
             this_1.machineStocks[i].selectionClass = 'selected';
             this_1.machineStocks[i].create(this_1.game, $("table-machine-spot-" + i), MACHINE_WIDTH, MACHINE_HEIGHT);
             this_1.machineStocks[i].setSelectionMode(0);
-            //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+            this_1.machineStocks[i].onItemCreate = function (cardDiv, type) { return setupMachineCard(game, cardDiv, type); };
             dojo.connect(this_1.machineStocks[i], 'onChangeSelection', this_1, function () { return _this.onMachineSelectionChanged(_this.machineStocks[i].getSelectedItems()); });
         };
         var this_1 = this;
@@ -345,7 +326,7 @@ var PlayerTable = /** @class */ (function () {
         this.machineStock.create(this.game, $("player-table-" + this.playerId + "-machines"), MACHINE_WIDTH, MACHINE_HEIGHT);
         this.machineStock.setSelectionMode(0);
         this.machineStock.centerItems = true;
-        //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+        this.machineStock.onItemCreate = function (cardDiv, type) { return setupMachineCard(game, cardDiv, type); };
         //dojo.connect(this.machineStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
         setupMachineCards([this.machineStock]);
         player.machines.forEach(function (machine) { return _this.machineStock.addToStockWithId(getUniqueId(machine), '' + machine.id); });
@@ -500,7 +481,7 @@ var Nicodemus = /** @class */ (function () {
         this.playerMachineHand.setSelectionAppearance('class');
         this.playerMachineHand.selectionClass = 'selected';
         this.playerMachineHand.centerItems = true;
-        //this.playerMachineHand.onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.mowCards.setupNewCard(this, card_div, card_type_id); 
+        this.playerMachineHand.onItemCreate = function (cardDiv, type) { return setupMachineCard(_this, cardDiv, type); };
         dojo.connect(this.playerMachineHand, 'onChangeSelection', this, function () { return _this.onPlayerMachineHandSelectionChanged(_this.playerMachineHand.getSelectedItems()); });
         setupMachineCards([this.playerMachineHand]);
         machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id); });

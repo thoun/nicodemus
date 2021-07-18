@@ -48,6 +48,7 @@
   width: 134px;
   height: 93px;
   box-shadow: 3px 3px 0px 0px #333, 5px 5px 3px black;
+  cursor: default;
 }
 #table .projects #table-projects {
   position: absolute;
@@ -170,6 +171,12 @@ html {
 }
 #page-title .icon {
   margin: -5px 0;
+}
+
+.dijitTooltipContents .icon {
+  width: 16px;
+  height: 16px;
+  margin-bottom: -2px;
 }
 
 .player-icon {

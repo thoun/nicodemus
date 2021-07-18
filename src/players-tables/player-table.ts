@@ -29,7 +29,7 @@ class PlayerTable {
         this.machineStock.create(this.game, $(`player-table-${this.playerId}-machines`), MACHINE_WIDTH, MACHINE_HEIGHT);
         this.machineStock.setSelectionMode(0);
         this.machineStock.centerItems = true;
-        //this.stocks[i].onItemCreate = dojo.hitch(this, 'setupNewLordCard'); 
+        this.machineStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(game, cardDiv, type);
         //dojo.connect(this.machineStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
         setupMachineCards([this.machineStock]);
 

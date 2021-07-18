@@ -56,6 +56,13 @@ html {
   }
 }
 
+.dijitTooltipContents { 
+  .icon {
+    width: 16px;
+    height: 16px;
+    margin-bottom: -2px;
+  }
+}
 
 .player-icon {
   display: inline-block;
