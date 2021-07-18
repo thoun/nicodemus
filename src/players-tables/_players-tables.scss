@@ -35,6 +35,17 @@ $red: #a1311f;
             }
         }
 
+        .player-resources {
+            display: grid;
+            grid-template-columns: repeat(4, 60px);
+            grid-template-rows: 200px;
+            grid-column-gap: 10px;
+
+            &>div {
+            position: relative;
+            }
+        }
+
         &.right {
             flex-direction: row-reverse;
         }

@@ -320,14 +320,14 @@ var Table = /** @class */ (function () {
     Table.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
     };
-    Table.prototype.getPlaceOnCard = function (cardPlaced) {
+    Table.prototype.getPlaceOnCard = function (placed) {
         var _this = this;
         var newPlace = {
             x: Math.random() * 228 + 16,
             y: Math.random() * 38 + 16,
         };
         var protection = 0;
-        while (protection < 1000 && cardPlaced.some(function (place) { return _this.getDistance(newPlace, place) < 32; })) {
+        while (protection < 1000 && placed.some(function (place) { return _this.getDistance(newPlace, place) < 32; })) {
             newPlace.x = Math.random() * 228 + 16;
             newPlace.y = Math.random() * 38 + 16;
             protection++;
@@ -341,15 +341,25 @@ var Table = /** @class */ (function () {
         if (!div) {
             return;
         }
-        var cardPlaced = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
+        var placed = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
         // add tokens
-        resources.filter(function (resource) { return !cardPlaced.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
-            var newPlace = _this.getPlaceOnCard(cardPlaced);
-            cardPlaced.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
-            var html = "<div \n                id=\"resource" + type + "-" + resource.id + "\" \n                class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                style=\"left: " + (newPlace.x - 16) + "px; top: " + (newPlace.y - 16) + "px;\"\n            ></div>";
-            dojo.place(html, divId);
+        resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
+            var newPlace = _this.getPlaceOnCard(placed);
+            placed.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
+            var resourceDivId = "resource" + type + "-" + resource.id;
+            var resourceDiv = document.getElementById("resource" + type + "-" + resource.id);
+            if (resourceDiv) {
+                var originDiv = resourceDiv.parentElement;
+                var originPlaced = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
+                originDiv.dataset.placed = JSON.stringify(originPlaced.filter(function (place) { return place.resourceId != resource.id; }));
+                slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
+            }
+            else {
+                var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + (newPlace.x - 16) + "px; top: " + (newPlace.y - 16) + "px;\"\n                ></div>";
+                dojo.place(html, divId);
+            }
         });
-        div.dataset.placed = JSON.stringify(cardPlaced);
+        div.dataset.placed = JSON.stringify(placed);
     };
     return Table;
 }());
@@ -359,7 +369,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var color = player.color.startsWith('00') ? 'blue' : 'red';
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div class=\"player-icon " + color + "\"></div>\n            </div>\n            <div class=\"gradient " + color + " " + side + "\"></div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div class=\"player-icon " + color + "\"></div>\n            </div>\n            <div class=\"player-resources " + side + "\">\n                <div id=\"player" + this.playerId + "-resources0\"></div>\n                <div id=\"player" + this.playerId + "-resources1\"></div>\n                <div id=\"player" + this.playerId + "-resources2\"></div>\n                <div id=\"player" + this.playerId + "-resources3\"></div>\n            </div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n        </div>";
         dojo.place(html, 'playerstables');
         this.machineStock = new ebg.stock();
         this.machineStock.setSelectionAppearance('class');
@@ -371,9 +381,55 @@ var PlayerTable = /** @class */ (function () {
         //dojo.connect(this.machineStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
         setupMachineCards([this.machineStock]);
         player.machines.forEach(function (machine) { return _this.machineStock.addToStockWithId(getUniqueId(machine), '' + machine.id); });
+        // resources
+        for (var i = 0; i <= 3; i++) {
+            var resourcesToPlace = player.resources[i];
+            this.addResources(i, resourcesToPlace);
+        }
     }
-    PlayerTable.prototype.setResource = function (type, number) {
-        // TODO
+    PlayerTable.prototype.getDistance = function (p1, p2) {
+        return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
+    };
+    PlayerTable.prototype.getPlaceOnCard = function (placed) {
+        var _this = this;
+        var newPlace = {
+            x: Math.random() * 38 + 16,
+            y: Math.random() * 178 + 16,
+        };
+        var protection = 0;
+        while (protection < 1000 && placed.some(function (place) { return _this.getDistance(newPlace, place) < 32; })) {
+            newPlace.x = Math.random() * 38 + 16;
+            newPlace.y = Math.random() * 178 + 16;
+            protection++;
+        }
+        return newPlace;
+    };
+    PlayerTable.prototype.addResources = function (type, resources) {
+        var _this = this;
+        var divId = "player" + this.playerId + "-resources" + type;
+        var div = document.getElementById(divId);
+        if (!div) {
+            return;
+        }
+        var placed = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
+        // add tokens
+        resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
+            var newPlace = _this.getPlaceOnCard(placed);
+            placed.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
+            var resourceDivId = "resource" + type + "-" + resource.id;
+            var resourceDiv = document.getElementById("resource" + type + "-" + resource.id);
+            if (resourceDiv) {
+                var originDiv = resourceDiv.parentElement;
+                var originPlaced = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
+                originDiv.dataset.placed = JSON.stringify(originPlaced.filter(function (place) { return place.resourceId != resource.id; }));
+                slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
+            }
+            else {
+                var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + (newPlace.x - 16) + "px; top: " + (newPlace.y - 16) + "px;\"\n                ></div>";
+                dojo.place(html, divId);
+            }
+        });
+        div.dataset.placed = JSON.stringify(placed);
     };
     return PlayerTable;
 }());
