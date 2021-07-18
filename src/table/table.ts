@@ -76,11 +76,7 @@ class Table {
         // resources
         for (let i=0; i<=3; i++) {
             const resourcesToPlace = resources[i];
-
-            resourcesToPlace.forEach(resource => dojo.place(
-                `<div id="resource${i}-${resource.id}" class="cube resource${i} aspect${resource.id % (i == 0 ? 8 : 4)}"></div>`, 
-                `table-resources${i}`
-            ));
+            this.addResources(i, resourcesToPlace);
         }
     }
 
@@ -145,5 +141,50 @@ class Table {
         const fromHandId = `my-machines_item_${machine.id}`;
         const from = document.getElementById(fromHandId) ? fromHandId : `player-icon-${playerId}`;
         this.machineStocks[machine.location_arg].addToStockWithId(getUniqueId(machine), ''+machine.id, from);
+    }
+
+    private getDistance(p1: Partial<PlacedTokens>, p2: Partial<PlacedTokens>): number {
+        return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+    }
+
+    private getPlaceOnCard(cardPlaced: PlacedTokens[]): Partial<PlacedTokens> {
+        const newPlace = {
+            x: Math.random() * 228 + 16,
+            y: Math.random() * 38 + 16,
+        };
+        let protection = 0;
+        while (protection < 1000 && cardPlaced.some(place => this.getDistance(newPlace, place) < 32)) {
+            newPlace.x = Math.random() * 228 + 16;
+            newPlace.y = Math.random() * 38 + 16;
+            protection++;
+        }
+
+        return newPlace;
+    }
+
+    public addResources(type: number, resources: Resource[]) {
+        const divId = `table-resources${type}`;
+        const div = document.getElementById(divId);
+        if (!div) {
+            return;
+        }
+        const cardPlaced: PlacedTokens[] = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
+
+        // add tokens
+        resources.filter(resource => !cardPlaced.some(place => place.resourceId == resource.id)).forEach(resource => {
+            const newPlace = this.getPlaceOnCard(cardPlaced);
+            cardPlaced.push({
+                ...newPlace, 
+                resourceId: resource.id,
+            } as PlacedTokens);
+            let html = `<div 
+                id="resource${type}-${resource.id}" 
+                class="cube resource${type} aspect${resource.id % (type == 0 ? 8 : 4)}" 
+                style="left: ${newPlace.x - 16}px; top: ${newPlace.y - 16}px;"
+            ></div>`;
+            dojo.place(html, divId);
+        });
+
+        div.dataset.placed = JSON.stringify(cardPlaced);
     }
 }

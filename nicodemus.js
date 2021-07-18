@@ -1,4 +1,4 @@
-function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
+function slideToObjectAndAttach(object, destinationId, posX, posY) {
     var destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
         return Promise.resolve(true);
@@ -8,13 +8,12 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
         object.style.zIndex = '10';
         var objectCR = object.getBoundingClientRect();
         var destinationCR = destination.getBoundingClientRect();
-        var deltaX = destinationCR.left - objectCR.left + (posX !== null && posX !== void 0 ? posX : 0) * game.getZoom();
-        var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0) * game.getZoom();
+        var deltaX = destinationCR.left - objectCR.left + (posX !== null && posX !== void 0 ? posX : 0);
+        var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0);
         //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
         object.style.transition = "transform 0.5s ease-in";
-        object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px)";
+        object.style.transform = "translate(" + deltaX + "px, " + deltaY + "px)";
         var transitionend = function () {
-            console.log('ontransitionend', object, destination);
             object.style.top = posY !== undefined ? posY + "px" : 'unset';
             object.style.left = posX !== undefined ? posX + "px" : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
@@ -181,6 +180,17 @@ function formatTextIcons(rawText) {
         .replace(/\[resource3\]/ig, '<span class="icon crystal"></span>')
         .replace(/\[resource9\]/ig, '<span class="icon joker"></span>');
 }
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var Table = /** @class */ (function () {
     function Table(game, players, projects, machines, resources) {
         var _this = this;
@@ -246,13 +256,10 @@ var Table = /** @class */ (function () {
         for (var i = 1; i <= 10; i++) {
             _loop_3(i);
         }
-        var _loop_4 = function (i) {
-            var resourcesToPlace = resources[i];
-            resourcesToPlace.forEach(function (resource) { return dojo.place("<div id=\"resource" + i + "-" + resource.id + "\" class=\"cube resource" + i + " aspect" + resource.id % (i == 0 ? 8 : 4) + "\"></div>", "table-resources" + i); });
-        };
         // resources
         for (var i = 0; i <= 3; i++) {
-            _loop_4(i);
+            var resourcesToPlace = resources[i];
+            this.addResources(i, resourcesToPlace);
         }
     }
     Table.prototype.getSelectedProjectsIds = function () {
@@ -309,6 +316,40 @@ var Table = /** @class */ (function () {
         var fromHandId = "my-machines_item_" + machine.id;
         var from = document.getElementById(fromHandId) ? fromHandId : "player-icon-" + playerId;
         this.machineStocks[machine.location_arg].addToStockWithId(getUniqueId(machine), '' + machine.id, from);
+    };
+    Table.prototype.getDistance = function (p1, p2) {
+        return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
+    };
+    Table.prototype.getPlaceOnCard = function (cardPlaced) {
+        var _this = this;
+        var newPlace = {
+            x: Math.random() * 228 + 16,
+            y: Math.random() * 38 + 16,
+        };
+        var protection = 0;
+        while (protection < 1000 && cardPlaced.some(function (place) { return _this.getDistance(newPlace, place) < 32; })) {
+            newPlace.x = Math.random() * 228 + 16;
+            newPlace.y = Math.random() * 38 + 16;
+            protection++;
+        }
+        return newPlace;
+    };
+    Table.prototype.addResources = function (type, resources) {
+        var _this = this;
+        var divId = "table-resources" + type;
+        var div = document.getElementById(divId);
+        if (!div) {
+            return;
+        }
+        var cardPlaced = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
+        // add tokens
+        resources.filter(function (resource) { return !cardPlaced.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
+            var newPlace = _this.getPlaceOnCard(cardPlaced);
+            cardPlaced.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
+            var html = "<div \n                id=\"resource" + type + "-" + resource.id + "\" \n                class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                style=\"left: " + (newPlace.x - 16) + "px; top: " + (newPlace.y - 16) + "px;\"\n            ></div>";
+            dojo.place(html, divId);
+        });
+        div.dataset.placed = JSON.stringify(cardPlaced);
     };
     return Table;
 }());
@@ -444,12 +485,12 @@ var Nicodemus = /** @class */ (function () {
                     var choosePlayActionArgs_1 = args;
                     this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.charcoalium + " [resource0])"), function () { return _this.getCharcoalium(); });
                     if (choosePlayActionArgs_1.resource == 9) {
-                        var _loop_5 = function (i) {
+                        var _loop_4 = function (i) {
                             this_2.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
                         };
                         var this_2 = this;
                         for (var i = 1; i <= 3; i++) {
-                            _loop_5(i);
+                            _loop_4(i);
                         }
                     }
                     else {
@@ -509,19 +550,19 @@ var Nicodemus = /** @class */ (function () {
             dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-" + player.id + "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            <div class=\"counters\">\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
             var charcoaliumCounter = new ebg.counter();
             charcoaliumCounter.create("charcoalium-counter-" + playerId);
-            charcoaliumCounter.setValue(player.charcoalium);
+            charcoaliumCounter.setValue(player.resources[0].length);
             _this.charcoaliumCounters[playerId] = charcoaliumCounter;
             var woodCounter = new ebg.counter();
             woodCounter.create("wood-counter-" + playerId);
-            woodCounter.setValue(player.wood);
+            woodCounter.setValue(player.resources[1].length);
             _this.woodCounters[playerId] = woodCounter;
             var copperCounter = new ebg.counter();
             copperCounter.create("copper-counter-" + playerId);
-            copperCounter.setValue(player.copper);
+            copperCounter.setValue(player.resources[2].length);
             _this.copperCounters[playerId] = copperCounter;
             var crystalCounter = new ebg.counter();
             crystalCounter.create("crystal-counter-" + playerId);
-            crystalCounter.setValue(player.crystal);
+            crystalCounter.setValue(player.resources[3].length);
             _this.crystalCounters[playerId] = crystalCounter;
             if (player.playerNo == 1) {
                 dojo.place("<div id=\"player-icon-" + player.id + "\" class=\"player-icon first-player\"></div>", "player_board_" + player.id);

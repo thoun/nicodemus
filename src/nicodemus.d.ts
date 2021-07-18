@@ -21,14 +21,17 @@ interface Resource {
     location_arg: number;
 }
 
+interface PlacedTokens {
+    resourceId: number;
+    x: number;
+    y: number;
+}
+
 interface NicodemusPlayer extends Player {
     playerNo: number;
     machines: Machine[];
     projects: Project[];
-    charcoalium: number;
-    wood: number;
-    copper: number;
-    crystal: number;
+    resources: Resource[][];
 }
 
 /**

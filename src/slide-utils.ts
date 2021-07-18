@@ -1,4 +1,4 @@
-function slideToObjectAndAttach(game: NicodemusGame, object: HTMLElement, destinationId: string, posX?: number, posY?: number): Promise<boolean> {
+function slideToObjectAndAttach(object: HTMLElement, destinationId: string, posX?: number, posY?: number): Promise<boolean> {
     const destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
         return Promise.resolve(true);
@@ -11,16 +11,15 @@ function slideToObjectAndAttach(game: NicodemusGame, object: HTMLElement, destin
         const objectCR = object.getBoundingClientRect();
         const destinationCR = destination.getBoundingClientRect();
 
-        const deltaX = destinationCR.left - objectCR.left + (posX ?? 0) * game.getZoom();
-        const deltaY = destinationCR.top - objectCR.top + (posY ?? 0) * game.getZoom();
+        const deltaX = destinationCR.left - objectCR.left + (posX ?? 0);
+        const deltaY = destinationCR.top - objectCR.top + (posY ?? 0);
 
         //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
 
         object.style.transition = `transform 0.5s ease-in`;
-        object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px)`;
+        object.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 
         const transitionend = () => {
-            console.log('ontransitionend', object, destination);
             object.style.top = posY !== undefined ? `${posY}px` : 'unset';
             object.style.left = posX !== undefined ? `${posX}px` : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';

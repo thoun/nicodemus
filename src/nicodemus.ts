@@ -225,22 +225,22 @@ class Nicodemus implements NicodemusGame {
 
             const charcoaliumCounter = new ebg.counter();
             charcoaliumCounter.create(`charcoalium-counter-${playerId}`);
-            charcoaliumCounter.setValue(player.charcoalium);
+            charcoaliumCounter.setValue(player.resources[0].length);
             this.charcoaliumCounters[playerId] = charcoaliumCounter;
 
             const woodCounter = new ebg.counter();
             woodCounter.create(`wood-counter-${playerId}`);
-            woodCounter.setValue(player.wood);
+            woodCounter.setValue(player.resources[1].length);
             this.woodCounters[playerId] = woodCounter;
 
             const copperCounter = new ebg.counter();
             copperCounter.create(`copper-counter-${playerId}`);
-            copperCounter.setValue(player.copper);
+            copperCounter.setValue(player.resources[2].length);
             this.copperCounters[playerId] = copperCounter;
 
             const crystalCounter = new ebg.counter();
             crystalCounter.create(`crystal-counter-${playerId}`);
-            crystalCounter.setValue(player.crystal);
+            crystalCounter.setValue(player.resources[3].length);
             this.crystalCounters[playerId] = crystalCounter;
 
             if (player.playerNo == 1) {
