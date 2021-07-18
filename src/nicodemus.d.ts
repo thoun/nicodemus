@@ -103,3 +103,7 @@ interface NotifResourcesArgs {
     opponentId: number;
     opponentCount: number;
 }
+
+interface NotifHandRefillArgs {
+    machines: Machine[];
+}

@@ -717,6 +717,7 @@ var Nicodemus = /** @class */ (function () {
             ['machinePlayed', ANIMATION_MS],
             ['machineRepaired', ANIMATION_MS],
             ['tableMove', ANIMATION_MS],
+            ['handRefill', ANIMATION_MS],
             ['points', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
@@ -740,6 +741,10 @@ var Nicodemus = /** @class */ (function () {
             var machine = notif.args.moved[key];
             moveToAnotherStock(_this.table.machineStocks[originalSpot], _this.table.machineStocks[machine.location_arg], getUniqueId(machine), '' + machine.id);
         });
+    };
+    Nicodemus.prototype.notif_handRefill = function (notif) {
+        var _this = this;
+        notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id); });
     };
     Nicodemus.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.points);

@@ -359,6 +359,7 @@ class Nicodemus implements NicodemusGame {
             ['machinePlayed', ANIMATION_MS],
             ['machineRepaired', ANIMATION_MS],
             ['tableMove', ANIMATION_MS],
+            ['handRefill', ANIMATION_MS],
             ['points', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
@@ -396,6 +397,10 @@ class Nicodemus implements NicodemusGame {
                 ''+machine.id
             );
         });
+    }
+
+    notif_handRefill(notif: Notif<NotifHandRefillArgs>) {
+        notif.args.machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id));
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {

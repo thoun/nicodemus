@@ -14,12 +14,24 @@ trait StateTrait {
     function stRefillHand() {
         $playerId = self::getActivePlayerId();
 
-        if (intval($this->machines->countCardInLocation('deck')) > 0) {
-            $machine = $this->getMachineFromDb($this->machines->pickCard('deck', $playerId));
-            // TODO notif
-        } else {
+        $remainingCardsInDeck = intval($this->machines->countCardInLocation('deck'));
+        $machineCountInHand = intval($this->machines->countCardInLocation('hand', $playerId));
+        $cardNumberToRefill = 5 - $machineCountInHand;
+
+
+        
+        if ($remainingCardsInDeck < $cardNumberToRefill) {
             // no more cards in deck, end turn
             self::setGameStateValue(LAST_TURN, 1);
+        }
+
+        if ($remainingCardsInDeck > 0) {
+
+            $machines = $this->getMachinesFromDb($this->machines->pickCards(min($remainingCardsInDeck, $cardNumberToRefill), 'deck', $playerId));
+
+            self::notifyPlayer($playerId, 'handRefill', '', [
+                'machines' => $machines,
+            ]);
         }
 
         $this->gamestate->nextState('nextPlayer');
