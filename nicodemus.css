@@ -140,16 +140,6 @@
   height: 48px;
 }
 
-html {
-  /*background: url('img/background.jpg') #00587a;
-  background-repeat: repeat;*/
-}
-
-.mode_3d #game_play_area_background {
-  /*background: url('img/background.jpg') #00587a;
-  background-repeat: repeat;*/
-}
-
 .icon {
   display: inline-block;
   position: relative;
