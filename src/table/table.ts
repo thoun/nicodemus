@@ -17,7 +17,7 @@ class Table {
             html += `<div id="player-${player.id}-point-marker" class="point-marker ${player.color.startsWith('00') ? 'blue' : 'red'}"></div>`
         );
         dojo.place(html, 'table');
-        players.forEach(player => this.setPoints(Number(player.id), Number(player.score)));
+        players.forEach(player => this.setPoints(Number(player.id), Number(player.score), true));
 
         // projects
 
@@ -108,11 +108,26 @@ class Table {
         }
     }
 
-    public setPoints(playerId: number, points: number) {
+    public setPoints(playerId: number, points: number, firstPosition = false) {
         const markerDiv = document.getElementById(`player-${playerId}-point-marker`);
 
-        markerDiv.style.top = `${points % 2 ? 40 : 52}px`;
-        markerDiv.style.left = `${16 + points*46.2}px`;
+        const top = points % 2 ? 40 : 52;
+        const left = 16 + points*46.2;
+
+        if (firstPosition) {
+            markerDiv.style.top = `${top}px`;
+            markerDiv.style.left = `${left}px`;
+        } else {
+            dojo.fx.slideTo({
+                node: markerDiv,
+                top: top,
+                left: left,
+                delay: 0,
+                duration: ANIMATION_MS,
+                easing: dojo.fx.easing.cubicInOut,
+                unit: "px"
+            }).play();
+        }
     }
 
     public machinePlayed(playerId: number, machine: Machine) {

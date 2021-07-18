@@ -212,7 +212,7 @@ var Table = /** @class */ (function () {
             return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker " + (player.color.startsWith('00') ? 'blue' : 'red') + "\"></div>";
         });
         dojo.place(html, 'table');
-        players.forEach(function (player) { return _this.setPoints(Number(player.id), Number(player.score)); });
+        players.forEach(function (player) { return _this.setPoints(Number(player.id), Number(player.score), true); });
         // projects
         html = '';
         for (var i = 1; i <= 6; i++) {
@@ -295,10 +295,26 @@ var Table = /** @class */ (function () {
             this.machineStocks.forEach(function (stock) { return stock.unselectAll(); });
         }
     };
-    Table.prototype.setPoints = function (playerId, points) {
+    Table.prototype.setPoints = function (playerId, points, firstPosition) {
+        if (firstPosition === void 0) { firstPosition = false; }
         var markerDiv = document.getElementById("player-" + playerId + "-point-marker");
-        markerDiv.style.top = (points % 2 ? 40 : 52) + "px";
-        markerDiv.style.left = 16 + points * 46.2 + "px";
+        var top = points % 2 ? 40 : 52;
+        var left = 16 + points * 46.2;
+        if (firstPosition) {
+            markerDiv.style.top = top + "px";
+            markerDiv.style.left = left + "px";
+        }
+        else {
+            dojo.fx.slideTo({
+                node: markerDiv,
+                top: top,
+                left: left,
+                delay: 0,
+                duration: ANIMATION_MS,
+                easing: dojo.fx.easing.cubicInOut,
+                unit: "px"
+            }).play();
+        }
     };
     Table.prototype.machinePlayed = function (playerId, machine) {
         var fromHandId = "my-machines_item_" + machine.id;
