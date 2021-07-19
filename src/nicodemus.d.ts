@@ -80,6 +80,10 @@ interface SelectResourceArgs {
     possibleCombinations: number[][];
 }
 
+interface SelectProjectArgs {
+    projects: Project[];
+}
+
 interface NotifMachinePlayedArgs {
     playerId: number;
     machine: Machine;

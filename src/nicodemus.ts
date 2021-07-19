@@ -168,6 +168,13 @@ class Nicodemus implements NicodemusGame {
                     );
                     break;
 
+                case 'selectProject':
+                    const selectProjectArgs = args as SelectProjectArgs;
+                    selectProjectArgs.projects.forEach(project => 
+                        (this as any).addActionButton(`selectProject${project.id}-button`, 'TODO'+project.id, () => this.selectProject(project.id))
+                    );
+                    break;
+
                 case 'chooseProject':
                     (this as any).addActionButton('selectProjects-button', _('Complete projects'), () => this.selectProjects(this.table.getSelectedProjectsIds()));
                     (this as any).addActionButton('skipProjects-button', _('Skip'), () => this.selectProjects([]), null, null, 'red');
@@ -354,6 +361,16 @@ class Nicodemus implements NicodemusGame {
 
         this.takeAction('selectResource', { 
             resourcesTypes: resourcesTypes.join(',')
+        });
+    }
+
+    public selectProject(id: number) {
+        if(!(this as any).checkAction('selectProject')) {
+            return;
+        }
+
+        this.takeAction('selectProject', {
+            id
         });
     }
 

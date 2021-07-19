@@ -118,25 +118,42 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "selectResource" => ST_PLAYER_SELECT_RESOURCE,
-            "selectCard" => ST_PLAYER_SELECT_CARD,
+            "selectMachine" => ST_PLAYER_SELECT_MACHINE,
+            "selectProject" => ST_PLAYER_SELECT_PROJECT,
             "selectExchange" => ST_PLAYER_SELECT_EXCHANGE,
             "refillHand" => ST_REFILL_HAND,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
 
-    ST_PLAYER_SELECT_CARD => [
-        "name" => "selectCard",
-        "description" => clienttranslate('${actplayer} must choose a card'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a card'),
+    ST_PLAYER_SELECT_MACHINE => [
+        "name" => "selectMachine",
+        "description" => clienttranslate('${actplayer} must choose a machine'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a machine'),
         "type" => "activeplayer",        
-        "args" => "argSelectCard",
+        "args" => "argSelectMachine",
         "possibleactions" => [ 
-            "selectCard",
+            "selectMachine",
         ],
         "transitions" => [
-            "selectCard" => ST_PLAYER_SELECT_CARD,
+            "selectMachine" => ST_PLAYER_SELECT_MACHINE,
+            "selectProject" => ST_PLAYER_SELECT_PROJECT,
             "selectResource" => ST_PLAYER_SELECT_RESOURCE,
+            "refillHand" => ST_REFILL_HAND,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_SELECT_PROJECT => [
+        "name" => "selectProject",
+        "description" => clienttranslate('${actplayer} must choose a project'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a project'),
+        "type" => "activeplayer",        
+        "args" => "argSelectProject",
+        "possibleactions" => [ 
+            "selectProject",
+        ],
+        "transitions" => [
             "refillHand" => ST_REFILL_HAND,
             "zombiePass" => ST_NEXT_PLAYER,
         ]

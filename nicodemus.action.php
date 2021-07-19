@@ -89,11 +89,20 @@
         self::ajaxResponse();
     }
 
-    public function selectCard() {
+    public function selectMachine() {
         self::setAjaxMode();     
 
         $id = self::getArg("id", AT_posint, true);
-        $this->game->selectCard($id);
+        $this->game->selectMachine($id);
+
+        self::ajaxResponse();
+    }
+
+    public function selectProject() {
+        self::setAjaxMode();     
+
+        $id = self::getArg("id", AT_posint, true);
+        $this->game->selectProject($id);
 
         self::ajaxResponse();
     }

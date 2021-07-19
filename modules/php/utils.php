@@ -419,7 +419,7 @@ trait UtilTrait {
 
     function applyTransformationEffect(int $playerId, object $machine, object $context) {
         if ($machine->subType < 4) {
-            return "selectCard";
+            return "selectMachine";
         }
 
         switch ($machine->subType) {
@@ -532,11 +532,11 @@ trait UtilTrait {
                 // TODO 
                 break;
             case 2: 
-                if ($context->selectedCardId !== null) {
-                    $copiedMachine = $this->getMachineFromDb($this->machines->getCard($context->selectedCardId));
+                if ($context->mimicCardId !== null) {
+                    $copiedMachine = $this->getMachineFromDb($this->machines->getCard($context->mimicCardId));
                     return $this->applyMachineEffect($playerId, $copiedMachine, $context);
                 } else {
-                    return "selectResource";
+                    return "selectMachine";
                 }
                 break;
         }

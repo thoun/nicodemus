@@ -44,12 +44,47 @@ trait ArgsTrait {
         ];
     }
 
-    function argSelectCard() {
+    function argSelectMachine() {
+        $playerId = self::getActivePlayerId();
+
         $machine = $this->getMachineForEffect();
 
-        // TODO
-        return [
+        $selectableMachines = null;
 
+        if ($machine->type == 2) {
+            if ($machine->subType == 1) {
+                $selectableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $playerId));
+            } else {
+                $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+
+                if ($machine->subType == 2 || $machine->subType == 3) {
+                    $sliceSize = $machine->subType == 2 ? 3 : 2;
+                    $start = max(0, count($tableMachines) - 1 - $sliceSize);
+                    $end = count($tableMachines) - 1;
+                    if ($end > $start) {
+                        $selectableMachines = array_slice($tableMachines, $start, $end - $start);
+                    }
+                }
+            }
+        } else if ($machine->type == 4 && $machine->subType == 2) {
+            $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+            $selectableMachines = array_slice($tableMachines, 0, count($tableMachines) - 1);
+        }
+
+        if ($selectableMachines == null) {
+            throw new Error("Impossible to determinate cards to select");
+        }
+
+        return [
+            'selectableMachines' => $selectableMachines,
+        ];
+    }
+
+    function argSelectProject() {
+        $projects = $this->getProjectsFromDb($this->project->getCardsOnTop(2, 'deck'));
+
+        return [
+            'projects' => $projects,
         ];
     }
 

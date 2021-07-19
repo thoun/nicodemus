@@ -578,6 +578,12 @@ var Nicodemus = /** @class */ (function () {
                         return _this.addActionButton("selectResourceCombination" + index + "-button", formatTextIcons(combination.map(function (type) { return "[resource" + type + "]"; }).join('')), function () { return _this.selectResource(combination); });
                     });
                     break;
+                case 'selectProject':
+                    var selectProjectArgs = args;
+                    selectProjectArgs.projects.forEach(function (project) {
+                        return _this.addActionButton("selectProject" + project.id + "-button", 'TODO' + project.id, function () { return _this.selectProject(project.id); });
+                    });
+                    break;
                 case 'chooseProject':
                     this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects(_this.table.getSelectedProjectsIds()); });
                     this.addActionButton('skipProjects-button', _('Skip'), function () { return _this.selectProjects([]); }, null, null, 'red');
@@ -712,6 +718,14 @@ var Nicodemus = /** @class */ (function () {
         }
         this.takeAction('selectResource', {
             resourcesTypes: resourcesTypes.join(',')
+        });
+    };
+    Nicodemus.prototype.selectProject = function (id) {
+        if (!this.checkAction('selectProject')) {
+            return;
+        }
+        this.takeAction('selectProject', {
+            id: id
         });
     };
     Nicodemus.prototype.takeAction = function (action, data) {

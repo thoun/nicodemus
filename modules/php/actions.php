@@ -136,10 +136,8 @@ trait ActionTrait {
         $this->gamestate->nextState('nextPlayer');
     }
 
-    
-
-    public function selectCard(int $id) {
-        self::checkAction('selectCard'); 
+    public function selectMachine(int $id) {
+        self::checkAction('selectMachine'); 
         
         $playerId = self::getActivePlayerId();
 
@@ -151,6 +149,22 @@ trait ActionTrait {
         } else {
             $context->selectedCardId = $id;
         }
+        $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
+
+        $transition = $this->applyMachineEffect($playerId, $machine, $context);
+
+        $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
+    }
+
+    public function selectProject(int $id) {
+        self::checkAction('selectProject'); 
+        
+        $playerId = self::getActivePlayerId();
+
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        $context = $this->getApplyEffectContext();
+        $context->selectedCardId = $id;
         $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
 
         $transition = $this->applyMachineEffect($playerId, $machine, $context);
