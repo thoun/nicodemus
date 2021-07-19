@@ -370,7 +370,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var color = player.color.startsWith('00') ? 'blue' : 'red';
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div class=\"player-icon " + color + "\"></div>\n            </div>\n            <div class=\"player-resources " + side + "\">\n                <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                <div id=\"player" + this.playerId + "-resources1\"></div>\n                <div id=\"player" + this.playerId + "-resources2\"></div>\n                <div id=\"player" + this.playerId + "-resources3\"></div>\n            </div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n            </div>\n            <div class=\"player-resources " + side + "\">\n                <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                <div id=\"player" + this.playerId + "-resources1\"></div>\n                <div id=\"player" + this.playerId + "-resources2\"></div>\n                <div id=\"player" + this.playerId + "-resources3\"></div>\n            </div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n        </div>";
         dojo.place(html, 'playerstables');
         this.machineStock = new ebg.stock();
         this.machineStock.setSelectionAppearance('class');
@@ -394,7 +394,7 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.getPlaceOnCard = function (placed, type) {
         var _this = this;
         var xMaxShift = type ? 28 : 148;
-        var yMaxShift = type ? 82 : 44;
+        var yMaxShift = type ? 66 : 28;
         var newPlace = {
             x: Math.random() * xMaxShift + 16,
             y: Math.random() * yMaxShift + 16,

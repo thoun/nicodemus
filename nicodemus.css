@@ -516,3 +516,7 @@ html {
 .effect.effect15 {
   background-position: 99.7% 10%;
 }
+
+.spectatorMode #myhand-wrap {
+  display: none;
+}

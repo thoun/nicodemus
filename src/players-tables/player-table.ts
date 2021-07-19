@@ -15,7 +15,7 @@ class PlayerTable {
         <div id="player-table-${this.playerId}" class="player-table whiteblock ${side}">
             <div class="name-column ${color} ${side}">
                 <div class="player-name">${player.name}</div>
-                <div class="player-icon ${color}"></div>
+                <div id="player-icon-${this.playerId}" class="player-icon ${color}"></div>
             </div>
             <div class="player-resources ${side}">
                 <div id="player${this.playerId}-resources0" class="top"></div>
@@ -53,7 +53,7 @@ class PlayerTable {
 
     private getPlaceOnCard(placed: PlacedTokens[], type: number): Partial<PlacedTokens> {
         const xMaxShift = type ? 28 : 148;
-        const yMaxShift = type ? 82 : 44;
+        const yMaxShift = type ? 66 : 28;
         const newPlace = {
             x: Math.random() * xMaxShift + 16,
             y: Math.random() * yMaxShift + 16,

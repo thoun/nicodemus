@@ -345,6 +345,19 @@ trait UtilTrait {
 
         return $cost;
     }
+
+    function getMachineCostForPlayerBeforeJoker(int $playerId, object $machine, array $tableMachines) {
+        $producedResources = $this->getProducedResources($playerId);
+        $cost = $this->getMachineCost($machine,$tableMachines);
+
+        for ($i=1; $i<=3; $i++) {
+            if (array_key_exists($i, $machine->cost)) {
+                $cost[$i] -= $producedResources[$i];
+            }
+        }
+
+        return $cost;
+    }
     
     function canPay(array $canSpend, array $cost) {
         $remainingCost = $cost; // shallow copy

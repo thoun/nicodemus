@@ -44,16 +44,22 @@ trait ActionTrait {
 
         $machine = $this->getMachineFromDb($this->machines->getCard($id));
 
-        $machineSpot = null;
         $canSpend = $this->getCanSpend($playerId);
         $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
-        foreach($tableMachines as $tableMachine) {
-            if ($tableMachine->id == $machine->id) {
-                $machineSpot = $machine->location_arg;
-                $cost = $this->getMachineCost($tableMachine, $tableMachines);
-                if (!$this->canPay($canSpend, $cost)) {
-                    throw new Error('Not enough resources');
-                }
+
+        $machineSpot = $machine->location_arg;
+        $cost = $this->getMachineCost($machine, $tableMachines);
+        if (!$this->canPay($canSpend, $cost)) {
+            throw new Error('Not enough resources');
+        }
+
+        $costForPlayer = $this->getMachineCostForPlayerBeforeJoker($playerId, $machine, $tableMachines);
+
+        // TODO handle jokers
+
+        for ($i=0; $i<=3; $i++) {
+            if (array_key_exists($i, $costForPlayer)) {
+                $this->removeResource($playerId, $costForPlayer[$i], $i);
             }
         }
 
