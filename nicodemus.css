@@ -108,9 +108,12 @@
 }
 #playerstables .player-table .player-resources {
   display: grid;
-  grid-template-columns: repeat(4, 60px);
-  grid-template-rows: 200px;
-  grid-column-gap: 10px;
+  grid-template-columns: repeat(3, 60px);
+  grid-template-rows: 4fr 6fr;
+  grid-row-gap: 5px;
+}
+#playerstables .player-table .player-resources .top {
+  grid-column: 1/4;
 }
 #playerstables .player-table .player-resources > div {
   position: relative;

@@ -18,7 +18,7 @@ class PlayerTable {
                 <div class="player-icon ${color}"></div>
             </div>
             <div class="player-resources ${side}">
-                <div id="player${this.playerId}-resources0"></div>
+                <div id="player${this.playerId}-resources0" class="top"></div>
                 <div id="player${this.playerId}-resources1"></div>
                 <div id="player${this.playerId}-resources2"></div>
                 <div id="player${this.playerId}-resources3"></div>
@@ -51,15 +51,17 @@ class PlayerTable {
         return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
     }
 
-    private getPlaceOnCard(placed: PlacedTokens[]): Partial<PlacedTokens> {
+    private getPlaceOnCard(placed: PlacedTokens[], type: number): Partial<PlacedTokens> {
+        const xMaxShift = type ? 28 : 148;
+        const yMaxShift = type ? 82 : 44;
         const newPlace = {
-            x: Math.random() * 28 + 16,
-            y: Math.random() * 178 + 16,
+            x: Math.random() * xMaxShift + 16,
+            y: Math.random() * yMaxShift + 16,
         };
         let protection = 0;
         while (protection < 1000 && placed.some(place => this.getDistance(newPlace, place) < 32)) {
-            newPlace.x = Math.random() * 28 + 16;
-            newPlace.y = Math.random() * 178 + 16;
+            newPlace.x = Math.random() * xMaxShift + 16;
+            newPlace.y = Math.random() * yMaxShift + 16;
             protection++;
         }
 
@@ -76,7 +78,7 @@ class PlayerTable {
 
         // add tokens
         resources.filter(resource => !placed.some(place => place.resourceId == resource.id)).forEach(resource => {
-            const newPlace = this.getPlaceOnCard(placed);
+            const newPlace = this.getPlaceOnCard(placed, type);
             placed.push({
                 ...newPlace, 
                 resourceId: resource.id,
