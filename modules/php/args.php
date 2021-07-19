@@ -42,7 +42,65 @@ trait ArgsTrait {
             'resource' => $machine->produce,
             'machine' => $machine,
         ];
-    }  
+    }
+
+    function argSelectCard() {
+        $machine = $this->getMachineForEffect();
+
+        // TODO
+        return [
+
+        ];
+    }
+
+    function argSelectResource() {
+        $machine = $this->getMachineForEffect();
+        $machineType = $machine->type*10 + $machine->subType;
+        $possibleCombinations = null;
+
+        if ($machine->type == 1 && $machine->subType == 5) {
+            $possibleCombinations = [[1], [2], [3]];
+        } else if ($machine->type == 2) {
+            $context = $this->getApplyEffectContext();
+            $discardedMachine = $this->getMachineFromDb($this->machines->getCard($context->selectedCardId));
+
+            if ($machine->subType == 1 || $machine->subType == 5) {
+                $possibleCombinations = $this->getTwoResourcesCombinations($discardedMachine->cost);
+            } else {                
+                $possibleCombinations = $this->getOneResourceCombinations($discardedMachine->cost);
+            }
+            // TODO list possibilities from discarded machine
+        } else if ($machine->type == 3) {
+            $playerId = self::getActivePlayerId();
+            $opponentId = $this->getOpponentId($playerId);            
+
+            $canSpend = [];
+            for ($i=1; $i<=3; $i++) {
+                $canSpend[$i] = count($this->getResources($i, $opponentId));
+            }
+
+            if ($machine->subType == 4) {
+                $possibleCombinations = $this->getTwoResourcesCombinations($canSpend);
+            } else {                
+                $possibleCombinations = $this->getOneResourceCombinations($canSpend);
+            }
+        }
+
+        if ($possibleCombinations == null) {
+            throw new Error("Impossible to determinate resources to select");
+        }
+
+        return [
+            'possibleCombinations' => $possibleCombinations,
+        ];
+    }
+
+    function argSelectExchange() {
+        // TODO
+        return [
+
+        ];
+    }
     
     function argChooseProject() {
 
@@ -53,5 +111,5 @@ trait ArgsTrait {
         return [
             'completeProjects' => $completeProjects,
         ];
-    }  
+    }
 }

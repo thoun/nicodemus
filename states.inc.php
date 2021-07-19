@@ -117,6 +117,56 @@ $playerActionsGameStates = [
             "applyEffect",
         ],
         "transitions" => [
+            "selectResource" => ST_PLAYER_SELECT_RESOURCE,
+            "selectCard" => ST_PLAYER_SELECT_CARD,
+            "selectExchange" => ST_PLAYER_SELECT_EXCHANGE,
+            "refillHand" => ST_REFILL_HAND,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_SELECT_CARD => [
+        "name" => "selectCard",
+        "description" => clienttranslate('${actplayer} must choose a card'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a card'),
+        "type" => "activeplayer",        
+        "args" => "argSelectCard",
+        "possibleactions" => [ 
+            "selectCard",
+        ],
+        "transitions" => [
+            "selectCard" => ST_PLAYER_SELECT_CARD,
+            "selectResource" => ST_PLAYER_SELECT_RESOURCE,
+            "refillHand" => ST_REFILL_HAND,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_SELECT_RESOURCE => [
+        "name" => "selectResource",
+        "description" => clienttranslate('${actplayer} must choose resource(s)'),
+        "descriptionmyturn" => clienttranslate('${you} must choose resource(s)'),
+        "type" => "activeplayer",        
+        "args" => "argSelectResource",
+        "possibleactions" => [ 
+            "selectResource",
+        ],
+        "transitions" => [
+            "refillHand" => ST_REFILL_HAND,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_SELECT_EXCHANGE => [
+        "name" => "selectExchange",
+        "description" => clienttranslate('${actplayer} must choose resource(s) to exchange'),
+        "descriptionmyturn" => clienttranslate('${you} must choose resource(s) to exchange'),
+        "type" => "activeplayer",        
+        "args" => "argSelectExchange",
+        "possibleactions" => [ 
+            "selectExchange",
+        ],
+        "transitions" => [
             "refillHand" => ST_REFILL_HAND,
             "zombiePass" => ST_NEXT_PLAYER,
         ]

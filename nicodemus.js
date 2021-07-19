@@ -570,6 +570,13 @@ var Nicodemus = /** @class */ (function () {
                         }
                     }
                     this.addActionButton('applyEffect-button', _('Apply effect'), function () { return _this.applyEffect(); });
+                    this.addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs_1.machine)));
+                    break;
+                case 'selectResource':
+                    var selectResourceArgs = args;
+                    selectResourceArgs.possibleCombinations.forEach(function (combination, index) {
+                        return _this.addActionButton("selectResourceCombination" + index + "-button", formatTextIcons(combination.map(function (type) { return "[resource" + type + "]"; }).join('')), function () { return _this.selectResource(combination); });
+                    });
                     break;
                 case 'chooseProject':
                     this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects(_this.table.getSelectedProjectsIds()); });
@@ -634,7 +641,8 @@ var Nicodemus = /** @class */ (function () {
             crystalCounter.setValue(player.resources[3].length);
             _this.crystalCounters[playerId] = crystalCounter;
             if (player.playerNo == 1) {
-                dojo.place("<div id=\"player-icon-" + player.id + "\" class=\"player-icon first-player\"></div>", "player_board_" + player.id);
+                dojo.place("<div id=\"player-icon-first-player\" class=\"player-icon first-player\"></div>", "player_board_" + player.id);
+                _this.addTooltipHtml('player-icon-first-player', _("First player"));
             }
         });
         this.addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
@@ -698,6 +706,14 @@ var Nicodemus = /** @class */ (function () {
             ids: ids.join(',')
         });
     };
+    Nicodemus.prototype.selectResource = function (resourcesTypes) {
+        if (!this.checkAction('selectResource')) {
+            return;
+        }
+        this.takeAction('selectResource', {
+            resourcesTypes: resourcesTypes.join(',')
+        });
+    };
     Nicodemus.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
@@ -734,6 +750,8 @@ var Nicodemus = /** @class */ (function () {
             ['points', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
+            ['discardHandMachines', ANIMATION_MS],
+            ['discardTableMachines', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -770,6 +788,14 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.notif_removeResources = function (notif) {
         this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
         this.table.addResources(notif.args.resourceType, notif.args.resources);
+    };
+    Nicodemus.prototype.notif_discardHandMachines = function (notif) {
+        var _this = this;
+        notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.removeFromStockById('' + machine.id); });
+    };
+    Nicodemus.prototype.notif_discardTableMachines = function (notif) {
+        var _this = this;
+        notif.args.machines.forEach(function (machine) { return _this.table.machineStocks[machine.location_arg].removeFromStockById('' + machine.id); });
     };
     Nicodemus.prototype.getMachineColor = function (color) {
         switch (color) {

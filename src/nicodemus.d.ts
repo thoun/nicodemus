@@ -76,6 +76,10 @@ interface ChooseProjectArgs {
     completeProjects: Project[];
 }
 
+interface SelectResourceArgs {
+    possibleCombinations: number[][];
+}
+
 interface NotifMachinePlayedArgs {
     playerId: number;
     machine: Machine;
@@ -106,5 +110,9 @@ interface NotifResourcesArgs {
 }
 
 interface NotifHandRefillArgs {
+    machines: Machine[];
+}
+
+interface NotifDiscardMachinesArgs {
     machines: Machine[];
 }

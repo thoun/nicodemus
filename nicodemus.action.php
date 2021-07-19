@@ -86,7 +86,33 @@
         $projectsIds = self::getArg( "ids", AT_numberlist, true );
         $this->game->selectProjects(array_map(function($idStr) { return intval($idStr); }, explode(',', $projectsIds)));
 
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
 
+    public function selectCard() {
+        self::setAjaxMode();     
+
+        $id = self::getArg("id", AT_posint, true);
+        $this->game->selectCard($id);
+
+        self::ajaxResponse();
+    }
+
+    public function selectResource() {
+        self::setAjaxMode();     
+
+        $resourcesTypes = self::getArg( "resourcesTypes", AT_numberlist, true );
+        $this->game->selectResource(array_map(function($idStr) { return intval($idStr); }, explode(',', $resourcesTypes)));
+
+        self::ajaxResponse();
+    }
+
+    public function selectExchange() {
+        self::setAjaxMode();     
+
+        $exchanges = self::getArg( "exchanges", AT_numberlist, true );
+        $this->game->selectExchange(array_map(function($idStr) { return intval($idStr); }, explode(',', $exchanges)));
+
+        self::ajaxResponse();
+    }
   }

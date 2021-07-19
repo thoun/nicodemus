@@ -158,6 +158,14 @@ class Nicodemus implements NicodemusGame {
                         }
                     }
                     (this as any).addActionButton('applyEffect-button', _('Apply effect'), () => this.applyEffect());
+                    (this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
+                    break;
+
+                case 'selectResource':
+                    const selectResourceArgs = args as SelectResourceArgs;
+                    selectResourceArgs.possibleCombinations.forEach((combination, index) => 
+                        (this as any).addActionButton(`selectResourceCombination${index}-button`, formatTextIcons(combination.map(type => `[resource${type}]`).join('')), () => this.selectResource(combination))
+                    );
                     break;
 
                 case 'chooseProject':
@@ -258,7 +266,8 @@ class Nicodemus implements NicodemusGame {
             this.crystalCounters[playerId] = crystalCounter;
 
             if (player.playerNo == 1) {
-                dojo.place(`<div id="player-icon-${player.id}" class="player-icon first-player"></div>`, `player_board_${player.id}`);
+                dojo.place(`<div id="player-icon-first-player" class="player-icon first-player"></div>`, `player_board_${player.id}`);
+                (this as any).addTooltipHtml('player-icon-first-player', _("First player"));
             }
         });
 
@@ -338,6 +347,16 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
+    public selectResource(resourcesTypes: number[]) {
+        if(!(this as any).checkAction('selectResource')) {
+            return;
+        }
+
+        this.takeAction('selectResource', { 
+            resourcesTypes: resourcesTypes.join(',')
+        });
+    }
+
     public takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
@@ -377,6 +396,8 @@ class Nicodemus implements NicodemusGame {
             ['points', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
+            ['discardHandMachines', ANIMATION_MS],
+            ['discardTableMachines', ANIMATION_MS],
         ];
 
         notifs.forEach((notif) => {
@@ -432,6 +453,14 @@ class Nicodemus implements NicodemusGame {
         this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
 
         this.table.addResources(notif.args.resourceType, notif.args.resources);
+    }
+
+    notif_discardHandMachines(notif: Notif<NotifDiscardMachinesArgs>) {
+        notif.args.machines.forEach(machine => this.playerMachineHand.removeFromStockById(''+machine.id));
+    }
+
+    notif_discardTableMachines(notif: Notif<NotifDiscardMachinesArgs>) {
+        notif.args.machines.forEach(machine => this.table.machineStocks[machine.location_arg].removeFromStockById(''+machine.id));
     }
     
     private getMachineColor(color: number) {

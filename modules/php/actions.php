@@ -3,6 +3,7 @@
 require_once(__DIR__.'/objects/machine.php');
 require_once(__DIR__.'/objects/project.php');
 require_once(__DIR__.'/objects/resource.php');
+require_once(__DIR__.'/objects/apply-effect-context.php');
 
 trait ActionTrait {
 
@@ -111,9 +112,13 @@ trait ActionTrait {
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
-        // TODO applyEffect
 
-        $this->gamestate->nextState('refillHand');
+        $context = new ApplyEffectContext();
+        $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
+
+        $transition = $this->applyMachineEffect($playerId, $machine, $context);
+
+        $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
     }
 
     public function selectProjects(array $ids) {
@@ -129,5 +134,59 @@ trait ActionTrait {
         // TODO notif
 
         $this->gamestate->nextState('nextPlayer');
+    }
+
+    
+
+    public function selectCard(int $id) {
+        self::checkAction('selectCard'); 
+        
+        $playerId = self::getActivePlayerId();
+
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        $context = $this->getApplyEffectContext();
+        if ($machine->type == 4 && $machine->subType) {
+            $context->mimicCardId = $id;
+        } else {
+            $context->selectedCardId = $id;
+        }
+        $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
+
+        $transition = $this->applyMachineEffect($playerId, $machine, $context);
+
+        $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
+    }
+
+    public function selectResource(array $resourcesTypes) {
+        self::checkAction('selectResource'); 
+        
+        $playerId = self::getActivePlayerId();
+
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        $context = $this->getApplyEffectContext();
+        $context->selectedResources = $resourcesTypes;
+        $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
+
+        $transition = $this->applyMachineEffect($playerId, $machine, $context);
+
+        $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
+    }
+
+    public function selectExchange(array $exchanges) {
+        self::checkAction('selectExchange'); 
+        
+        $playerId = self::getActivePlayerId();
+
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        $context = $this->getApplyEffectContext();
+        $context->exchanges = $exchanges;
+        $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
+
+        $transition = $this->applyMachineEffect($playerId, $machine, $context);
+
+        $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
     }
 }
