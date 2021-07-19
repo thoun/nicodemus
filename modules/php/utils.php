@@ -258,10 +258,17 @@ trait UtilTrait {
             $this->machines->moveCard($machine->id, 'discard');
         }
         foreach($row2machines as &$machine) {
-            $this->machines->moveCard($machine->id, 'table', $machine->location_arg - 5);
+            $machine->location_arg -= 5;
+            $this->machines->moveCard($machine->id, 'table', $machine->location_arg);
         }
-        
-        // TODO notif
+
+        self::notifyAllPlayers('discardTableMachines', '', [
+            'machines' => $row1machines,
+        ]);
+
+        self::notifyAllPlayers('tableMove', '', [
+            'moved' => $row2machines,
+        ]);
     }
 
     function removeEmptySpaceFromTable() {
@@ -294,12 +301,17 @@ trait UtilTrait {
         }
 
         $lastMachineId = intval(self::getGameStateValue(PLAYED_MACHINE));
+        $discardedMachines = [];
         foreach($machines as $machine) {
             if ($machine->id != $lastMachineId) {
+                $discardedMachines[] = $machine;
                 $this->machines->moveCard($machine->id, 'discard');
             }
         }
-        // TODO notif
+
+        self::notifyAllPlayers('discardPlayerMachines', '', [
+            'machines' => $discardedMachines,
+        ]);
     }
 
     function getProducedResources(int $playerId) {

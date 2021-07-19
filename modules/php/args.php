@@ -102,7 +102,6 @@ trait ArgsTrait {
             } else {                
                 $possibleCombinations = $this->getOneResourceCombinations($discardedMachine->cost);
             }
-            // TODO list possibilities from discarded machine
         } else if ($machine->type == 3) {
             $playerId = self::getActivePlayerId();
             $opponentId = $this->getOpponentId($playerId);            

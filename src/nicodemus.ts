@@ -462,6 +462,7 @@ class Nicodemus implements NicodemusGame {
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
             ['discardHandMachines', ANIMATION_MS],
+            ['discardPlayerMachines', ANIMATION_MS],
             ['discardTableMachines', ANIMATION_MS],
             ['addWorkshopProjects', ANIMATION_MS],
         ];
@@ -527,6 +528,10 @@ class Nicodemus implements NicodemusGame {
 
     notif_discardHandMachines(notif: Notif<NotifDiscardMachinesArgs>) {
         notif.args.machines.forEach(machine => this.playerMachineHand.removeFromStockById(''+machine.id));
+    }
+
+    notif_discardPlayerMachines(notif: Notif<NotifDiscardMachinesArgs>) {
+        notif.args.machines.forEach(machine => this.getPlayerTable(machine.location_arg).machineStock.removeFromStockById(''+machine.id));
     }
 
     notif_discardTableMachines(notif: Notif<NotifDiscardMachinesArgs>) {

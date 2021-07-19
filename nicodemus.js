@@ -801,6 +801,7 @@ var Nicodemus = /** @class */ (function () {
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
             ['discardHandMachines', ANIMATION_MS],
+            ['discardPlayerMachines', ANIMATION_MS],
             ['discardTableMachines', ANIMATION_MS],
             ['addWorkshopProjects', ANIMATION_MS],
         ];
@@ -846,6 +847,10 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.notif_discardHandMachines = function (notif) {
         var _this = this;
         notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.removeFromStockById('' + machine.id); });
+    };
+    Nicodemus.prototype.notif_discardPlayerMachines = function (notif) {
+        var _this = this;
+        notif.args.machines.forEach(function (machine) { return _this.getPlayerTable(machine.location_arg).machineStock.removeFromStockById('' + machine.id); });
     };
     Nicodemus.prototype.notif_discardTableMachines = function (notif) {
         var _this = this;
