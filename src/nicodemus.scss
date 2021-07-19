@@ -2,6 +2,7 @@
 
 @import 'table/table';
 @import 'players-tables/players-tables';
+@import 'help';
 .player-board {
   @import 'playerboards';
 }
@@ -51,9 +52,6 @@ html {
   .icon {
     width: 20px;
     height: 20px;
-  }
-
-  .icon {
     margin: -5px 0;
   }
 }

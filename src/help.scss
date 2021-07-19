@@ -1,37 +1,35 @@
-#conspiracy-help-button {
+
+$machine-width: 190px; 
+$machine-height: 190px;
+$project-width: 134px; 
+$project-height: 93px;
+
+#nicodemus-help-button {
     position: fixed;
     bottom: 75px;
     left: 5px;
     width: 50px;
     height: 50px;
-    background: url('img/tokens.png');
-    background-position: 73% 5%;
-    background-size: 800%;
+    background: #a1311f;
     font-weight: bold;
-    text-shadow: 0 0 4px white;
+    color: white;
     border-radius: 25px;
-    border: 1px solid #777;
     box-shadow: 3px 5px 5px 0px rgb(0 0 0);
     cursor: pointer;
     z-index: 949;
     font-size: 28pt;
-    font-family: 'MoolBoran';
 }
 
 /* we show help button if user has no mouse ( = no tooltips) */
 @media (hover: hover) {
-    #conspiracy-help-button {
+    #nicodemus-help-button {
         display: none;
     }
 }
 
-#popin_conspiracyHelpDialog {
-    color: #212222;
-    background: #e5f4fd;
-}
-        
-h2.standard_popin_title {
-    font-family: 'MoolBoran';
+#popin_nicodemusHelpDialog {
+    background: url('img/background.jpg') #eae3d3;
+    background-repeat: repeat;
 }
 
 #help-popin {
@@ -40,8 +38,14 @@ h2.standard_popin_title {
     overflow: auto;
 
     h1 {
-        font-family: 'TribalGaramondPL-SC700';
-        color: #0094bb;
+        color: black;
+    }
+
+    
+    .icon {
+        width: 20px;
+        height: 20px;
+        margin: -5px 0;
     }
 
     .help-section {    
@@ -51,45 +55,35 @@ h2.standard_popin_title {
         }
     }
 
-    #help-lords {
-        .lord {
-            width: $lord-width; 
-            height: $lord-height;
-            background-image: url('img/lords.jpg');
+    #help-machines {
+        .machine {
+            width: $machine-width; 
+            height: $machine-height;
+            background-image: url('img/cards.jpg');
         }
-        @for $i from 1 through 3 {
-            #lord#{$i} {
-                background-position: (-1200% - $i * 100%) 0%;
-            }
-        }
-        @for $i from 4 through 6 {
-            #lord#{$i} {
-                background-position: (-1200% - $i * 100%) 100%;
+        @for $i from 0 through 15 {
+            #machine#{$i} {
+                background-position: ($i * 100% / 15) 0%;
             }
         }
     }
 
-    #help-locations {
-        .location {
-            width: $location-width; 
-            height: $location-height;
-            background-image: url('img/locations.jpg');
+    #help-projects {
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
         }
-        @for $i from 1 through 12 {
-            #location#{$i} {
-                background-position: (- $i * 100%) 0%;
+
+        .project {
+            width: $project-width; 
+            height: $project-height;
+            background-image: url('img/projects.jpg');
+        }
+        
+        @for $i from 0 through 16 {
+            #project#{$i} {
+                background-position: ($i * 100% / 16) 0%;
             }
-        }
-        @for $i from 13 through 14 {
-            #location#{$i} {
-                background-position: (- $i * 100%) 100%;
-            }
-        }
-        #location100 {        
-            background-position: -1700% 100%;
-        }
-        #location101 {        
-            background-position: -2200% 100%;
         }
 }
 }

@@ -133,16 +133,16 @@ function setupMachineCard(game, cardDiv, type) {
 function getProjectTooltip(type) {
     switch (type) {
         // colors
-        case 10:
+        case 10: return _("You must have at least 1 machine of each color in your workshop.");
         case 11:
         case 12:
-        case 13: return _("You must have at least 2 machines of the indicated color in your workshop.");
-        case 14: return _("You must have at least 1 machine of each color in your workshop.");
+        case 13:
+        case 14: return _("You must have at least 2 machines of the indicated color in your workshop.");
         // points
-        case 20:
+        case 20: return _("You must have at least 2 identical machines in your workshop.");
         case 21:
-        case 22: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
-        case 23: return _("You must have at least 2 identical machines in your workshop.");
+        case 22:
+        case 23: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
         // resources
         case 31:
         case 32:
@@ -490,6 +490,7 @@ var Nicodemus = /** @class */ (function () {
             dojo.toggleClass('skipProjects-button', 'disabled', !!selectProjectsIds.length);
         };
         this.createPlayerTables(gamedatas);
+        this.addHelp();
         this.setupNotifications();
         log("Ending game setup");
     };
@@ -752,6 +753,30 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.setResourceCount = function (playerId, resource, number) {
         var counters = [this.charcoaliumCounters, this.woodCounters, this.copperCounters, this.crystalCounters];
         counters[resource][playerId].toValue(number);
+    };
+    Nicodemus.prototype.addHelp = function () {
+        var _this = this;
+        dojo.place("<button id=\"nicodemus-help-button\">?</button>", 'left-side');
+        dojo.connect($('nicodemus-help-button'), 'onclick', this, function () { return _this.showHelp(); });
+    };
+    Nicodemus.prototype.showHelp = function () {
+        if (!this.helpDialog) {
+            this.helpDialog = new ebg.popindialog();
+            this.helpDialog.create('nicodemusHelpDialog');
+            this.helpDialog.setTitle(_("Cards help"));
+            var html = "<div id=\"help-popin\">\n                <h1>" + _("Machines effects") + "</h1>\n                <div id=\"help-machines\" class=\"help-section\">\n                    <table>";
+            MACHINES_IDS.forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + index + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
+            html += "</table>\n                </div>\n                <h1>" + _("Projects") + "</h1>\n                <div id=\"help-projects\" class=\"help-section\">\n                    <table><tr><td class=\"grid\">";
+            PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project" + (index + 1) + "\" class=\"project\"></div>"; });
+            html += "</td><td>" + getProjectTooltip(11) + "</td></tr>\n                <tr><td><div id=\"project0\" class=\"project\"></div></td><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
+            PROJECTS_IDS.slice(6, 9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 6) + "\" class=\"project\"></div>"; });
+            html += "</td><td>" + getProjectTooltip(21) + "</td></tr>\n                <tr><td><div id=\"project5\" class=\"project\"></div></td><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
+            PROJECTS_IDS.slice(9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 9) + "\" class=\"project\"></div>"; });
+            html += "</td><td>" + getProjectTooltip(31) + "</td></tr></table>\n                </div>\n            </div>";
+            // Show the dialog
+            this.helpDialog.setContent(html);
+        }
+        this.helpDialog.show();
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications

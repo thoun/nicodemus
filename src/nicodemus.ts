@@ -23,6 +23,7 @@ class Nicodemus implements NicodemusGame {
     private woodCounters: Counter[] = [];
     private copperCounters: Counter[] = [];
     private crystalCounters: Counter[] = [];
+    private helpDialog: any;
 
     private playerMachineHand: Stock;
     private table: Table;
@@ -65,6 +66,8 @@ class Nicodemus implements NicodemusGame {
             dojo.toggleClass('skipProjects-button', 'disabled', !!selectProjectsIds.length);
         };
         this.createPlayerTables(gamedatas);
+
+        this.addHelp();
 
         this.setupNotifications();
 
@@ -394,6 +397,45 @@ class Nicodemus implements NicodemusGame {
     private setResourceCount(playerId: number, resource: number, number: number) {
         const counters = [this.charcoaliumCounters, this.woodCounters, this.copperCounters, this.crystalCounters];
         counters[resource][playerId].toValue(number);
+    }
+
+    private addHelp() {
+        dojo.place(`<button id="nicodemus-help-button">?</button>`, 'left-side');
+        dojo.connect( $('nicodemus-help-button'), 'onclick', this, () => this.showHelp());
+    }
+
+    private showHelp() {
+        if (!this.helpDialog) {
+            this.helpDialog = new ebg.popindialog();
+            this.helpDialog.create( 'nicodemusHelpDialog' );
+            this.helpDialog.setTitle( _("Cards help") );
+            
+            var html = `<div id="help-popin">
+                <h1>${_("Machines effects")}</h1>
+                <div id="help-machines" class="help-section">
+                    <table>`;
+                MACHINES_IDS.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
+                html += `</table>
+                </div>
+                <h1>${_("Projects")}</h1>
+                <div id="help-projects" class="help-section">
+                    <table><tr><td class="grid">`;
+                PROJECTS_IDS.slice(1, 5).forEach((number, index) => html += `<div id="project${index + 1}" class="project"></div>`);
+                html += `</td><td>${getProjectTooltip(11)}</td></tr>
+                <tr><td><div id="project0" class="project"></div></td><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
+                PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
+                html += `</td><td>${getProjectTooltip(21)}</td></tr>
+                <tr><td><div id="project5" class="project"></div></td><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
+                PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);
+                html += `</td><td>${getProjectTooltip(31)}</td></tr></table>
+                </div>
+            </div>`;
+            
+            // Show the dialog
+            this.helpDialog.setContent(html);
+        }
+
+        this.helpDialog.show();
     }
 
     ///////////////////////////////////////////////////

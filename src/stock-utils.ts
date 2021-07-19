@@ -135,12 +135,12 @@ function setupMachineCard(game: Game, cardDiv: HTMLDivElement, type: number) {
 function getProjectTooltip(type: number) {
     switch (type) {        
         // colors
-        case 10: case 11: case 12: case 13: return _("You must have at least 2 machines of the indicated color in your workshop.");
-        case 14: return _("You must have at least 1 machine of each color in your workshop.");
+        case 10: return _("You must have at least 1 machine of each color in your workshop.");
+        case 11: case 12: case 13: case 14: return _("You must have at least 2 machines of the indicated color in your workshop.");
 
         // points
-        case 20: case 21: case 22: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
-        case 23: return _("You must have at least 2 identical machines in your workshop.");
+        case 20: return _("You must have at least 2 identical machines in your workshop.");
+        case 21: case 22: case 23: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
 
         // resources
         case 31: case 32: case 33: case 34: case 35: case 36: case 37: case 38: return formatTextIcons(_("You must have machines in your workshop that have the indicated resources and/or charcoalium in their production zones. [resource9] resources do not count towards these objectives."));
