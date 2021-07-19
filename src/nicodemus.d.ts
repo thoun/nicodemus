@@ -69,6 +69,7 @@ interface ChooseActionArgs {
 interface ChoosePlayActionArgs {
     charcoalium: number;
     resource: number;
+    machine: Machine;
 }
 
 interface ChooseProjectArgs {

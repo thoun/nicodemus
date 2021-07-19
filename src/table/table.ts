@@ -141,6 +141,7 @@ class Table {
         const fromHandId = `my-machines_item_${machine.id}`;
         const from = document.getElementById(fromHandId) ? fromHandId : `player-icon-${playerId}`;
         this.machineStocks[machine.location_arg].addToStockWithId(getUniqueId(machine), ''+machine.id, from);
+        dojo.addClass(`table-machine-spot-${machine.location_arg}_item_${machine.id}`, 'selected');
     }
 
     private getDistance(p1: Partial<PlacedTokens>, p2: Partial<PlacedTokens>): number {

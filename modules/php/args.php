@@ -40,6 +40,7 @@ trait ArgsTrait {
         return [
             'charcoalium' => $machine->points,
             'resource' => $machine->produce,
+            'machine' => $machine,
         ];
     }  
     

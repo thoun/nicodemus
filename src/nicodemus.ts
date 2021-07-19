@@ -84,6 +84,9 @@ class Nicodemus implements NicodemusGame {
             case 'chooseAction':
                 this.onEnteringStateChooseAction(args.args as ChooseActionArgs);
                 break;
+            case 'choosePlayAction':
+                this.onEnteringStateChoosePlayAction(args.args as ChoosePlayActionArgs);
+                break;
             case 'chooseProject':
                 if((this as any).isCurrentPlayerActive()) {
                     this.table.setProjectSelectable(true);
@@ -101,6 +104,10 @@ class Nicodemus implements NicodemusGame {
         }
     }
 
+    private onEnteringStateChoosePlayAction(args: ChoosePlayActionArgs) {
+        dojo.addClass(`table-machine-spot-${args.machine.location_arg}_item_${args.machine.id}`, 'selected');
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -110,6 +117,9 @@ class Nicodemus implements NicodemusGame {
         switch (stateName) {
             case 'chooseAction':
                 this.onLeavingChooseAction();
+                break;
+            case 'choosePlayAction':
+                this.onLeavingChoosePlayAction();
                 break;
             case 'chooseProject':
                 this.table.setProjectSelectable(false);
@@ -121,6 +131,10 @@ class Nicodemus implements NicodemusGame {
         this.setHandSelectable(false);
         this.table.setMachineSelectable(false);
         dojo.query('.stockitem').removeClass('disabled');
+    }
+
+    onLeavingChoosePlayAction() {
+        dojo.query('.stockitem').removeClass('selected');
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the

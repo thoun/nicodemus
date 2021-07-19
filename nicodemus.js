@@ -316,6 +316,7 @@ var Table = /** @class */ (function () {
         var fromHandId = "my-machines_item_" + machine.id;
         var from = document.getElementById(fromHandId) ? fromHandId : "player-icon-" + playerId;
         this.machineStocks[machine.location_arg].addToStockWithId(getUniqueId(machine), '' + machine.id, from);
+        dojo.addClass("table-machine-spot-" + machine.location_arg + "_item_" + machine.id, 'selected');
     };
     Table.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
@@ -497,6 +498,9 @@ var Nicodemus = /** @class */ (function () {
             case 'chooseAction':
                 this.onEnteringStateChooseAction(args.args);
                 break;
+            case 'choosePlayAction':
+                this.onEnteringStateChoosePlayAction(args.args);
+                break;
             case 'chooseProject':
                 if (this.isCurrentPlayerActive()) {
                     this.table.setProjectSelectable(true);
@@ -511,6 +515,9 @@ var Nicodemus = /** @class */ (function () {
             args.disabledMachines.forEach(function (machine) { return dojo.addClass("table-machine-spot-" + machine.location_arg + "_item_" + machine.id, 'disabled'); });
         }
     };
+    Nicodemus.prototype.onEnteringStateChoosePlayAction = function (args) {
+        dojo.addClass("table-machine-spot-" + args.machine.location_arg + "_item_" + args.machine.id, 'selected');
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -519,6 +526,9 @@ var Nicodemus = /** @class */ (function () {
         switch (stateName) {
             case 'chooseAction':
                 this.onLeavingChooseAction();
+                break;
+            case 'choosePlayAction':
+                this.onLeavingChoosePlayAction();
                 break;
             case 'chooseProject':
                 this.table.setProjectSelectable(false);
@@ -529,6 +539,9 @@ var Nicodemus = /** @class */ (function () {
         this.setHandSelectable(false);
         this.table.setMachineSelectable(false);
         dojo.query('.stockitem').removeClass('disabled');
+    };
+    Nicodemus.prototype.onLeavingChoosePlayAction = function () {
+        dojo.query('.stockitem').removeClass('selected');
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
