@@ -38,8 +38,6 @@ trait ArgsTrait {
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
     
         return [
-            'charcoalium' => $machine->points,
-            'resource' => $machine->produce,
             'machine' => $machine,
         ];
     }

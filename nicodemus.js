@@ -559,8 +559,8 @@ var Nicodemus = /** @class */ (function () {
             switch (stateName) {
                 case 'choosePlayAction':
                     var choosePlayActionArgs_1 = args;
-                    this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.charcoalium + " [resource0])"), function () { return _this.getCharcoalium(); });
-                    if (choosePlayActionArgs_1.resource == 9) {
+                    this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.machine.points + " [resource0])"), function () { return _this.getCharcoalium(); });
+                    if (choosePlayActionArgs_1.machine.produce == 9) {
                         var _loop_4 = function (i) {
                             this_2.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
                         };
@@ -570,13 +570,13 @@ var Nicodemus = /** @class */ (function () {
                         }
                     }
                     else {
-                        this.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + choosePlayActionArgs_1.resource + "])"), function () { return _this.getResource(choosePlayActionArgs_1.resource); });
-                        if (choosePlayActionArgs_1.resource == 0) {
+                        this.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + choosePlayActionArgs_1.machine.produce + "])"), function () { return _this.getResource(choosePlayActionArgs_1.machine.produce); });
+                        if (choosePlayActionArgs_1.machine.produce == 0) {
                             dojo.removeClass('getResource-button', 'bgabutton_blue');
                             dojo.addClass('getResource-button', 'bgabutton_gray');
                         }
                     }
-                    this.addActionButton('applyEffect-button', _('Apply effect'), function () { return _this.applyEffect(); });
+                    this.addActionButton('applyEffect-button', _('Apply effect') + (" <div class=\"effect effect" + MACHINES_IDS.indexOf(getUniqueId(choosePlayActionArgs_1.machine)) + "\"></div>"), function () { return _this.applyEffect(); });
                     this.addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs_1.machine)));
                     break;
                 case 'selectResource':

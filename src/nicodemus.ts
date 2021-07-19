@@ -148,19 +148,19 @@ class Nicodemus implements NicodemusGame {
             switch (stateName) {                
                 case 'choosePlayAction': 
                     const choosePlayActionArgs = args as ChoosePlayActionArgs;
-                    (this as any).addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(` (${choosePlayActionArgs.charcoalium} [resource0])`), () => this.getCharcoalium());
-                    if (choosePlayActionArgs.resource == 9) {
+                    (this as any).addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(` (${choosePlayActionArgs.machine.points} [resource0])`), () => this.getCharcoalium());
+                    if (choosePlayActionArgs.machine.produce == 9) {
                         for (let i=1; i<=3; i++) {
                             (this as any).addActionButton(`getResource${i}-button`, _('Get resource') + formatTextIcons(` ([resource${i}])`), () => this.getResource(i));
                         }
                     } else {
-                        (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.resource}])`), () => this.getResource(choosePlayActionArgs.resource));
-                        if (choosePlayActionArgs.resource == 0) {
+                        (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.machine.produce}])`), () => this.getResource(choosePlayActionArgs.machine.produce));
+                        if (choosePlayActionArgs.machine.produce == 0) {
                             dojo.removeClass('getResource-button', 'bgabutton_blue');
                             dojo.addClass('getResource-button', 'bgabutton_gray');
                         }
                     }
-                    (this as any).addActionButton('applyEffect-button', _('Apply effect'), () => this.applyEffect());
+                    (this as any).addActionButton('applyEffect-button', _('Apply effect') + ` <div class="effect effect${MACHINES_IDS.indexOf(getUniqueId(choosePlayActionArgs.machine))}"></div>`, () => this.applyEffect());
                     (this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
                     break;
 

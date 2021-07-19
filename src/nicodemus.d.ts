@@ -4,6 +4,8 @@ interface Machine {
     subType: number;
     location: string;
     location_arg: number;
+    points: number;
+    produce: number;
 }
 
 interface Project {
@@ -67,8 +69,6 @@ interface ChooseActionArgs {
 }
 
 interface ChoosePlayActionArgs {
-    charcoalium: number;
-    resource: number;
     machine: Machine;
 }
 

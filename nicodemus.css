@@ -457,3 +457,62 @@ html {
 #myhand-wrap #my-machines {
   flex: 1;
 }
+
+.effect {
+  border-radius: 8px;
+  width: 80px;
+  height: 31px;
+  background-image: url("img/cards.jpg");
+  display: inline-block;
+  vertical-align: inherit;
+  margin-left: 5px;
+  margin-bottom: 1px;
+}
+.effect.effect0 {
+  background-position: 3.4% 10%;
+}
+.effect.effect1 {
+  background-position: 9.82% 10%;
+}
+.effect.effect2 {
+  background-position: 16.24% 10%;
+}
+.effect.effect3 {
+  background-position: 22.66% 10%;
+}
+.effect.effect4 {
+  background-position: 29.08% 10%;
+}
+.effect.effect5 {
+  background-position: 35.5% 10%;
+}
+.effect.effect6 {
+  background-position: 41.92% 10%;
+}
+.effect.effect7 {
+  background-position: 48.34% 10%;
+}
+.effect.effect8 {
+  background-position: 54.76% 10%;
+}
+.effect.effect9 {
+  background-position: 61.18% 10%;
+}
+.effect.effect10 {
+  background-position: 67.6% 10%;
+}
+.effect.effect11 {
+  background-position: 74.02% 10%;
+}
+.effect.effect12 {
+  background-position: 80.44% 10%;
+}
+.effect.effect13 {
+  background-position: 86.86% 10%;
+}
+.effect.effect14 {
+  background-position: 93.28% 10%;
+}
+.effect.effect15 {
+  background-position: 99.7% 10%;
+}
