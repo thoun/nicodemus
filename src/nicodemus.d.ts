@@ -120,3 +120,8 @@ interface NotifHandRefillArgs {
 interface NotifDiscardMachinesArgs {
     machines: Machine[];
 }
+
+interface NotifAddWorkshopProjectsArgs {
+    playerId: number;
+    projects: Project[];
+}

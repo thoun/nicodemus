@@ -529,7 +529,16 @@ trait UtilTrait {
     function applySpecialEffect(int $playerId, object $machine, object $context) {
         switch ($machine->subType) {
             case 1: 
-                // TODO 
+                if ($context->selectedCardId !== null) {
+                    $this->machines->moveCard($context->selectedCardId, 'hand', $playerId);
+                    $this->project->shuffle('deck');
+                    self::notifyAllPlayers('addWorkshopProjects', '', [
+                        'playerId' => $playerId,
+                        'projects' => [$this->getProjectFromDb($this->project->getCard($context->selectedCardId))],
+                    ]);
+                } else {
+                    return "selectProject";
+                }
                 break;
             case 2: 
                 if ($context->mimicCardId !== null) {

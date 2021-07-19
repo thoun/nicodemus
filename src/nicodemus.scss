@@ -125,3 +125,33 @@ html {
     }
   }
 }
+
+#myhand-wrap {
+  display: flex;
+  padding: 0;
+
+  #my-hand-label {
+    display: flex;
+    padding-right: 5px;
+
+    &.blue {
+      background: linear-gradient(0.25turn, $blue 60%, transparent);
+    }
+    &.red {
+        background: linear-gradient(0.25turn, $red 60%, transparent);
+    }
+
+    h3 {
+      flex: 1;
+      text-align: center;
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);    
+      color: white;
+      padding: 5px;
+    }
+  }
+
+  #my-machines {
+    flex: 1;
+  }
+}

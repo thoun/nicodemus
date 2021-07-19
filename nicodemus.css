@@ -272,3 +272,29 @@ html {
 .cube.resource0.aspect7 {
   background-position: 100% 100%;
 }
+
+#myhand-wrap {
+  display: flex;
+  padding: 0;
+}
+#myhand-wrap #my-hand-label {
+  display: flex;
+  padding-right: 5px;
+}
+#myhand-wrap #my-hand-label.blue {
+  background: linear-gradient(0.25turn, #006e7d 60%, transparent);
+}
+#myhand-wrap #my-hand-label.red {
+  background: linear-gradient(0.25turn, #a1311f 60%, transparent);
+}
+#myhand-wrap #my-hand-label h3 {
+  flex: 1;
+  text-align: center;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  color: white;
+  padding: 5px;
+}
+#myhand-wrap #my-machines {
+  flex: 1;
+}

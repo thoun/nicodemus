@@ -1,10 +1,9 @@
 {OVERALL_GAME_HEADER}
 
 <div id="myhand-wrap" class="whiteblock">
-    <h3>{MY_HAND}</h3>
-        <div id="my-machines"></div>
-        <div id="my-projects"></div>
-    </div>
+    <div id="my-hand-label"><h3>{MY_HAND}</h3></div>
+    <div id="my-machines"></div>
+    <div id="my-projects"></div>
 </div>
 
 <div id="playerstables"></div>

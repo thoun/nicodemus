@@ -432,6 +432,10 @@ var PlayerTable = /** @class */ (function () {
         });
         div.dataset.placed = JSON.stringify(placed);
     };
+    PlayerTable.prototype.addWorkshopProjects = function (projects) {
+        // TODO
+        //projects.forEach(project => this.playerProjectHand.addToStockWithId(getUniqueId(project), ''+project.id));
+    };
     return PlayerTable;
 }());
 var __spreadArray = (this && this.__spreadArray) || function (to, from) {
@@ -608,6 +612,11 @@ var Nicodemus = /** @class */ (function () {
         dojo.connect(this.playerMachineHand, 'onChangeSelection', this, function () { return _this.onPlayerMachineHandSelectionChanged(_this.playerMachineHand.getSelectedItems()); });
         setupMachineCards([this.playerMachineHand]);
         machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id); });
+        var player = Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) === _this.getPlayerId(); });
+        if (player) {
+            var color = player.color.startsWith('00') ? 'blue' : 'red';
+            dojo.addClass('my-hand-label', color);
+        }
     };
     Nicodemus.prototype.setHandSelectable = function (selectable) {
         this.playerMachineHand.setSelectionMode(selectable ? 1 : 0);
@@ -766,6 +775,7 @@ var Nicodemus = /** @class */ (function () {
             ['removeResources', ANIMATION_MS],
             ['discardHandMachines', ANIMATION_MS],
             ['discardTableMachines', ANIMATION_MS],
+            ['addWorkshopProjects', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -790,6 +800,9 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.notif_handRefill = function (notif) {
         var _this = this;
         notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id); });
+    };
+    Nicodemus.prototype.notif_addWorkshopProjects = function (notif) {
+        this.getPlayerTable(notif.args.playerId).addWorkshopProjects(notif.args.projects);
     };
     Nicodemus.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.points);

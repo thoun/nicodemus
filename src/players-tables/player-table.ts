@@ -101,4 +101,9 @@ class PlayerTable {
 
         div.dataset.placed = JSON.stringify(placed);
     }
+
+    public addWorkshopProjects(projects: Project[]) {
+        // TODO
+        //projects.forEach(project => this.playerProjectHand.addToStockWithId(getUniqueId(project), ''+project.id));
+    }
 }

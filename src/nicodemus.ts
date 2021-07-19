@@ -204,6 +204,12 @@ class Nicodemus implements NicodemusGame {
         setupMachineCards([this.playerMachineHand]);
 
         machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id));
+
+        const player = Object.values(this.gamedatas.players).find(player => Number(player.id) === this.getPlayerId());
+        if (player) {
+            const color = player.color.startsWith('00') ? 'blue' : 'red';
+            dojo.addClass('my-hand-label', color);
+        }
     }
 
     public setHandSelectable(selectable: boolean) {
@@ -415,6 +421,7 @@ class Nicodemus implements NicodemusGame {
             ['removeResources', ANIMATION_MS],
             ['discardHandMachines', ANIMATION_MS],
             ['discardTableMachines', ANIMATION_MS],
+            ['addWorkshopProjects', ANIMATION_MS],
         ];
 
         notifs.forEach((notif) => {
@@ -453,6 +460,10 @@ class Nicodemus implements NicodemusGame {
 
     notif_handRefill(notif: Notif<NotifHandRefillArgs>) {
         notif.args.machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id));
+    }
+
+    notif_addWorkshopProjects(notif: Notif<NotifAddWorkshopProjectsArgs>) {
+        this.getPlayerTable(notif.args.playerId).addWorkshopProjects(notif.args.projects);
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {
