@@ -79,7 +79,7 @@ trait ArgsTrait {
     }
 
     function argSelectProject() {
-        $projects = $this->getProjectsFromDb($this->project->getCardsOnTop(2, 'deck'));
+        $projects = $this->getProjectsFromDb($this->projects->getCardsOnTop(2, 'deck'));
 
         return [
             'projects' => $projects,

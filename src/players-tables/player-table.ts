@@ -1,6 +1,7 @@
 class PlayerTable {
     public playerId: number;
     public machineStock: Stock;
+    public projectStock: Stock;
 
     constructor(
         private game: NicodemusGame, 
@@ -24,9 +25,27 @@ class PlayerTable {
                 <div id="player${this.playerId}-resources3"></div>
             </div>
             <div id="player-table-${this.playerId}-machines" class="machines"></div>
+            <div id="player-table-${this.playerId}-projects" class="projects"></div>
         </div>`;
 
         dojo.place(html, 'playerstables');
+
+        // projects        
+
+        this.projectStock = new ebg.stock() as Stock;
+        this.projectStock.setSelectionAppearance('class');
+        this.projectStock.selectionClass = 'selected';
+        this.projectStock.create(this.game, $(`player-table-${this.playerId}-projects`), PROJECT_WIDTH, PROJECT_HEIGHT);
+        this.projectStock.setSelectionMode(0);
+        //this.projectStock.centerItems = true;
+        this.projectStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
+        //dojo.connect(this.projectStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.projectStocks[i].getSelectedItems()));
+        setupProjectCards([this.projectStock]);
+
+        player.projects.forEach(project => this.projectStock.addToStockWithId(getUniqueId(project), ''+project.id));
+        this.setProjectStockWidth();
+
+        // machines
 
         this.machineStock = new ebg.stock() as Stock;
         this.machineStock.setSelectionAppearance('class');
@@ -105,7 +124,11 @@ class PlayerTable {
     }
 
     public addWorkshopProjects(projects: Project[]) {
-        // TODO
-        //projects.forEach(project => this.playerProjectHand.addToStockWithId(getUniqueId(project), ''+project.id));
+        projects.forEach(project => this.projectStock.addToStockWithId(getUniqueId(project), ''+project.id, 'page-title'));
+        this.setProjectStockWidth();
+    }
+    
+    private setProjectStockWidth() {
+        document.getElementById(`player-table-${this.playerId}-projects`).style.width = this.projectStock.items.length ? `${PROJECT_WIDTH + 10}px` : undefined;
     }
 }

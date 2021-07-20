@@ -174,7 +174,7 @@ class Nicodemus implements NicodemusGame {
                 case 'selectProject':
                     const selectProjectArgs = args as SelectProjectArgs;
                     selectProjectArgs.projects.forEach(project => 
-                        (this as any).addActionButton(`selectProject${project.id}-button`, 'TODO'+project.id, () => this.selectProject(project.id))
+                        (this as any).addActionButton(`selectProject${project.id}-button`, `<div class="project project${PROJECTS_IDS.indexOf(getUniqueId(project))}"></div>`, () => this.selectProject(project.id))
                     );
                     break;
 

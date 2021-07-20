@@ -171,6 +171,18 @@ html {
   }
 }
 
+.project {
+  width: $project-width; 
+  height: $project-height;
+  background-image: url('img/projects.jpg');
+
+  @for $i from 0 through 16 {
+    &.project#{$i} {
+        background-position: ($i * 100% / 16) 0%;
+    }
+  }
+}
+
 .spectatorMode #myhand-wrap {
   display: none;
 }

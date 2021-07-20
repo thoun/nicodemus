@@ -370,8 +370,21 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var color = player.color.startsWith('00') ? 'blue' : 'red';
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n            </div>\n            <div class=\"player-resources " + side + "\">\n                <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                <div id=\"player" + this.playerId + "-resources1\"></div>\n                <div id=\"player" + this.playerId + "-resources2\"></div>\n                <div id=\"player" + this.playerId + "-resources3\"></div>\n            </div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n            </div>\n            <div class=\"player-resources " + side + "\">\n                <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                <div id=\"player" + this.playerId + "-resources1\"></div>\n                <div id=\"player" + this.playerId + "-resources2\"></div>\n                <div id=\"player" + this.playerId + "-resources3\"></div>\n            </div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n            <div id=\"player-table-" + this.playerId + "-projects\" class=\"projects\"></div>\n        </div>";
         dojo.place(html, 'playerstables');
+        // projects        
+        this.projectStock = new ebg.stock();
+        this.projectStock.setSelectionAppearance('class');
+        this.projectStock.selectionClass = 'selected';
+        this.projectStock.create(this.game, $("player-table-" + this.playerId + "-projects"), PROJECT_WIDTH, PROJECT_HEIGHT);
+        this.projectStock.setSelectionMode(0);
+        //this.projectStock.centerItems = true;
+        this.projectStock.onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
+        //dojo.connect(this.projectStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.projectStocks[i].getSelectedItems()));
+        setupProjectCards([this.projectStock]);
+        player.projects.forEach(function (project) { return _this.projectStock.addToStockWithId(getUniqueId(project), '' + project.id); });
+        this.setProjectStockWidth();
+        // machines
         this.machineStock = new ebg.stock();
         this.machineStock.setSelectionAppearance('class');
         this.machineStock.selectionClass = 'selected';
@@ -435,8 +448,12 @@ var PlayerTable = /** @class */ (function () {
         div.dataset.placed = JSON.stringify(placed);
     };
     PlayerTable.prototype.addWorkshopProjects = function (projects) {
-        // TODO
-        //projects.forEach(project => this.playerProjectHand.addToStockWithId(getUniqueId(project), ''+project.id));
+        var _this = this;
+        projects.forEach(function (project) { return _this.projectStock.addToStockWithId(getUniqueId(project), '' + project.id, 'page-title'); });
+        this.setProjectStockWidth();
+    };
+    PlayerTable.prototype.setProjectStockWidth = function () {
+        document.getElementById("player-table-" + this.playerId + "-projects").style.width = this.projectStock.items.length ? PROJECT_WIDTH + 10 + "px" : undefined;
     };
     return PlayerTable;
 }());
@@ -588,7 +605,7 @@ var Nicodemus = /** @class */ (function () {
                 case 'selectProject':
                     var selectProjectArgs = args;
                     selectProjectArgs.projects.forEach(function (project) {
-                        return _this.addActionButton("selectProject" + project.id + "-button", 'TODO' + project.id, function () { return _this.selectProject(project.id); });
+                        return _this.addActionButton("selectProject" + project.id + "-button", "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\"></div>", function () { return _this.selectProject(project.id); });
                     });
                     break;
                 case 'chooseProject':

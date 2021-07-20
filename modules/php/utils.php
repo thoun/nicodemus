@@ -555,11 +555,11 @@ trait UtilTrait {
         switch ($machine->subType) {
             case 1: 
                 if ($context->selectedCardId !== null) {
-                    $this->machines->moveCard($context->selectedCardId, 'hand', $playerId);
-                    $this->project->shuffle('deck');
+                    $this->projects->moveCard($context->selectedCardId, 'player', $playerId);
+                    $this->projects->shuffle('deck');
                     self::notifyAllPlayers('addWorkshopProjects', '', [
                         'playerId' => $playerId,
-                        'projects' => [$this->getProjectFromDb($this->project->getCard($context->selectedCardId))],
+                        'projects' => [$this->getProjectFromDb($this->projects->getCard($context->selectedCardId))],
                     ]);
                 } else {
                     return "selectProject";
