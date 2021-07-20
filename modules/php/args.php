@@ -135,10 +135,11 @@ trait ArgsTrait {
     }
     
     function argChooseProject() {
+        $playerId = self::getActivePlayerId();
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
-        $completeProjects = $this->getCompleteProjects($machine);
+        $completeProjects = $this->getCompleteProjects($playerId, $machine);
     
         return [
             'completeProjects' => $completeProjects,

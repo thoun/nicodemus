@@ -80,7 +80,7 @@ trait ActionTrait {
         
         $this->checkPlayerWorkshopMachinesLimit($playerId);
 
-        $this->gamestate->nextState(count($this->getCompleteProjects($machine)) > 0 ? 'chooseProject' : 'nextPlayer');
+        $this->gamestate->nextState(count($this->getCompleteProjects($playerId, $machine)) > 0 ? 'chooseProject' : 'nextPlayer');
     }
 
     public function getCharcoalium() {

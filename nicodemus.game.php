@@ -24,12 +24,16 @@ require_once('modules/php/utils.php');
 require_once('modules/php/actions.php');
 require_once('modules/php/states.php');
 require_once('modules/php/args.php');
+require_once('modules/php/effects.php');
+require_once('modules/php/projects.php');
 
 class Nicodemus extends Table {
     use UtilTrait;
     use ActionTrait;
     use StateTrait;
     use ArgsTrait;
+    use EffectTrait;
+    use ProjectTrait;
 
 	function __construct() {
         // Your global variables labels:
