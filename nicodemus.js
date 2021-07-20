@@ -611,6 +611,13 @@ var Nicodemus = /** @class */ (function () {
                         return _this.addActionButton("selectProject" + project.id + "-button", "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\"></div>", function () { return _this.selectProject(project.id); });
                     });
                     break;
+                case 'selectExchange':
+                    var selectExchangeArgs = args;
+                    selectExchangeArgs.possibleExchanges.forEach(function (possibleExchange, index) {
+                        return _this.addActionButton("selectExchange" + index + "-button", formatTextIcons("[resource" + possibleExchange.from + "] &#x21E8; [resource" + possibleExchange.to + "]"), function () { return _this.selectExchange(possibleExchange); });
+                    });
+                    this.addActionButton('skipExchange-button', _('Skip'), function () { return _this.skipExchange(); }, null, null, 'red');
+                    break;
                 case 'chooseProject':
                     this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects(_this.table.getSelectedProjectsIds()); });
                     this.addActionButton('skipProjects-button', _('Skip'), function () { return _this.selectProjects([]); }, null, null, 'red');
@@ -759,6 +766,18 @@ var Nicodemus = /** @class */ (function () {
         this.takeAction('selectProject', {
             id: id
         });
+    };
+    Nicodemus.prototype.selectExchange = function (exchange) {
+        if (!this.checkAction('selectExchange')) {
+            return;
+        }
+        this.takeAction('selectExchange', exchange);
+    };
+    Nicodemus.prototype.skipExchange = function () {
+        if (!this.checkAction('skipExchange')) {
+            return;
+        }
+        this.takeAction('skipExchange');
     };
     Nicodemus.prototype.takeAction = function (action, data) {
         data = data || {};

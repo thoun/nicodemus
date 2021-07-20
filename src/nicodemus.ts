@@ -181,6 +181,14 @@ class Nicodemus implements NicodemusGame {
                     );
                     break;
 
+                case 'selectExchange':
+                    const selectExchangeArgs = args as SelectExchangeArgs;
+                    selectExchangeArgs.possibleExchanges.forEach((possibleExchange, index) => 
+                        (this as any).addActionButton(`selectExchange${index}-button`, formatTextIcons(`[resource${possibleExchange.from}] &#x21E8; [resource${possibleExchange.to}]`), () => this.selectExchange(possibleExchange))
+                    );
+                    (this as any).addActionButton('skipExchange-button', _('Skip'), () => this.skipExchange(), null, null, 'red');
+                    break;
+
                 case 'chooseProject':
                     (this as any).addActionButton('selectProjects-button', _('Complete projects'), () => this.selectProjects(this.table.getSelectedProjectsIds()));
                     (this as any).addActionButton('skipProjects-button', _('Skip'), () => this.selectProjects([]), null, null, 'red');
@@ -384,6 +392,22 @@ class Nicodemus implements NicodemusGame {
         this.takeAction('selectProject', {
             id
         });
+    }
+
+    public selectExchange(exchange: Exchange) {
+        if(!(this as any).checkAction('selectExchange')) {
+            return;
+        }
+
+        this.takeAction('selectExchange', exchange);
+    }
+
+    public skipExchange() {
+        if(!(this as any).checkAction('skipExchange')) {
+            return;
+        }
+
+        this.takeAction('skipExchange');
     }
 
     public takeAction(action: string, data?: any) {
