@@ -8,8 +8,7 @@ trait EffectTrait {
         if ($machine->type == 2) {
             switch ($machine->subType) {
                 case 1: return intval($this->machines->countCardInLocation('hand', $playerId)) >= 1;
-                case 2: return $this->countMachinesOnTable() >= 2;
-                case 3: return $this->countMachinesOnTable() >= 2;
+                case 2: case 3: case 5: return $this->countMachinesOnTable() >= 2;
                 case 4: 
                     for ($i=0; $i<=3; $i++) {
                         if (count($this->getResources($i, $playerId)) > 0) {
@@ -17,7 +16,6 @@ trait EffectTrait {
                         }
                     }
                     return false;
-                case 5: return $this->countMachinesOnTable() >= 2;
             }
         } else if ($machine->type == 4 && $machine->subType == 2) {
             return $this->countMachinesOnTable() >= 2;
@@ -118,15 +116,48 @@ trait EffectTrait {
         return null;
     }
 
+    function discardPreviousMachineForResources(object $context, int $playerId) {
+        $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation(
+            $playerId == 0 ? 'table' : 'hand', 
+            $playerId == 0 ? null : $playerId, 
+            'location_arg'
+        ));
+        if (count($machines) < 2) {
+            throw new Error("No previous machine");
+        }
+        if ($context->selectedCardId == null && count($machines) == ($playerId == 0 ? 2 : 1)) {
+            $context->selectedCardId = $machine[0];
+        } 
+        if ($context->selectedCardId != null) {
+            if (count($context->selectedResources) > 0) {
+                $discardedMachine = $machines[count($machines) - 2];
+                $this->addResourcesFromCombination($playerId, $context->selectedResources);
+                $this->machines->moveCard($discardedMachine->id, 'discard');
+                self::notifyAllPlayers('discardTableMachines', '', [
+                    'machines' => [$discardedMachine],
+                ]);
+                return null;
+            } else {
+                return "selectResource";
+            }
+        } else {
+            return 'selectMachine';
+        }
+    }
+
     function applyTransformationEffect(int $playerId, object $machine, object $context) {
         if ($machine->subType < 4) {
             return "selectMachine";
         }
 
         switch ($machine->subType) {
-            case 1: break;
-            case 2: break;
-            case 3: break;
+            case 1: 
+                return $this->discardPreviousMachineForResources($context, $playerId);
+            case 2: 
+                return $this->discardPreviousMachineForResources($context, 0);
+            case 3: 
+                $this->addResource($playerId, 1, 0);
+                return $this->discardPreviousMachineForResources($context, 0);                
             case 4: 
                 if ($context->exchanges < 3) {
                     return "selectExchange";
@@ -143,12 +174,12 @@ trait EffectTrait {
                         self::notifyAllPlayers('discardTableMachines', '', [
                             'machines' => [$discardedMachine],
                         ]);
-
+                        return null;
                     } else {
                         return "selectResource";
                     }
                 } else {
-                    // TOCHECK no effect ?
+                    throw new Error("No previous machine");
                 }
                 break;
         }
