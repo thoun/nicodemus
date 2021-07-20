@@ -63,12 +63,12 @@ $this->PROJECTS = [
   23 => new ProjectCard(1, null, 3),
 
   // resources
-  31 => new ProjectCard(2, null, null, 1, 1, 0, 0),
-  32 => new ProjectCard(2, null, null, 1, 0, 1, 0),
-  33 => new ProjectCard(2, null, null, 1, 0, 0, 1),
-  34 => new ProjectCard(2, null, null, 2, 0, 0, 0),
-  35 => new ProjectCard(2, null, null, 0, 2, 0, 0),
-  36 => new ProjectCard(2, null, null, 0, 0, 2, 0),
-  37 => new ProjectCard(3, null, null, 0, 0, 0, 2),
-  38 => new ProjectCard(3, null, null, 0, 1, 1, 1),
+  31 => new ProjectCard(2, null, null, [0 => 1, 1 => 1]),
+  32 => new ProjectCard(2, null, null, [0 => 1, 2 => 1]),
+  33 => new ProjectCard(2, null, null, [0 => 1, 3 => 1]),
+  34 => new ProjectCard(2, null, null, [0 => 2]),
+  35 => new ProjectCard(2, null, null, [1 => 2]),
+  36 => new ProjectCard(2, null, null, [2 => 2]),
+  37 => new ProjectCard(3, null, null, [3 => 2]),
+  38 => new ProjectCard(3, null, null, [1 => 1, 2 => 1, 3 => 1]),
 ];
