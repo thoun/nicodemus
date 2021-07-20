@@ -26,6 +26,7 @@ require_once('modules/php/states.php');
 require_once('modules/php/args.php');
 require_once('modules/php/effects.php');
 require_once('modules/php/projects.php');
+require_once('modules/php/debug-util.php');
 
 class Nicodemus extends Table {
     use UtilTrait;
@@ -34,6 +35,7 @@ class Nicodemus extends Table {
     use ArgsTrait;
     use EffectTrait;
     use ProjectTrait;
+    use DebugUtilTrait;
 
 	function __construct() {
         // Your global variables labels:
@@ -111,6 +113,9 @@ class Nicodemus extends Table {
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
+
+        // TODO TEMP card to test
+        $this->debugSetup();
 
         /************ End of the game initialization *****/
     }

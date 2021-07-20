@@ -220,7 +220,7 @@ trait ActionTrait {
 
     public function skipExchange() {
         self::checkAction('skipExchange'); 
-        
+
         $this->gamestate->nextState('refillHand');
     }
 }

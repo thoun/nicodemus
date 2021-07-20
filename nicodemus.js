@@ -276,7 +276,7 @@ var Table = /** @class */ (function () {
     Table.prototype.onMachineSelectionChanged = function (items) {
         if (items.length == 1) {
             var card = items[0];
-            this.game.repairMachine(card.id);
+            this.game.machineClick(card.id, 'table');
         }
     };
     Table.prototype.setProjectSelectable = function (selectable) {
@@ -407,7 +407,7 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.getPlaceOnCard = function (placed, type) {
         var _this = this;
         var xMaxShift = type ? 28 : 148;
-        var yMaxShift = type ? 66 : 28;
+        var yMaxShift = type ? 82 : 32;
         var newPlace = {
             x: Math.random() * xMaxShift + 16,
             y: Math.random() * yMaxShift + 16,
@@ -478,6 +478,7 @@ var Nicodemus = /** @class */ (function () {
         this.crystalCounters = [];
         this.playersTables = [];
         this.zoom = 1;
+        this.clickAction = 'play';
         /*const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -520,11 +521,15 @@ var Nicodemus = /** @class */ (function () {
         log('Entering state: ' + stateName, args.args);
         switch (stateName) {
             case 'chooseAction':
+                this.clickAction = 'play';
                 this.onEnteringStateChooseAction(args.args);
                 break;
             case 'choosePlayAction':
                 this.onEnteringStateChoosePlayAction(args.args);
                 break;
+            case 'selectMachine':
+                this.clickAction = 'select';
+                this.onEnteringStateSelectMachine(args.args);
             case 'chooseProject':
                 if (this.isCurrentPlayerActive()) {
                     this.table.setProjectSelectable(true);
@@ -542,6 +547,13 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.onEnteringStateChoosePlayAction = function (args) {
         dojo.addClass("table-machine-spot-" + args.machine.location_arg + "_item_" + args.machine.id, 'selected');
     };
+    Nicodemus.prototype.onEnteringStateSelectMachine = function (args) {
+        var stocks = this.getMachineStocks();
+        stocks.forEach(function (stock) { return stock.items
+            .filter(function (item) { return !args.selectableMachines.some(function (machine) { return machine.id === Number(item.id); }); })
+            .forEach(function (item) { return dojo.addClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
+        stocks.forEach(function (stock) { return stock.setSelectionMode(1); });
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -554,6 +566,9 @@ var Nicodemus = /** @class */ (function () {
             case 'choosePlayAction':
                 this.onLeavingChoosePlayAction();
                 break;
+            case 'selectMachine':
+                this.clickAction = 'select';
+                this.onLeavingStateSelectMachine();
             case 'chooseProject':
                 this.table.setProjectSelectable(false);
                 break;
@@ -566,6 +581,12 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.onLeavingChoosePlayAction = function () {
         dojo.query('.stockitem').removeClass('selected');
+    };
+    Nicodemus.prototype.onLeavingStateSelectMachine = function () {
+        var stocks = this.getMachineStocks();
+        stocks.forEach(function (stock) { return stock.items
+            .forEach(function (item) { return dojo.removeClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
+        stocks.forEach(function (stock) { return stock.setSelectionMode(0); });
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -648,13 +669,16 @@ var Nicodemus = /** @class */ (function () {
             dojo.addClass('my-hand-label', color);
         }
     };
+    Nicodemus.prototype.getMachineStocks = function () {
+        return __spreadArray(__spreadArray([this.playerMachineHand], this.table.machineStocks.slice(1)), this.playersTables.map(function (pt) { return pt.machineStock; }));
+    };
     Nicodemus.prototype.setHandSelectable = function (selectable) {
         this.playerMachineHand.setSelectionMode(selectable ? 1 : 0);
     };
     Nicodemus.prototype.onPlayerMachineHandSelectionChanged = function (items) {
         if (items.length == 1) {
             var card = items[0];
-            this.playMachine(card.id);
+            this.machineClick(card.id, 'hand');
         }
     };
     Nicodemus.prototype.getPlayerId = function () {
@@ -707,6 +731,19 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.createPlayerTable = function (gamedatas, playerId, side) {
         this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId], side));
     };
+    Nicodemus.prototype.machineClick = function (id, from) {
+        if (this.clickAction === 'select') {
+            this.selectMachine(id);
+        }
+        else if (this.clickAction === 'play') {
+            if (from === 'hand') {
+                this.playMachine(id);
+            }
+            else if (from === 'table') {
+                this.repairMachine(id);
+            }
+        }
+    };
     Nicodemus.prototype.playMachine = function (id) {
         if (!this.checkAction('playMachine')) {
             return;
@@ -757,6 +794,14 @@ var Nicodemus = /** @class */ (function () {
         }
         this.takeAction('selectResource', {
             resourcesTypes: resourcesTypes.join(',')
+        });
+    };
+    Nicodemus.prototype.selectMachine = function (id) {
+        if (!this.checkAction('selectMachine')) {
+            return;
+        }
+        this.takeAction('selectMachine', {
+            id: id
         });
     };
     Nicodemus.prototype.selectProject = function (id) {
@@ -866,7 +911,14 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.notif_handRefill = function (notif) {
         var _this = this;
-        notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id); });
+        var from = undefined;
+        if (notif.args.from === 0) {
+            from = 'machine-deck';
+        }
+        else if (notif.args.from > 0) {
+            from = "player-icon-" + from;
+        }
+        notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id, from); });
     };
     Nicodemus.prototype.notif_addWorkshopProjects = function (notif) {
         this.getPlayerTable(notif.args.playerId).addWorkshopProjects(notif.args.projects);

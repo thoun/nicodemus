@@ -74,6 +74,7 @@
   width: 190px;
   height: 190px;
   box-shadow: 3px 3px 0px 0px #333, 5px 5px 3px black;
+  cursor: default;
 }
 
 #playerstables {
@@ -375,7 +376,6 @@ html {
 .stockitem.disabled {
   filter: contrast(0.6);
   cursor: not-allowed;
-  pointer-events: none;
 }
 
 .cube {

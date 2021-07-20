@@ -72,7 +72,7 @@ class PlayerTable {
 
     private getPlaceOnCard(placed: PlacedTokens[], type: number): Partial<PlacedTokens> {
         const xMaxShift = type ? 28 : 148;
-        const yMaxShift = type ? 66 : 28;
+        const yMaxShift = type ? 82 : 32;
         const newPlace = {
             x: Math.random() * xMaxShift + 16,
             y: Math.random() * yMaxShift + 16,

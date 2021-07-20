@@ -31,6 +31,8 @@ class Nicodemus implements NicodemusGame {
 
     public zoom: number = 1;
 
+    public clickAction: 'play' | 'select' = 'play';
+
     constructor() {    
         /*const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
@@ -85,11 +87,15 @@ class Nicodemus implements NicodemusGame {
 
         switch (stateName) {
             case 'chooseAction':
+                this.clickAction = 'play';
                 this.onEnteringStateChooseAction(args.args as ChooseActionArgs);
                 break;
             case 'choosePlayAction':
                 this.onEnteringStateChoosePlayAction(args.args as ChoosePlayActionArgs);
                 break;
+            case 'selectMachine':
+                this.clickAction = 'select';
+                this.onEnteringStateSelectMachine(args.args as SelectMachineArgs);
             case 'chooseProject':
                 if((this as any).isCurrentPlayerActive()) {
                     this.table.setProjectSelectable(true);
@@ -110,6 +116,15 @@ class Nicodemus implements NicodemusGame {
     private onEnteringStateChoosePlayAction(args: ChoosePlayActionArgs) {
         dojo.addClass(`table-machine-spot-${args.machine.location_arg}_item_${args.machine.id}`, 'selected');
     }
+    
+    private onEnteringStateSelectMachine(args: SelectMachineArgs) {
+        const stocks = this.getMachineStocks();
+        stocks.forEach(stock => stock.items
+            .filter(item => !args.selectableMachines.some(machine => machine.id === Number(item.id)))
+            .forEach(item => dojo.addClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
+        );
+        stocks.forEach(stock => stock.setSelectionMode(1));
+    }
 
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
@@ -124,6 +139,9 @@ class Nicodemus implements NicodemusGame {
             case 'choosePlayAction':
                 this.onLeavingChoosePlayAction();
                 break;
+            case 'selectMachine':
+                this.clickAction = 'select';
+                this.onLeavingStateSelectMachine();
             case 'chooseProject':
                 this.table.setProjectSelectable(false);
                 break;
@@ -138,6 +156,14 @@ class Nicodemus implements NicodemusGame {
 
     onLeavingChoosePlayAction() {
         dojo.query('.stockitem').removeClass('selected');
+    }
+    
+    private onLeavingStateSelectMachine() {
+        const stocks = this.getMachineStocks();
+        stocks.forEach(stock => stock.items
+            .forEach(item => dojo.removeClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
+        );
+        stocks.forEach(stock => stock.setSelectionMode(0));
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -225,6 +251,10 @@ class Nicodemus implements NicodemusGame {
             dojo.addClass('my-hand-label', color);
         }
     }
+    
+    private getMachineStocks() {
+        return [this.playerMachineHand, ...this.table.machineStocks.slice(1), ...this.playersTables.map(pt => pt.machineStock)];
+    }
 
     public setHandSelectable(selectable: boolean) {
         this.playerMachineHand.setSelectionMode(selectable ? 1 : 0);
@@ -233,7 +263,7 @@ class Nicodemus implements NicodemusGame {
     public onPlayerMachineHandSelectionChanged(items: any) {
         if (items.length == 1) {
             const card = items[0];
-            this.playMachine(card.id);
+            this.machineClick(card.id, 'hand');
         }
     }
 
@@ -318,7 +348,19 @@ class Nicodemus implements NicodemusGame {
         this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId], side));
     }
 
-    public playMachine(id: number) {
+    public machineClick(id: number, from: 'hand' | 'table') {
+        if (this.clickAction === 'select') {
+            this.selectMachine(id);
+        } else if (this.clickAction === 'play') {
+            if (from === 'hand') {
+                this.playMachine(id);
+            } else if (from === 'table') {
+                this.repairMachine(id);
+            }
+        }
+    }
+
+    private playMachine(id: number) {
         if(!(this as any).checkAction('playMachine')) {
             return;
         }
@@ -328,7 +370,7 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
-    public repairMachine(id: number) {
+    private repairMachine(id: number) {
         if(!(this as any).checkAction('repairMachine')) {
             return;
         }
@@ -364,7 +406,7 @@ class Nicodemus implements NicodemusGame {
         this.takeAction('applyEffect');
     }
 
-    public selectProjects(ids: number[]) {
+    private selectProjects(ids: number[]) {
         if(!(this as any).checkAction('selectProjects')) {
             return;
         }
@@ -381,6 +423,16 @@ class Nicodemus implements NicodemusGame {
 
         this.takeAction('selectResource', { 
             resourcesTypes: resourcesTypes.join(',')
+        });
+    }
+
+    public selectMachine(id: number) {
+        if(!(this as any).checkAction('selectMachine')) {
+            return;
+        }
+
+        this.takeAction('selectMachine', {
+            id
         });
     }
 
@@ -529,7 +581,13 @@ class Nicodemus implements NicodemusGame {
     }
 
     notif_handRefill(notif: Notif<NotifHandRefillArgs>) {
-        notif.args.machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id));
+        let from = undefined;
+        if (notif.args.from === 0) {
+            from = 'machine-deck';
+        } else if (notif.args.from > 0) {
+            from = `player-icon-${from}`;
+        }
+        notif.args.machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id, from));
     }
 
     notif_addWorkshopProjects(notif: Notif<NotifAddWorkshopProjectsArgs>) {

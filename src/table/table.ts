@@ -97,7 +97,7 @@ class Table {
     public onMachineSelectionChanged(items: any) {
         if (items.length == 1) {
             const card = items[0];
-            this.game.repairMachine(card.id);
+            this.game.machineClick(card.id, 'table');
         }
     }
 

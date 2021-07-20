@@ -61,7 +61,7 @@ interface NicodemusGamedatas {
 
 interface NicodemusGame extends Game {
     getPlayerId(): number;
-    repairMachine(id: number): void;
+    machineClick(id: number, from: 'hand' | 'table'): void;
 }
 
 interface ChooseActionArgs {
@@ -75,6 +75,10 @@ interface ChoosePlayActionArgs {
 
 interface ChooseProjectArgs {
     completeProjects: Project[];
+}
+
+interface SelectMachineArgs {
+    selectableMachines: Machine[];
 }
 
 interface SelectResourceArgs {
@@ -126,6 +130,7 @@ interface NotifResourcesArgs {
 
 interface NotifHandRefillArgs {
     machines: Machine[];
+    from: number;
 }
 
 interface NotifDiscardMachinesArgs {
