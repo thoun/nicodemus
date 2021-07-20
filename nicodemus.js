@@ -594,6 +594,9 @@ var Nicodemus = /** @class */ (function () {
                         }
                     }
                     this.addActionButton('applyEffect-button', _('Apply effect') + (" <div class=\"effect effect" + MACHINES_IDS.indexOf(getUniqueId(choosePlayActionArgs_1.machine)) + "\"></div>"), function () { return _this.applyEffect(); });
+                    if (!choosePlayActionArgs_1.canApplyEffect) {
+                        dojo.addClass('applyEffect-button', 'disabled');
+                    }
                     this.addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs_1.machine)));
                     break;
                 case 'selectResource':

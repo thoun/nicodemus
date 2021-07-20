@@ -34,11 +34,14 @@ trait ArgsTrait {
     }
 
     function argChoosePlayAction() {
+        $playerId = self::getActivePlayerId();
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+        $canApplyEffect = $this->canApplyEffect($playerId, $machine);
     
         return [
             'machine' => $machine,
+            'canApplyEffect' => $canApplyEffect,
         ];
     }
 
@@ -128,9 +131,15 @@ trait ArgsTrait {
     }
 
     function argSelectExchange() {
-        // TODO
-        return [
+        $playerId = self::getActivePlayerId();
 
+        $context = $this->getApplyEffectContext();
+        
+        $possibleExchanges = $this->getPossibleExchanges($playerId);
+
+        return [
+            'number' => $context->exchanges + 1,
+            'possibleExchanges' => $possibleExchanges,
         ];
     }
     

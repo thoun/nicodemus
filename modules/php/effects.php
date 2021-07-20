@@ -1,6 +1,29 @@
 <?php
 
+require_once(__DIR__.'/objects/exchange.php');
+
 trait EffectTrait {
+
+    function canApplyEffect(int $playerId, object $machine) {
+        if ($machine->type == 2) {
+            switch ($machine->subType) {
+                case 1: return intval($this->machines->countCardInLocation('hand', $playerId)) >= 1;
+                case 2: return $this->countMachinesOnTable() >= 2;
+                case 3: return $this->countMachinesOnTable() >= 2;
+                case 4: 
+                    for ($i=0; $i<=3; $i++) {
+                        if (count($this->getResources($i, $playerId)) > 0) {
+                            return true;
+                        }
+                    }
+                    return false;
+                case 5: return $this->countMachinesOnTable() >= 2;
+            }
+        } else if ($machine->type == 4 && $machine->subType == 2) {
+            return $this->countMachinesOnTable() >= 2;
+        }
+        return true;
+    }
 
     function countProducedResourceOnTable(int $type) {
         $count = 0;
@@ -105,8 +128,11 @@ trait EffectTrait {
             case 2: break;
             case 3: break;
             case 4: 
-                // TODO exchange
-                break;
+                if ($context->exchanges < 3) {
+                    return "selectExchange";
+                } else {
+                    return null;
+                }
             case 5: 
                 $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table', null, 'location_arg'));
                 if (count($machines) > 1) {
@@ -225,5 +251,22 @@ trait EffectTrait {
             case 3: return $this->applyAttackEffect($playerId, $machine, $context);
             case 4: return $this->applySpecialEffect($playerId, $machine, $context);
         }
+    }
+
+    function getPossibleExchanges(int $playerId) {
+        $possibleExchanges = [];
+        for ($i=0; $i<=3; $i++) {
+            if (count($this->getResources($i, $playerId)) > 0) {
+                if ($i == 0) {
+                    $possibleExchanges[] = new Exchange(0, 1);
+                    $possibleExchanges[] = new Exchange(0, 2);
+                    $possibleExchanges[] = new Exchange(0, 3);
+                } else {
+                    $possibleExchanges[] = new Exchange($i, 0);
+                }
+            }
+        }
+        
+        return $possibleExchanges;
     }
 }

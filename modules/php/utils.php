@@ -135,8 +135,8 @@ trait UtilTrait {
         return array_map(function($dbObject) { return $this->getResourceFromDb($dbObject); }, array_values($dbObjects));
     }
 
-    function getAvailableMachineSpot() {
-        return intval($this->machines->countCardInLocation('table')) + 1;
+    function countMachinesOnTable() {
+        return intval($this->machines->countCardInLocation('table'));
     }
 
     function getResources(int $type, int $playerId) { // or 0 for table

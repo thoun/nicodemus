@@ -161,6 +161,9 @@ class Nicodemus implements NicodemusGame {
                         }
                     }
                     (this as any).addActionButton('applyEffect-button', _('Apply effect') + ` <div class="effect effect${MACHINES_IDS.indexOf(getUniqueId(choosePlayActionArgs.machine))}"></div>`, () => this.applyEffect());
+                    if (!choosePlayActionArgs.canApplyEffect) {
+                        dojo.addClass('applyEffect-button', 'disabled');
+                    }
                     (this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
                     break;
 

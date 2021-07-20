@@ -176,14 +176,16 @@ $playerActionsGameStates = [
 
     ST_PLAYER_SELECT_EXCHANGE => [
         "name" => "selectExchange",
-        "description" => clienttranslate('${actplayer} must choose resource(s) to exchange'),
-        "descriptionmyturn" => clienttranslate('${you} must choose resource(s) to exchange'),
+        "description" => clienttranslate('${actplayer} can exchange resource/charcoalium (${number}/3)'),
+        "descriptionmyturn" => clienttranslate('${you} can exchange resource/charcoalium (${number}/3)'),
         "type" => "activeplayer",        
         "args" => "argSelectExchange",
         "possibleactions" => [ 
             "selectExchange",
+            "skipExchange",
         ],
         "transitions" => [
+            "selectExchange" => ST_PLAYER_SELECT_EXCHANGE,
             "refillHand" => ST_REFILL_HAND,
             "zombiePass" => ST_NEXT_PLAYER,
         ]

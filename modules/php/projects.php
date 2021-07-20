@@ -3,6 +3,8 @@
 trait ProjectTrait {
 
     function machinesToCompleteColorProject(object $project, array $playerMachines, object $machine) {
+
+        //$project->colors
         
         // TODO
 
@@ -10,6 +12,8 @@ trait ProjectTrait {
     }
 
     function machinesToCompletePointProject(object $project, array $playerMachines, object $machine) {
+
+        //$project->colors
         
         // TODO
 

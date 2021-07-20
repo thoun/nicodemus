@@ -70,6 +70,7 @@ interface ChooseActionArgs {
 
 interface ChoosePlayActionArgs {
     machine: Machine;
+    canApplyEffect: boolean;
 }
 
 interface ChooseProjectArgs {
@@ -82,6 +83,16 @@ interface SelectResourceArgs {
 
 interface SelectProjectArgs {
     projects: Project[];
+}
+
+interface Exchange {
+    from: number;
+    to: number;
+}
+
+interface SelectExchangeArgs {
+    number: number;
+    possibleExchanges: Exchange[];
 }
 
 interface NotifMachinePlayedArgs {

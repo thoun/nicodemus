@@ -110,7 +110,7 @@
     public function selectResource() {
         self::setAjaxMode();     
 
-        $resourcesTypes = self::getArg( "resourcesTypes", AT_numberlist, true );
+        $resourcesTypes = self::getArg("resourcesTypes", AT_numberlist, true);
         $this->game->selectResource(array_map(function($idStr) { return intval($idStr); }, explode(',', $resourcesTypes)));
 
         self::ajaxResponse();
@@ -119,8 +119,17 @@
     public function selectExchange() {
         self::setAjaxMode();     
 
-        $exchanges = self::getArg( "exchanges", AT_numberlist, true );
-        $this->game->selectExchange(array_map(function($idStr) { return intval($idStr); }, explode(',', $exchanges)));
+        $from = self::getArg("from", AT_posint, true);
+        $to = self::getArg("to", AT_posint, true);
+        $this->game->selectExchange($from, $to);
+
+        self::ajaxResponse();
+    }
+
+    public function skipExchange() {
+        self::setAjaxMode();     
+
+        $this->game->skipExchange();
 
         self::ajaxResponse();
     }

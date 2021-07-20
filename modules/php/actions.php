@@ -21,7 +21,7 @@ trait ActionTrait {
         
         $playerId = intval(self::getActivePlayerId());
 
-        $freeTableSpot = $this->getAvailableMachineSpot();
+        $freeTableSpot = $this->countMachinesOnTable() + 1;
         $this->machines->moveCard($id, 'table', $freeTableSpot);
         self::setGameStateValue(PLAYED_MACHINE, $id);
 
@@ -131,12 +131,17 @@ trait ActionTrait {
 
         $projects = $this->getProjectsFromDb($this->projects->getCards($ids));
 
+        $discardedMachines = [];
+
         foreach ($projects as $project) {
+            //$machinesToCompleteProject = $this->machinesToCompleteProject($project)
+
             $this->incPlayerScore($playerId, $project->points);
 
-            // TODO remove project
-            // TODO remove associated machines
+            //$discardedMachines = array_merge($discardedMachines, $machinesToCompleteProject);
         }
+        // TODO discard $projects
+        // TODO discard $discardedMachines
         // TODO notif
 
         $this->gamestate->nextState('nextPlayer');
@@ -194,19 +199,28 @@ trait ActionTrait {
         $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
     }
 
-    public function selectExchange(array $exchanges) {
+    public function selectExchange(int $from, int $to) {
         self::checkAction('selectExchange'); 
         
         $playerId = self::getActivePlayerId();
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
+        $this->removeResource($playerId, 1, $from);
+        $this->addResource($playerId, 1, $to);
+
         $context = $this->getApplyEffectContext();
-        $context->exchanges = $exchanges;
+        $context->exchanges += 1;
         $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
 
         $transition = $this->applyMachineEffect($playerId, $machine, $context);
 
         $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
+    }
+
+    public function skipExchange() {
+        self::checkAction('skipExchange'); 
+        
+        $this->gamestate->nextState('refillHand');
     }
 }
