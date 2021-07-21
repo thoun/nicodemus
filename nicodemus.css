@@ -116,7 +116,7 @@
 #playerstables .player-table .player-resources {
   display: grid;
   grid-template-columns: repeat(3, 60px);
-  grid-template-rows: 4fr 6fr;
+  grid-template-rows: 80px auto;
   grid-row-gap: 5px;
 }
 #playerstables .player-table .player-resources .top {

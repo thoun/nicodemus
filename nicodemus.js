@@ -210,21 +210,30 @@ var Table = /** @class */ (function () {
             html += "<div id=\"table-project-" + i + "\" class=\"table-project-stock\" style=\"left: " + 181 * (i - 1) + "px\"></div>";
         }
         dojo.place(html, 'table-projects');
+        var _loop_1 = function (i) {
+            this_1.projectStocks[i] = new ebg.stock();
+            this_1.projectStocks[i].setSelectionAppearance('class');
+            this_1.projectStocks[i].selectionClass = 'selected';
+            this_1.projectStocks[i].create(this_1.game, $("table-project-" + i), PROJECT_WIDTH, PROJECT_HEIGHT);
+            this_1.projectStocks[i].setSelectionMode(0);
+            this_1.projectStocks[i].onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
+            dojo.connect(this_1.projectStocks[i], 'onChangeSelection', this_1, function () {
+                _this.projectStocks[i].getSelectedItems()
+                    .filter(function (item) { return document.getElementById("table-project-" + i + "_item_" + item.id).classList.contains('disabled'); })
+                    .forEach(function (item) { return _this.projectStocks[i].unselectItem(item.id); });
+                _this._onProjectSelectionChanged();
+            });
+        };
+        var this_1 = this;
         for (var i = 1; i <= 6; i++) {
-            this.projectStocks[i] = new ebg.stock();
-            this.projectStocks[i].setSelectionAppearance('class');
-            this.projectStocks[i].selectionClass = 'selected';
-            this.projectStocks[i].create(this.game, $("table-project-" + i), PROJECT_WIDTH, PROJECT_HEIGHT);
-            this.projectStocks[i].setSelectionMode(0);
-            this.projectStocks[i].onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
-            dojo.connect(this.projectStocks[i], 'onChangeSelection', this, function () { return _this._onProjectSelectionChanged(); });
+            _loop_1(i);
         }
         setupProjectCards(this.projectStocks);
-        var _loop_1 = function (i) {
+        var _loop_2 = function (i) {
             projects.filter(function (project) { return project.location_arg == i; }).forEach(function (project) { return _this.projectStocks[i].addToStockWithId(getUniqueId(project), '' + project.id); });
         };
         for (var i = 1; i <= 6; i++) {
-            _loop_1(i);
+            _loop_2(i);
         }
         // machines
         html = "<div class=\"machines\">";
@@ -236,13 +245,13 @@ var Table = /** @class */ (function () {
         }
         html += "<div id=\"machine-deck\" class=\"stockitem\"></div></div>";
         dojo.place(html, 'table');
-        var _loop_2 = function (i) {
-            this_1.machineStocks[i] = new ebg.stock();
-            this_1.machineStocks[i].setSelectionAppearance('class');
-            this_1.machineStocks[i].selectionClass = 'selected';
-            this_1.machineStocks[i].create(this_1.game, $("table-machine-spot-" + i), MACHINE_WIDTH, MACHINE_HEIGHT);
-            this_1.machineStocks[i].setSelectionMode(0);
-            this_1.machineStocks[i].onItemCreate = function (cardDiv, type) {
+        var _loop_3 = function (i) {
+            this_2.machineStocks[i] = new ebg.stock();
+            this_2.machineStocks[i].setSelectionAppearance('class');
+            this_2.machineStocks[i].selectionClass = 'selected';
+            this_2.machineStocks[i].create(this_2.game, $("table-machine-spot-" + i), MACHINE_WIDTH, MACHINE_HEIGHT);
+            this_2.machineStocks[i].setSelectionMode(0);
+            this_2.machineStocks[i].onItemCreate = function (cardDiv, type) {
                 var _a;
                 setupMachineCard(game, cardDiv, type);
                 var id = Number(cardDiv.id.split('_')[2]);
@@ -252,18 +261,18 @@ var Table = /** @class */ (function () {
                     _this.addResources(0, machine.resources);
                 }
             };
-            dojo.connect(this_1.machineStocks[i], 'onChangeSelection', this_1, function () { return _this.onMachineSelectionChanged(_this.machineStocks[i].getSelectedItems()); });
+            dojo.connect(this_2.machineStocks[i], 'onChangeSelection', this_2, function () { return _this.onMachineSelectionChanged(_this.machineStocks[i].getSelectedItems()); });
         };
-        var this_1 = this;
+        var this_2 = this;
         for (var i = 1; i <= 10; i++) {
-            _loop_2(i);
+            _loop_3(i);
         }
         setupMachineCards(this.machineStocks);
-        var _loop_3 = function (i) {
+        var _loop_4 = function (i) {
             machines.filter(function (machine) { return machine.location_arg == i; }).forEach(function (machine) { return _this.machineStocks[i].addToStockWithId(getUniqueId(machine), '' + machine.id); });
         };
         for (var i = 1; i <= 10; i++) {
-            _loop_3(i);
+            _loop_4(i);
         }
         // resources
         for (var i = 0; i <= 3; i++) {
@@ -486,6 +495,12 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.setProjectStockWidth = function () {
         document.getElementById("player-table-" + this.playerId + "-projects").style.width = this.projectStock.items.length ? PROJECT_WIDTH + 10 + "px" : undefined;
     };
+    PlayerTable.prototype.setProjectSelectable = function (selectable) {
+        this.projectStock.setSelectionMode(selectable ? 2 : 0);
+        if (!selectable) {
+            this.projectStock.unselectAll();
+        }
+    };
     return PlayerTable;
 }());
 var __spreadArray = (this && this.__spreadArray) || function (to, from) {
@@ -561,10 +576,9 @@ var Nicodemus = /** @class */ (function () {
             case 'selectMachine':
                 this.clickAction = 'select';
                 this.onEnteringStateSelectMachine(args.args);
+                break;
             case 'chooseProject':
-                if (this.isCurrentPlayerActive()) {
-                    this.table.setProjectSelectable(true);
-                }
+                this.onEnteringStateChooseProject(args.args);
                 break;
         }
     };
@@ -586,6 +600,16 @@ var Nicodemus = /** @class */ (function () {
             .filter(function (item) { return !args.selectableMachines.some(function (machine) { return machine.id === Number(item.id); }); })
             .forEach(function (item) { return dojo.addClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
         stocks.forEach(function (stock) { return stock.setSelectionMode(1); });
+    };
+    Nicodemus.prototype.onEnteringStateChooseProject = function (args) {
+        if (this.isCurrentPlayerActive()) {
+            this.setHandSelectable(true);
+            this.getPlayerTable(this.getPlayerId()).setProjectSelectable(true);
+            this.table.setProjectSelectable(true);
+            this.getProjectStocks().forEach(function (stock) { return stock.items
+                .filter(function (item) { return !args.completeProjects.some(function (project) { return project.id === Number(item.id); }); })
+                .forEach(function (item) { return dojo.addClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
+        }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
@@ -621,6 +645,12 @@ var Nicodemus = /** @class */ (function () {
             .forEach(function (item) { return dojo.removeClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
         stocks.forEach(function (stock) { return stock.setSelectionMode(0); });
     };
+    Nicodemus.prototype.onLeavingChooseProject = function () {
+        var _a;
+        this.setHandSelectable(false);
+        (_a = this.getPlayerTable(this.getPlayerId())) === null || _a === void 0 ? void 0 : _a.setProjectSelectable(false);
+        dojo.query('.stockitem').removeClass('disabled');
+    };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
@@ -632,12 +662,12 @@ var Nicodemus = /** @class */ (function () {
                     var choosePlayActionArgs_1 = args;
                     this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.machine.points + " [resource0])"), function () { return _this.getCharcoalium(); });
                     if (choosePlayActionArgs_1.machine.produce == 9) {
-                        var _loop_4 = function (i) {
-                            this_2.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
+                        var _loop_5 = function (i) {
+                            this_3.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
                         };
-                        var this_2 = this;
+                        var this_3 = this;
                         for (var i = 1; i <= 3; i++) {
-                            _loop_4(i);
+                            _loop_5(i);
                         }
                     }
                     else {

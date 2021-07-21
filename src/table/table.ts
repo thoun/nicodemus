@@ -36,7 +36,14 @@ class Table {
             this.projectStocks[i].create(this.game, $(`table-project-${i}`), PROJECT_WIDTH, PROJECT_HEIGHT);
             this.projectStocks[i].setSelectionMode(0);
             this.projectStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
-            dojo.connect(this.projectStocks[i], 'onChangeSelection', this, () => this._onProjectSelectionChanged());
+            dojo.connect(this.projectStocks[i], 'onChangeSelection', this, () => {
+                
+                this.projectStocks[i].getSelectedItems()
+                    .filter(item => document.getElementById(`table-project-${i}_item_${item.id}`).classList.contains('disabled'))
+                    .forEach(item => this.projectStocks[i].unselectItem(item.id));                
+
+                this._onProjectSelectionChanged()
+            });
         }
 
         setupProjectCards(this.projectStocks);

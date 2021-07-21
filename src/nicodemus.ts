@@ -96,10 +96,9 @@ class Nicodemus implements NicodemusGame {
             case 'selectMachine':
                 this.clickAction = 'select';
                 this.onEnteringStateSelectMachine(args.args as SelectMachineArgs);
+                break;
             case 'chooseProject':
-                if((this as any).isCurrentPlayerActive()) {
-                    this.table.setProjectSelectable(true);
-                }
+                this.onEnteringStateChooseProject(args.args as ChooseProjectArgs);
                 break;
         }
     }
@@ -127,6 +126,19 @@ class Nicodemus implements NicodemusGame {
             .forEach(item => dojo.addClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
         );
         stocks.forEach(stock => stock.setSelectionMode(1));
+    }
+
+    private onEnteringStateChooseProject(args: ChooseProjectArgs) {
+        if((this as any).isCurrentPlayerActive()) {
+            this.setHandSelectable(true);
+            this.getPlayerTable(this.getPlayerId()).setProjectSelectable(true);
+            this.table.setProjectSelectable(true);
+
+            this.getProjectStocks().forEach(stock => stock.items
+                .filter(item => !args.completeProjects.some(project => project.id === Number(item.id)))
+                .forEach(item => dojo.addClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
+            );
+        }
     }
 
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -167,6 +179,12 @@ class Nicodemus implements NicodemusGame {
             .forEach(item => dojo.removeClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
         );
         stocks.forEach(stock => stock.setSelectionMode(0));
+    }
+
+    onLeavingChooseProject() {
+        this.setHandSelectable(false);
+        this.getPlayerTable(this.getPlayerId())?.setProjectSelectable(false);
+        dojo.query('.stockitem').removeClass('disabled');
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the

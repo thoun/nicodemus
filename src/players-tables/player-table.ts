@@ -135,4 +135,10 @@ class PlayerTable {
     private setProjectStockWidth() {
         document.getElementById(`player-table-${this.playerId}-projects`).style.width = this.projectStock.items.length ? `${PROJECT_WIDTH + 10}px` : undefined;
     }
+    public setProjectSelectable(selectable: boolean) {
+        this.projectStock.setSelectionMode(selectable ? 2 : 0);
+        if (!selectable) {
+            this.projectStock.unselectAll();
+        }
+    }
 }
