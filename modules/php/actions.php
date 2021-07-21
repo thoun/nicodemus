@@ -84,6 +84,7 @@ trait ActionTrait {
             'machine' => $machine,
             'machine_name' => $this->getColorName($machine->type),
             'machineSpot' => $machineSpot,
+            'preserve' => ['machine'],
         ]);
         
         $this->removeEmptySpaceFromTable();

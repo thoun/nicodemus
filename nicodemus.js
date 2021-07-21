@@ -1013,10 +1013,13 @@ var Nicodemus = /** @class */ (function () {
                     args.machine_name = "<strong style=\"color: " + this.getMachineColor(args.machine.type) + "\">" + args.machine_name + "</strong>";
                 }
                 ['resource', 'resourceFrom', 'resourceTo'].forEach(function (argNameStart) {
-                    if (typeof args[argNameStart + "Name"] == 'string' && args[argNameStart + "Name"][0] != '<') {
+                    if (typeof args[argNameStart + "Name"] == 'string' && typeof args[argNameStart + "Type"] == 'number' && args[argNameStart + "Name"][0] != '<') {
                         args[argNameStart + "Name"] = formatTextIcons("[resource" + args[argNameStart + "Type"] + "]");
                     }
                 });
+                if (args.machine && args.playerId && log.indexOf('machine-log') === -1) {
+                    log += "<div class=\"machine-log machine" + args.machine.type + "\"></div>";
+                }
             }
         }
         catch (e) {

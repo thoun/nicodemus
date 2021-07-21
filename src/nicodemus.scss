@@ -187,6 +187,24 @@ html {
   }
 }
 
+.log {
+
+  .machine-log {
+    width: $machine-width; 
+    height: $machine-height;
+    background-image: url('img/cards.jpg');
+    
+    border-radius: 10px;
+    margin: 5px;
+
+    @for $i from 0 through 16 {
+      &.machine#{$i} {
+          background-position: ($i * 100% / 15) 0%;
+      }
+    }
+  }
+}
+
 .project {
   width: $project-width; 
   height: $project-height;
