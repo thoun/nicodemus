@@ -232,7 +232,6 @@ trait EffectTrait {
     }
 
     function applyAttackEffect(int $playerId, object $machine, object $context) {
-        // TODO log applied effect of machines
         $opponentId = $this->getOpponentId($playerId);
 
         switch ($machine->subType) {
@@ -244,6 +243,13 @@ trait EffectTrait {
                 $this->stealCard($playerId, $opponentId);
                 break;
 
+                self::notifyAllPlayers('applyAttackEffectNotif', clienttranslate('${player_name} uses ${machine_type} effect to steal 1 ${resourceName} and 1 machine with ${machineImage}'), [
+                    'playerId' => $playerId,
+                    'player_name' => self::getActivePlayerName(),
+                    'machine_type' => $this->getColorName($machine->type),
+                    'machineImage' => $this->getUniqueId($machine),
+                ]);
+
             case 2: 
                 if (count($context->selectedResources) == 1) {
                     $resourceType = $context->selectedResources[0];
@@ -251,6 +257,15 @@ trait EffectTrait {
 
                     // steal a card
                     $this->stealCard($playerId, $opponentId);
+
+                    self::notifyAllPlayers('applyAttackEffectNotif', clienttranslate('${player_name} uses ${machine_type} effect to steal 1 ${resourceName} and 1 machine with ${machineImage}'), [
+                        'playerId' => $playerId,
+                        'player_name' => self::getActivePlayerName(),
+                        'machine_type' => $this->getColorName($machine->type),
+                        'machineImage' => $this->getUniqueId($machine),
+                        'resourceName' => $this->getResourceName($resourceType),
+                        'resourceType' => $resourceType,
+                    ]);
                 } else {
                     return "selectResource";
                 }
@@ -275,6 +290,15 @@ trait EffectTrait {
                 // opponent discard 2 charcoaliums
                 $this->removeResource($opponentId, 2, 0); 
 
+                self::notifyAllPlayers('applyAttackEffectNotif', clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard 2 ${resourceName} and machines with ${machineImage}'), [
+                    'playerId' => $playerId,
+                    'player_name' => self::getActivePlayerName(),
+                    'machine_type' => $this->getColorName($machine->type),
+                    'machineImage' => $this->getUniqueId($machine),
+                    'resourceName' => $this->getResourceName(0),
+                    'resourceType' => 0,
+                ]);
+
                 break;
 
             case 4:    
@@ -287,6 +311,21 @@ trait EffectTrait {
                             $this->removeResource($opponentId, 1, $selectedResource);
                         }
                     }
+
+                    $message = count($context->selectedResources) >= 2 ?
+                        clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard ${resource1Name} and {resource2Name} with ${machineImage}') :
+                        clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard ${resource1Name} with ${machineImage}');
+
+                    self::notifyAllPlayers('applyAttackEffectNotif', $message, [
+                        'playerId' => $playerId,
+                        'player_name' => self::getActivePlayerName(),
+                        'machine_type' => $this->getColorName($machine->type),
+                        'machineImage' => $this->getUniqueId($machine),                        
+                        'resource1Name' => $this->getResourceName($context->selectedResources[0]),
+                        'resource1Type' => $context->selectedResources[0],                        
+                        'resource2Name' => count($context->selectedResources) >= 2 ? $this->getResourceName($context->selectedResources[1]) : null,
+                        'resource2Type' => count($context->selectedResources) >= 2 ? $context->selectedResources[1] : null,
+                    ]);
                 } else {
                     return "selectResource";
                 }
@@ -301,11 +340,15 @@ trait EffectTrait {
                 if ($context->selectedCardId !== null) {
                     $this->projects->moveCard($context->selectedCardId, 'player', $playerId);
                     $this->projects->shuffle('deck');
-                    self::notifyAllPlayers('addWorkshopProjects', '', [
+
+                    $project = $this->getProjectFromDb($this->projects->getCard($context->selectedCardId));
+                    self::notifyAllPlayers('addWorkshopProjects', clienttranslate('${player_name} uses ${machine_type} effect to copy ${projectImage}'), [
                         'playerId' => $playerId,
-                        'projects' => [$this->getProjectFromDb($this->projects->getCard($context->selectedCardId))],
+                        'projects' => [$project],
+                        'machine_type' => $this->getColorName($machine->type),
+                        'projectImage' => $this->getUniqueId($project),
                     ]);
-                    // TODO log applied effect of machines
+
                 } else {
                     return "selectProject";
                 }
@@ -314,8 +357,13 @@ trait EffectTrait {
                 if ($context->mimicCardId !== null) {
                     $copiedMachine = $this->getMachineFromDb($this->machines->getCard($context->mimicCardId));
 
+                    self::notifyAllPlayers('machineCopied', clienttranslate('${player_name} uses ${machine_type} effect to copy ${machineImage}'), [
+                        'playerId' => $playerId,
+                        'player_name' => self::getActivePlayerName(),
+                        'machine_type' => $this->getColorName($machine->type),
+                        'machineImage' => $this->getUniqueId($copiedMachine),
+                    ]);
                     
-                    // TODO log applied effect of machines
                     return $this->applyMachineEffect($playerId, $copiedMachine, $context);
                 } else {
                     return "selectMachine";

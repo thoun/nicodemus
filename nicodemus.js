@@ -1061,16 +1061,19 @@ var Nicodemus = /** @class */ (function () {
         try {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
-                if (typeof args.machine_name == 'string' && args.machine_name[0] != '<') {
-                    args.machine_name = "<strong style=\"color: " + this.getMachineColor(args.machine.type) + "\">" + args.machine_name + "</strong>";
+                if (typeof args.machine_type == 'string' && args.machine_type[0] != '<') {
+                    args.machine_type = "<strong style=\"color: " + this.getMachineColor(args.machine.type) + "\">" + args.machine_type + "</strong>";
                 }
                 ['resource', 'resourceFrom', 'resourceTo'].forEach(function (argNameStart) {
                     if (typeof args[argNameStart + "Name"] == 'string' && typeof args[argNameStart + "Type"] == 'number' && args[argNameStart + "Name"][0] != '<') {
                         args[argNameStart + "Name"] = formatTextIcons("[resource" + args[argNameStart + "Type"] + "]");
                     }
                 });
-                if (args.machine && args.playerId && log.indexOf('machine-log') === -1) {
-                    log += "<div class=\"machine-log machine" + args.machine.type + "\"></div>";
+                if (typeof args.machineImage == 'number') {
+                    args.machineImage = "<div class=\"machine machine" + MACHINES_IDS.indexOf(args.machineImage) + "\"></div>";
+                }
+                if (typeof args.projectImage == 'number') {
+                    args.projectImage = "<div class=\"project project" + PROJECTS_IDS.indexOf(args.projectImage) + "\"></div>";
                 }
             }
         }

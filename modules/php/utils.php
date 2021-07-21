@@ -10,6 +10,10 @@ trait UtilTrait {
     //////////// Utility functions
     ////////////
 
+    function getUniqueId(object $card) {
+        return $card->type * 10 + $card->subType;
+    }
+
     function array_some(array $array, callable $fn) {
         foreach ($array as $value) {
             if($fn($value)) {

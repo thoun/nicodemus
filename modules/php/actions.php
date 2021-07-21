@@ -27,11 +27,12 @@ trait ActionTrait {
 
         $machine = $this->getMachineFromDb($this->machines->getCard($id));
 
-        self::notifyAllPlayers('machinePlayed', clienttranslate('${player_name} plays ${machine_name} machine'), [
+        self::notifyAllPlayers('machinePlayed', clienttranslate('${player_name} plays ${machine_type} machine ${machineImage}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'machine' => $machine,
-            'machine_name' => $this->getColorName($machine->type),
+            'machine_type' => $this->getColorName($machine->type),
+            'machineImage' => $this->getUniqueId($machine),
         ]);
 
         $this->gamestate->nextState('choosePlayAction');
@@ -78,13 +79,13 @@ trait ActionTrait {
         $machineResources = $this->getResourcesFromDb($this->resources->getCardsInLocation('machine', $id));
         $this->moveResources($playerId, 0, $machineResources);
 
-        self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${machine_name} machine'), [
+        self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${machine_type} machine ${machineImage}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'machine' => $machine,
-            'machine_name' => $this->getColorName($machine->type),
+            'machine_type' => $this->getColorName($machine->type),
             'machineSpot' => $machineSpot,
-            'preserve' => ['machine'],
+            'machineImage' => $this->getUniqueId($machine),
         ]);
         
         $this->removeEmptySpaceFromTable();
