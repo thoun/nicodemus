@@ -242,7 +242,16 @@ var Table = /** @class */ (function () {
             this_1.machineStocks[i].selectionClass = 'selected';
             this_1.machineStocks[i].create(this_1.game, $("table-machine-spot-" + i), MACHINE_WIDTH, MACHINE_HEIGHT);
             this_1.machineStocks[i].setSelectionMode(0);
-            this_1.machineStocks[i].onItemCreate = function (cardDiv, type) { return setupMachineCard(game, cardDiv, type); };
+            this_1.machineStocks[i].onItemCreate = function (cardDiv, type) {
+                var _a;
+                setupMachineCard(game, cardDiv, type);
+                var id = Number(cardDiv.id.split('_')[2]);
+                var machine = machines.find(function (m) { return m.id == id; });
+                console.log('init machine card', machines, id, machine);
+                if ((_a = machine === null || machine === void 0 ? void 0 : machine.resources) === null || _a === void 0 ? void 0 : _a.length) {
+                    _this.addResources(0, machine.resources);
+                }
+            };
             dojo.connect(this_1.machineStocks[i], 'onChangeSelection', this_1, function () { return _this.onMachineSelectionChanged(_this.machineStocks[i].getSelectedItems()); });
         };
         var this_1 = this;
@@ -321,7 +330,7 @@ var Table = /** @class */ (function () {
     Table.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
     };
-    Table.prototype.getPlaceOnCard = function (placed) {
+    Table.prototype.getPlaceOnTable = function (placed) {
         var _this = this;
         var newPlace = {
             x: Math.random() * 228 + 16,
@@ -335,9 +344,21 @@ var Table = /** @class */ (function () {
         }
         return newPlace;
     };
+    Table.prototype.getPlaceOnMachine = function (placed) {
+        return {
+            x: 166,
+            y: 166 - (32 * placed.length)
+        };
+    };
     Table.prototype.addResources = function (type, resources) {
         var _this = this;
+        var toMachine = type == 0 && resources.length && resources[0].location === 'machine';
         var divId = "table-resources" + type;
+        if (toMachine) {
+            var machineId_1 = resources[0].location_arg;
+            var stock = this.machineStocks.find(function (stock) { return stock === null || stock === void 0 ? void 0 : stock.items.find(function (item) { return Number(item.id) == machineId_1; }); });
+            divId = stock.container_div.id + "_item_" + machineId_1;
+        }
         var div = document.getElementById(divId);
         if (!div) {
             return;
@@ -345,7 +366,7 @@ var Table = /** @class */ (function () {
         var placed = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
         // add tokens
         resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
-            var newPlace = _this.getPlaceOnCard(placed);
+            var newPlace = toMachine ? _this.getPlaceOnMachine(placed) : _this.getPlaceOnTable(placed);
             placed.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
             var resourceDivId = "resource" + type + "-" + resource.id;
             var resourceDiv = document.getElementById("resource" + type + "-" + resource.id);
@@ -353,7 +374,12 @@ var Table = /** @class */ (function () {
                 var originDiv = resourceDiv.parentElement;
                 var originPlaced = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
                 originDiv.dataset.placed = JSON.stringify(originPlaced.filter(function (place) { return place.resourceId != resource.id; }));
-                slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
+                if (originDiv.classList.contains('to_be_destroyed')) {
+                    div.appendChild(resourceDiv);
+                }
+                else {
+                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
+                }
             }
             else {
                 var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + (newPlace.x - 16) + "px; top: " + (newPlace.y - 16) + "px;\"\n                ></div>";
@@ -438,7 +464,12 @@ var PlayerTable = /** @class */ (function () {
                 var originDiv = resourceDiv.parentElement;
                 var originPlaced = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
                 originDiv.dataset.placed = JSON.stringify(originPlaced.filter(function (place) { return place.resourceId != resource.id; }));
-                slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
+                if (originDiv.classList.contains('to_be_destroyed')) {
+                    div.appendChild(resourceDiv);
+                }
+                else {
+                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
+                }
             }
             else {
                 var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + (newPlace.x - 16) + "px; top: " + (newPlace.y - 16) + "px;\"\n                ></div>";
@@ -885,7 +916,7 @@ var Nicodemus = /** @class */ (function () {
             ['machinePlayed', ANIMATION_MS],
             ['machineRepaired', ANIMATION_MS],
             ['tableMove', ANIMATION_MS],
-            ['handRefill', ANIMATION_MS],
+            ['addMachinesToHand', ANIMATION_MS],
             ['points', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
@@ -910,12 +941,16 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.notif_tableMove = function (notif) {
         var _this = this;
         Object.keys(notif.args.moved).forEach(function (key) {
+            var _a;
             var originalSpot = Number(key);
             var machine = notif.args.moved[key];
             moveToAnotherStock(_this.table.machineStocks[originalSpot], _this.table.machineStocks[machine.location_arg], getUniqueId(machine), '' + machine.id);
+            if ((_a = machine.resources) === null || _a === void 0 ? void 0 : _a.length) {
+                _this.table.addResources(0, machine.resources);
+            }
         });
     };
-    Nicodemus.prototype.notif_handRefill = function (notif) {
+    Nicodemus.prototype.notif_addMachinesToHand = function (notif) {
         var _this = this;
         var from = undefined;
         if (notif.args.from === 0) {
@@ -979,7 +1014,7 @@ var Nicodemus = /** @class */ (function () {
                 }
                 ['resource', 'resourceFrom', 'resourceTo'].forEach(function (argNameStart) {
                     if (typeof args[argNameStart + "Name"] == 'string' && args[argNameStart + "Name"][0] != '<') {
-                        args[argNameStart + "Name"] = formatTextIcons("[resource" + args[argNameStart + "Type"] + "\"]");
+                        args[argNameStart + "Name"] = formatTextIcons("[resource" + args[argNameStart + "Type"] + "]");
                     }
                 });
             }

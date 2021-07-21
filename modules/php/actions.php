@@ -47,7 +47,6 @@ trait ActionTrait {
         $canSpend = $this->getCanSpend($playerId);
         $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
 
-        $machineSpot = $machine->location_arg;
         $cost = $this->getMachineCost($machine, $tableMachines);
         if (!$this->canPay($canSpend, $cost)) {
             throw new Error('Not enough resources');
@@ -57,7 +56,15 @@ trait ActionTrait {
 
         // TODO handle jokers
 
-        for ($i=0; $i<=3; $i++) {
+        $machineSpot = $machine->location_arg;
+        // place charcoalium on cards
+        if (array_key_exists(0, $costForPlayer)) {
+            for ($i=1; $i<=$costForPlayer[0]; $i++) {
+                $this->removeResource($playerId, 1, 0, $machineSpot + $i);
+            }
+        }
+        // pay other resources
+        for ($i=1; $i<=3; $i++) {
             if (array_key_exists($i, $costForPlayer)) {
                 $this->removeResource($playerId, $costForPlayer[$i], $i);
             }
@@ -67,6 +74,9 @@ trait ActionTrait {
         $this->machines->moveCard($id, 'player', $playerId);
 
         $this->incPlayerScore($playerId, $machine->points);
+
+        $machineResources = $this->getResourcesFromDb($this->resources->getCardsInLocation('machine', $id));
+        $this->moveResources($playerId, 0, $machineResources);
 
         self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${machine_name} machine'), [
             'playerId' => $playerId,

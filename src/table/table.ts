@@ -64,7 +64,16 @@ class Table {
             this.machineStocks[i].selectionClass = 'selected';
             this.machineStocks[i].create(this.game, $(`table-machine-spot-${i}`), MACHINE_WIDTH, MACHINE_HEIGHT);
             this.machineStocks[i].setSelectionMode(0);
-            this.machineStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(game, cardDiv, type);
+            this.machineStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => {
+                setupMachineCard(game, cardDiv, type);
+
+                const id = Number(cardDiv.id.split('_')[2]);
+                const machine = machines.find(m => m.id == id);
+                console.log('init machine card', machines, id, machine);
+                if (machine?.resources?.length) {
+                    this.addResources(0, machine.resources);
+                }
+            }
             dojo.connect(this.machineStocks[i], 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
         }
         setupMachineCards(this.machineStocks);
@@ -148,7 +157,7 @@ class Table {
         return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
     }
 
-    private getPlaceOnCard(placed: PlacedTokens[]): Partial<PlacedTokens> {
+    private getPlaceOnTable(placed: PlacedTokens[]): Partial<PlacedTokens> {
         const newPlace = {
             x: Math.random() * 228 + 16,
             y: Math.random() * 38 + 16,
@@ -163,17 +172,32 @@ class Table {
         return newPlace;
     }
 
+    private getPlaceOnMachine(placed: PlacedTokens[]): Partial<PlacedTokens> {
+        return {
+            x: 166,
+            y: 166 - (32 * placed.length)
+        };
+    }
+
     public addResources(type: number, resources: Resource[]) {
-        const divId = `table-resources${type}`;
+        const toMachine = type == 0 && resources.length && resources[0].location === 'machine';
+        let divId = `table-resources${type}`;
+        if (toMachine) {
+            const machineId = resources[0].location_arg;
+            const stock = this.machineStocks.find(stock => stock?.items.find(item => Number(item.id) == machineId));
+            divId = `${stock.container_div.id}_item_${machineId}`;
+        }
+
         const div = document.getElementById(divId);
         if (!div) {
             return;
         }
+        
         const placed: PlacedTokens[] = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
 
         // add tokens
         resources.filter(resource => !placed.some(place => place.resourceId == resource.id)).forEach(resource => {
-            const newPlace = this.getPlaceOnCard(placed);
+            const newPlace = toMachine ? this.getPlaceOnMachine(placed) : this.getPlaceOnTable(placed);
             placed.push({
                 ...newPlace, 
                 resourceId: resource.id,
@@ -181,12 +205,17 @@ class Table {
 
             const resourceDivId = `resource${type}-${resource.id}`;
             const resourceDiv = document.getElementById(`resource${type}-${resource.id}`);
+            
             if (resourceDiv) {
                 const originDiv = resourceDiv.parentElement;
                 const originPlaced: PlacedTokens[] = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
                 originDiv.dataset.placed = JSON.stringify(originPlaced.filter(place => place.resourceId != resource.id));
 
-                slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
+                if (originDiv.classList.contains('to_be_destroyed')) {
+                    div.appendChild(resourceDiv);
+                } else {
+                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
+                }
             } else {
                 let html = `<div id="${resourceDivId}"
                     class="cube resource${type} aspect${resource.id % (type == 0 ? 8 : 4)}" 

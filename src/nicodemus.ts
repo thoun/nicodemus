@@ -543,7 +543,7 @@ class Nicodemus implements NicodemusGame {
             ['machinePlayed', ANIMATION_MS],
             ['machineRepaired', ANIMATION_MS],
             ['tableMove', ANIMATION_MS],
-            ['handRefill', ANIMATION_MS],
+            ['addMachinesToHand', ANIMATION_MS],
             ['points', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
@@ -577,7 +577,7 @@ class Nicodemus implements NicodemusGame {
     notif_tableMove(notif: Notif<NotifTableMoveArgs>) {
         Object.keys(notif.args.moved).forEach(key => {
             const originalSpot = Number(key);
-            const machine = notif.args.moved[key];
+            const machine: Machine = notif.args.moved[key];
 
             moveToAnotherStock(
                 this.table.machineStocks[originalSpot], 
@@ -585,10 +585,14 @@ class Nicodemus implements NicodemusGame {
                 getUniqueId(machine), 
                 ''+machine.id
             );
+
+            if (machine.resources?.length) {
+                this.table.addResources(0, machine.resources);
+            }
         });
     }
 
-    notif_handRefill(notif: Notif<NotifHandRefillArgs>) {
+    notif_addMachinesToHand(notif: Notif<NotifAddMachinesToHandArgs>) {
         let from = undefined;
         if (notif.args.from === 0) {
             from = 'machine-deck';
@@ -659,7 +663,7 @@ class Nicodemus implements NicodemusGame {
 
                 ['resource', 'resourceFrom', 'resourceTo'].forEach(argNameStart => {
                     if (typeof args[`${argNameStart}Name`] == 'string' && args[`${argNameStart}Name`][0] != '<') {
-                        args[`${argNameStart}Name`] = formatTextIcons(`[resource${args[`${argNameStart}Type`]}"]`);
+                        args[`${argNameStart}Name`] = formatTextIcons(`[resource${args[`${argNameStart}Type`]}]`);
                     }
                 });
             }

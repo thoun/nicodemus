@@ -1,3 +1,10 @@
+interface Resource {
+    id: number;
+    type: number;
+    location: string;
+    location_arg: number;
+}
+
 interface Machine {
     id: number;
     type: number;
@@ -6,19 +13,13 @@ interface Machine {
     location_arg: number;
     points: number;
     produce: number;
+    resources?: Resource[];
 }
 
 interface Project {
     id: number;
     type: number;
     subType: number;
-    location: string;
-    location_arg: number;
-}
-
-interface Resource {
-    id: number;
-    type: number;
     location: string;
     location_arg: number;
 }
@@ -128,7 +129,7 @@ interface NotifResourcesArgs {
     opponentCount: number;
 }
 
-interface NotifHandRefillArgs {
+interface NotifAddMachinesToHandArgs {
     machines: Machine[];
     from: number;
 }

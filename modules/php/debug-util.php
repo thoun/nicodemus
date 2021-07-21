@@ -8,16 +8,22 @@ trait DebugUtilTrait {
 
     function debugSetup() {
         //self::DbQuery("UPDATE card SET `card_location_arg` = card_location_arg + 200 where `card_type` = 117");
-        $this->addResource(2343492, 5, 0);
-        $this->addResource(2343492, 5, 1);
-        $this->addResource(2343492, 5, 2);
-        $this->addResource(2343492, 5, 3);
+        //$this->addResource(2343492, 4, 0);
+        $this->debugAddResources(2343492, 3);
+        $this->debugAddResources(2343493, 2);
         $this->debugSetMachineInHand(2343492, 22);
         $this->debugSetMachineInTable(11);
         $this->debugSetMachineInTable(12);
 
         // Activate first player must be commented in setup if this is used
         $this->gamestate->changeActivePlayer(2343492);
+    }
+
+    private function debugAddResources(int $playerId, int $number) {
+        for ($i=0; $i<=3; $i++) {
+            $this->addResource($playerId, $number, $i);
+        }
+
     }
 
     private function debugSetMachineInTable($cardType) {

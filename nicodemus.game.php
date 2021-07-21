@@ -115,7 +115,7 @@ class Nicodemus extends Table {
         $this->activeNextPlayer();
 
         // TODO TEMP card to test
-        //$this->debugSetup();
+        $this->debugSetup();
 
         /************ End of the game initialization *****/
     }
@@ -150,7 +150,8 @@ class Nicodemus extends Table {
         }
 
         $result['handMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $current_player_id));
-        $result['tableMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+        $tableMachines = $this->getMachinesWithResourcesFromDb($this->machines->getCardsInLocation('table'));
+        $result['tableMachines'] = $tableMachines;
         $result['tableProjects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('table'));
         $result['resources'] = [];
         for ($i=0;$i<=3;$i++) {

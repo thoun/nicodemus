@@ -110,7 +110,11 @@ class PlayerTable {
                 const originPlaced: PlacedTokens[] = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
                 originDiv.dataset.placed = JSON.stringify(originPlaced.filter(place => place.resourceId != resource.id));
 
-                slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
+                if (originDiv.classList.contains('to_be_destroyed')) {
+                    div.appendChild(resourceDiv);
+                } else {
+                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
+                }
             } else {
                 let html = `<div id="${resourceDivId}"
                     class="cube resource${type} aspect${resource.id % (type == 0 ? 8 : 4)}" 

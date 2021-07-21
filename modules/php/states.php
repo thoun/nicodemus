@@ -29,7 +29,7 @@ trait StateTrait {
 
             $machines = $this->getMachinesFromDb($this->machines->pickCards(min($remainingCardsInDeck, $cardNumberToRefill), 'deck', $playerId));
 
-            self::notifyPlayer($playerId, 'handRefill', '', [
+            self::notifyPlayer($playerId, 'addMachinesToHand', '', [
                 'machines' => $machines,
             ]);
         }

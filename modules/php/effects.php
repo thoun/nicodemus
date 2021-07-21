@@ -68,7 +68,7 @@ trait EffectTrait {
         self::notifyPlayer($opponentId, 'discardHandMachines', '', [
             'machines' => [$stolenMachine],
         ]);
-        self::notifyPlayer($playerId, 'handRefill', '', [
+        self::notifyPlayer($playerId, 'addMachinesToHand', '', [
             'machines' => [$stolenMachine],
         ]);
     }
@@ -117,7 +117,7 @@ trait EffectTrait {
     }
 
     function logProductionEffect(int $playerId, int $number, int $resource) {
-        self::notifyAllPlayers('applyProductionEffectNotif', clienttranslate('${player_name} wins $[number} ${resourceName} with applied effect'), [
+        self::notifyAllPlayers('applyProductionEffectNotif', clienttranslate('${player_name} wins ${number} ${resourceName} with applied effect'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'resourceName' => $this->getResourceName($resource),
@@ -183,7 +183,7 @@ trait EffectTrait {
                 $discardedMachine = $machines[count($machines) - 2];
                 $this->addResourcesFromCombination($playerId, $context->selectedResources);
                 $this->machines->moveCard($discardedMachine->id, 'discard');
-                self::notifyAllPlayers('discardTableMachines', '', [
+                self::notifyAllPlayers($from == 0 ? 'discardTableMachines' : 'discardHandMachines', '', [
                     'machines' => [$discardedMachine],
                 ]);
 

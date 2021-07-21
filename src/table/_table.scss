@@ -71,6 +71,13 @@
     left: 6px;
     top: 102px;
 
+    .cube.resource0 {
+      background-color: #FFFFFFAA;
+      box-shadow: 0 0 5px 6px #ffffffAA;
+      border-radius: 50%;
+      z-index: 12;
+    }
+
     .machine-spot {
       position: absolute;
     }

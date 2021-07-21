@@ -27,7 +27,7 @@ trait ArgsTrait {
         }
 
         $handMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $playerId));
-        return array_merge($tableMachines, $handMachines);
+        return array_merge($selectableMachines, $handMachines);
     }
     
     function argChooseAction() {
@@ -126,6 +126,8 @@ trait ArgsTrait {
                 $possibleCombinations = $this->getOneResourceCombinations($canSpend);
             }
         }
+
+        return $possibleCombinations;
     }
 
     function argSelectResource() {

@@ -63,6 +63,12 @@
   left: 6px;
   top: 102px;
 }
+#table .machines .cube.resource0 {
+  background-color: #FFFFFFAA;
+  box-shadow: 0 0 5px 6px #ffffffAA;
+  border-radius: 50%;
+  z-index: 12;
+}
 #table .machines .machine-spot {
   position: absolute;
 }
@@ -340,6 +346,18 @@ html {
   width: 20px;
   height: 20px;
   margin: -5px 0;
+}
+
+.log .icon {
+  width: 16px;
+  height: 16px;
+  margin-bottom: -2px;
+}
+
+.gamelogreview .icon {
+  width: 20px;
+  height: 20px;
+  margin-bottom: -2px;
 }
 
 .dijitTooltipContents .icon {
