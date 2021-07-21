@@ -36,10 +36,27 @@ trait EffectTrait {
 
     function addResourcesFromCombination(int $playerId, array $combination) {
         if (count($combination) == 2 && $combination[0] == $combination[1]) {
-            $this->addResource($playerId, 2, $combination[0]);
+            $resource = $combination[0];
+            $this->addResource($playerId, 2, $resource);
+
+            self::notifyAllPlayers('addResourcesFromCombinationNotif', clienttranslate('${player_name} wins ${number} ${resourceName} with applied effect'), [
+                'playerId' => $playerId,
+                'player_name' => self::getActivePlayerName(),
+                'resourceName' => $this->getResourceName($resource),
+                'resourceType' => $resource,
+                'number' => 2,
+            ]);
         } else {
             foreach($combination as $selectedResource) {
                 $this->addResource($playerId, 1, $selectedResource);
+
+                self::notifyAllPlayers('addResourcesFromCombinationNotif', clienttranslate('${player_name} wins ${number} ${resourceName} with applied effect'), [
+                    'playerId' => $playerId,
+                    'player_name' => self::getActivePlayerName(),
+                    'resourceName' => $this->getResourceName($selectedResource),
+                    'resourceType' => $selectedResource,
+                    'number' => 1,
+                ]);
             }
         }
     }
@@ -99,15 +116,44 @@ trait EffectTrait {
         return $possibleCombinations;
     }
 
+    function logProductionEffect(int $playerId, int $number, int $resource) {
+        self::notifyAllPlayers('applyProductionEffectNotif', clienttranslate('${player_name} wins $[number} ${resourceName} with applied effect'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'resourceName' => $this->getResourceName($resource),
+            'resourceType' => $resource,
+            'number' => $number,
+        ]);
+    }
+
     function applyProductionEffect(int $playerId, object $machine, object $context) {
         switch ($machine->subType) {
-            case 1: $this->addResource($playerId, $this->countProducedResourceOnTable(1), 1); break;
-            case 2: $this->addResource($playerId, $this->countProducedResourceOnTable(0), 0); break;
-            case 3: $this->addResource($playerId, $this->countProducedResourceOnTable(2), 2); break;
-            case 4: $this->addResource($playerId, $this->countProducedResourceOnTable(3), 3); break;
+            case 1: 
+                $number = $this->countProducedResourceOnTable(1);
+                $this->addResource($playerId, $number, 1); 
+                $this->logProductionEffect($playerId, $number, 1);
+                break;
+            case 2: 
+                $number = $this->countProducedResourceOnTable(0);
+                $this->addResource($playerId, $number, 0);
+                $this->logProductionEffect($playerId, $number, 0);
+                break;
+            case 3: 
+                $number = $this->countProducedResourceOnTable(2);
+                $this->addResource($playerId, $number, 2); 
+                $this->logProductionEffect($playerId, $number, 2);
+                break;
+            case 4: 
+                $number = $this->countProducedResourceOnTable(3);
+                $this->addResource($playerId, $number, 3); 
+                $this->logProductionEffect($playerId, $number, 3);
+                break;
             case 5: 
                 if (count($context->selectedResources) == 1) {
-                    $this->addResource($playerId, $this->countProducedResourceOnTable(9), $context->selectedResources[0]);
+                    $number = $this->countProducedResourceOnTable(9);
+                    $resource = $context->selectedResources[0];
+                    $this->addResource($playerId, $number, $resource);
+                    $this->logProductionEffect($playerId, $number, $resource);
                 } else {
                     return "selectResource";
                 }
@@ -186,6 +232,7 @@ trait EffectTrait {
     }
 
     function applyAttackEffect(int $playerId, object $machine, object $context) {
+        // TODO log applied effect of machines
         $opponentId = $this->getOpponentId($playerId);
 
         switch ($machine->subType) {
@@ -258,6 +305,7 @@ trait EffectTrait {
                         'playerId' => $playerId,
                         'projects' => [$this->getProjectFromDb($this->projects->getCard($context->selectedCardId))],
                     ]);
+                    // TODO log applied effect of machines
                 } else {
                     return "selectProject";
                 }
@@ -265,6 +313,9 @@ trait EffectTrait {
             case 2: 
                 if ($context->mimicCardId !== null) {
                     $copiedMachine = $this->getMachineFromDb($this->machines->getCard($context->mimicCardId));
+
+                    
+                    // TODO log applied effect of machines
                     return $this->applyMachineEffect($playerId, $copiedMachine, $context);
                 } else {
                     return "selectMachine";
@@ -276,7 +327,6 @@ trait EffectTrait {
 
     function applyMachineEffect(int $playerId, object $machine, object $context) {
         switch ($machine->type) {
-            // TODO log applied effect of machines
             case 1: return $this->applyProductionEffect($playerId, $machine, $context);
             case 2: return $this->applyTransformationEffect($playerId, $machine, $context);
             case 3: return $this->applyAttackEffect($playerId, $machine, $context);
