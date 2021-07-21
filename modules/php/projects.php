@@ -22,24 +22,6 @@ trait ProjectTrait {
         return null;
     }
 
-    function array_some(array $array, callable $fn) {
-        foreach ($array as $value) {
-            if($fn($value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    function array_every(array $array, callable $fn) {
-        foreach ($array as $value) {
-            if(!$fn($value)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     function machinesToCompletePointProject(object $project, array $playerMachines, object $machine) {
         $machines = [];
         if ($project->points == 0) {

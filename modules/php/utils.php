@@ -10,6 +10,24 @@ trait UtilTrait {
     //////////// Utility functions
     ////////////
 
+    function array_some(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if($fn($value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    function array_every(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if(!$fn($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     function setGlobalVariable(string $name, /*object|array*/ $obj) {
         /*if ($obj == null) {
             throw new \Error('Global Variable null');
