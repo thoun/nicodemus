@@ -221,7 +221,7 @@ var Table = /** @class */ (function () {
                 _this.projectStocks[i].getSelectedItems()
                     .filter(function (item) { return document.getElementById("table-project-" + i + "_item_" + item.id).classList.contains('disabled'); })
                     .forEach(function (item) { return _this.projectStocks[i].unselectItem(item.id); });
-                _this._onProjectSelectionChanged();
+                _this.onProjectSelectionChanged();
             });
         };
         var this_1 = this;
@@ -256,7 +256,6 @@ var Table = /** @class */ (function () {
                 setupMachineCard(game, cardDiv, type);
                 var id = Number(cardDiv.id.split('_')[2]);
                 var machine = machines.find(function (m) { return m.id == id; });
-                console.log('init machine card', machines, id, machine);
                 if ((_a = machine === null || machine === void 0 ? void 0 : machine.resources) === null || _a === void 0 ? void 0 : _a.length) {
                     _this.addResources(0, machine.resources);
                 }
@@ -287,9 +286,9 @@ var Table = /** @class */ (function () {
         }
         return selectedIds;
     };
-    Table.prototype._onProjectSelectionChanged = function () {
+    Table.prototype.onProjectSelectionChanged = function () {
         var _a;
-        (_a = this.onProjectSelectionChanged) === null || _a === void 0 ? void 0 : _a.call(this, this.getSelectedProjectsIds());
+        (_a = this.onTableProjectSelectionChanged) === null || _a === void 0 ? void 0 : _a.call(this, this.getSelectedProjectsIds());
     };
     Table.prototype.onMachineSelectionChanged = function (items) {
         if (items.length == 1) {
@@ -415,7 +414,12 @@ var PlayerTable = /** @class */ (function () {
         this.projectStock.setSelectionMode(0);
         //this.projectStock.centerItems = true;
         this.projectStock.onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
-        //dojo.connect(this.projectStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.projectStocks[i].getSelectedItems()));
+        dojo.connect(this.projectStock, 'onChangeSelection', this, function () {
+            _this.projectStock.getSelectedItems()
+                .filter(function (item) { return document.getElementById("player-table-" + _this.playerId + "-projects_item_" + item.id).classList.contains('disabled'); })
+                .forEach(function (item) { return _this.projectStock.unselectItem(item.id); });
+            _this.onProjectSelectionChanged();
+        });
         setupProjectCards([this.projectStock]);
         player.projects.forEach(function (project) { return _this.projectStock.addToStockWithId(getUniqueId(project), '' + project.id); });
         this.setProjectStockWidth();
@@ -436,6 +440,10 @@ var PlayerTable = /** @class */ (function () {
             this.addResources(i, resourcesToPlace);
         }
     }
+    PlayerTable.prototype.onProjectSelectionChanged = function () {
+        var _a;
+        (_a = this.onPlayerProjectSelectionChanged) === null || _a === void 0 ? void 0 : _a.call(this, this.projectStock.getSelectedItems().map(function (item) { return Number(item.id); }));
+    };
     PlayerTable.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
     };
@@ -523,6 +531,8 @@ var Nicodemus = /** @class */ (function () {
         this.copperCounters = [];
         this.crystalCounters = [];
         this.playersTables = [];
+        this.selectedPlayerProjectsIds = [];
+        this.selectedTableProjectsIds = [];
         this.zoom = 1;
         this.clickAction = 'play';
         /*const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
@@ -543,15 +553,16 @@ var Nicodemus = /** @class */ (function () {
         "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
     */
     Nicodemus.prototype.setup = function (gamedatas) {
+        var _this = this;
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
         this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
-        this.table.onProjectSelectionChanged = function (selectProjectsIds) {
-            dojo.toggleClass('selectProjects-button', 'disabled', !selectProjectsIds.length);
-            dojo.toggleClass('skipProjects-button', 'disabled', !!selectProjectsIds.length);
+        this.table.onTableProjectSelectionChanged = function (selectProjectsIds) {
+            _this.selectedTableProjectsIds = selectProjectsIds;
+            _this.onProjectSelectionChanged();
         };
         this.createPlayerTables(gamedatas);
         this.addHelp();
@@ -714,6 +725,11 @@ var Nicodemus = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Nicodemus.prototype.onProjectSelectionChanged = function () {
+        var selectionLength = this.selectedPlayerProjectsIds.length + this.selectedTableProjectsIds.length;
+        dojo.toggleClass('selectProjects-button', 'disabled', !selectionLength);
+        dojo.toggleClass('skipProjects-button', 'disabled', !!selectionLength);
+    };
     Nicodemus.prototype.setHand = function (machines) {
         var _this = this;
         this.playerMachineHand = new ebg.stock();
@@ -795,7 +811,13 @@ var Nicodemus = /** @class */ (function () {
         });
     };
     Nicodemus.prototype.createPlayerTable = function (gamedatas, playerId, side) {
-        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId], side));
+        var _this = this;
+        var playerTable = new PlayerTable(this, gamedatas.players[playerId], side);
+        this.playersTables.push(playerTable);
+        playerTable.onPlayerProjectSelectionChanged = function (selectProjectsIds) {
+            _this.selectedPlayerProjectsIds = selectProjectsIds;
+            _this.onProjectSelectionChanged();
+        };
     };
     Nicodemus.prototype.machineClick = function (id, from) {
         if (this.clickAction === 'select') {

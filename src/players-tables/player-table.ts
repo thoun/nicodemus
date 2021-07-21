@@ -3,6 +3,8 @@ class PlayerTable {
     public machineStock: Stock;
     public projectStock: Stock;
 
+    public onPlayerProjectSelectionChanged: (selectedProjectsIds: number[]) => any;
+
     constructor(
         private game: NicodemusGame, 
         player: NicodemusPlayer,
@@ -39,7 +41,14 @@ class PlayerTable {
         this.projectStock.setSelectionMode(0);
         //this.projectStock.centerItems = true;
         this.projectStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
-        //dojo.connect(this.projectStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.projectStocks[i].getSelectedItems()));
+        dojo.connect(this.projectStock, 'onChangeSelection', this, () => {
+            
+            this.projectStock.getSelectedItems()
+                .filter(item => document.getElementById(`player-table-${this.playerId}-projects_item_${item.id}`).classList.contains('disabled'))
+                .forEach(item => this.projectStock.unselectItem(item.id));                
+
+            this.onProjectSelectionChanged()
+        });
         setupProjectCards([this.projectStock]);
 
         player.projects.forEach(project => this.projectStock.addToStockWithId(getUniqueId(project), ''+project.id));
@@ -64,6 +73,10 @@ class PlayerTable {
             const resourcesToPlace = player.resources[i];
             this.addResources(i, resourcesToPlace);
         }
+    }
+
+    private onProjectSelectionChanged() {
+        this.onPlayerProjectSelectionChanged?.(this.projectStock.getSelectedItems().map(item => Number(item.id)));
     }
 
     private getDistance(p1: Partial<PlacedTokens>, p2: Partial<PlacedTokens>): number {

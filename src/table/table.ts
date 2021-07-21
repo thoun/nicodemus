@@ -2,7 +2,7 @@ class Table {
     public projectStocks: Stock[] = [];
     public machineStocks: Stock[] = [];
 
-    public onProjectSelectionChanged: (selectedProjectsIds: number[]) => any;
+    public onTableProjectSelectionChanged: (selectedProjectsIds: number[]) => any;
 
     constructor(
         private game: NicodemusGame, 
@@ -42,7 +42,7 @@ class Table {
                     .filter(item => document.getElementById(`table-project-${i}_item_${item.id}`).classList.contains('disabled'))
                     .forEach(item => this.projectStocks[i].unselectItem(item.id));                
 
-                this._onProjectSelectionChanged()
+                this.onProjectSelectionChanged()
             });
         }
 
@@ -76,7 +76,6 @@ class Table {
 
                 const id = Number(cardDiv.id.split('_')[2]);
                 const machine = machines.find(m => m.id == id);
-                console.log('init machine card', machines, id, machine);
                 if (machine?.resources?.length) {
                     this.addResources(0, machine.resources);
                 }
@@ -106,8 +105,8 @@ class Table {
         return selectedIds;
     }
 
-    private _onProjectSelectionChanged() {
-        this.onProjectSelectionChanged?.(this.getSelectedProjectsIds());
+    private onProjectSelectionChanged() {
+        this.onTableProjectSelectionChanged?.(this.getSelectedProjectsIds());
     }
 
     public onMachineSelectionChanged(items: any) {

@@ -29,6 +29,9 @@ class Nicodemus implements NicodemusGame {
     private table: Table;
     private playersTables: PlayerTable[] = [];
 
+    private selectedPlayerProjectsIds: number[] = []; 
+    private selectedTableProjectsIds: number[] = [];
+
     public zoom: number = 1;
 
     public clickAction: 'play' | 'select' = 'play';
@@ -63,9 +66,9 @@ class Nicodemus implements NicodemusGame {
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
         this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
-        this.table.onProjectSelectionChanged = selectProjectsIds => {
-            dojo.toggleClass('selectProjects-button', 'disabled', !selectProjectsIds.length);
-            dojo.toggleClass('skipProjects-button', 'disabled', !!selectProjectsIds.length);
+        this.table.onTableProjectSelectionChanged = selectProjectsIds => {
+            this.selectedTableProjectsIds = selectProjectsIds;
+            this.onProjectSelectionChanged();
         };
         this.createPlayerTables(gamedatas);
 
@@ -251,6 +254,11 @@ class Nicodemus implements NicodemusGame {
 
 
     ///////////////////////////////////////////////////
+    private onProjectSelectionChanged() {
+        const selectionLength = this.selectedPlayerProjectsIds.length + this.selectedTableProjectsIds.length;
+        dojo.toggleClass('selectProjects-button', 'disabled', !selectionLength);
+        dojo.toggleClass('skipProjects-button', 'disabled', !!selectionLength);
+    }
 
     public setHand(machines: Machine[]) {
         this.playerMachineHand = new ebg.stock() as Stock;
@@ -370,7 +378,12 @@ class Nicodemus implements NicodemusGame {
     }
 
     private createPlayerTable(gamedatas: NicodemusGamedatas, playerId: number, side: 'left' | 'right') {
-        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId], side));
+        const playerTable = new PlayerTable(this, gamedatas.players[playerId], side);
+        this.playersTables.push(playerTable);
+        playerTable.onPlayerProjectSelectionChanged = selectProjectsIds => {
+            this.selectedPlayerProjectsIds = selectProjectsIds;
+            this.onProjectSelectionChanged();
+        };
     }
 
     public machineClick(id: number, from: 'hand' | 'table') {
