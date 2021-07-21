@@ -11,25 +11,31 @@ trait ArgsTrait {
         These methods function is to return some additional information that is specific to the current
         game state.
     */
-    
-    function argChooseAction() {
-        $playerId = self::getActivePlayerId();
 
+    function getSelectableMachinesForChooseAction(int $playerId) {
         $canSpend = $this->getCanSpend($playerId);
 
         $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
 
-        $disabledMachines = [];
+        $selectableMachines = [];
 
         foreach($tableMachines as $machine) {
             $cost = $this->getMachineCost($machine, $tableMachines);
-            if (!$this->canPay($canSpend, $cost)) {
-                $disabledMachines[] = $machine;
+            if ($this->canPay($canSpend, $cost)) {
+                $selectableMachines[] = $machine;
             }
         }
+
+        $handMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $playerId));
+        return array_merge($tableMachines, $handMachines);
+    }
+    
+    function argChooseAction() {
+        $playerId = self::getActivePlayerId();
+        $selectableMachines = $this->getSelectableMachinesForChooseAction($playerId);
     
         return [
-            'disabledMachines' => $disabledMachines,
+            'selectableMachines' => $selectableMachines,
         ];
     }
 
@@ -89,7 +95,7 @@ trait ArgsTrait {
         ];
     }
 
-    function argSelectResource() {
+    function getSelectResourceCombinations() {
         $machine = $this->getMachineForEffect();
         $machineType = $machine->type*10 + $machine->subType;
         $possibleCombinations = null;
@@ -120,6 +126,10 @@ trait ArgsTrait {
                 $possibleCombinations = $this->getOneResourceCombinations($canSpend);
             }
         }
+    }
+
+    function argSelectResource() {
+        $possibleCombinations = $this->getSelectResourceCombinations();
 
         if ($possibleCombinations == null) {
             throw new Error("Impossible to determinate resources to select");

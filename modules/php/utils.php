@@ -28,6 +28,18 @@ trait UtilTrait {
         return true;
     }
 
+    function array_identical(array $a1, array $a2) {
+        if (count($a1) != count($a2)) {
+            return false;
+        }
+        for ($i=0;$i<count($a1);$i++) {
+            if ($a1[$i] != $a2[$i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     function setGlobalVariable(string $name, /*object|array*/ $obj) {
         /*if ($obj == null) {
             throw new \Error('Global Variable null');
@@ -242,6 +254,17 @@ trait UtilTrait {
             case 4: $colorName = _('Special'); break;
         }
         return $colorName;
+    }
+
+    function getResourceName(int $type) {
+        $resourceName = null;
+        switch ($type) {
+            case 0: $resourceName = _('charcoalium'); break;
+            case 1: $resourceName = _('wood'); break;
+            case 2: $resourceName = _('copper'); break;
+            case 3: $resourceName = _('crystal'); break;
+        }
+        return $resourceName;
     }
 
     function clearTableRowIfNecessary() {

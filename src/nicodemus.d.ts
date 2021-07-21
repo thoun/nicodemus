@@ -65,7 +65,7 @@ interface NicodemusGame extends Game {
 }
 
 interface ChooseActionArgs {
-    disabledMachines: Machine[];
+    selectableMachines: Machine[];
 }
 
 interface ChoosePlayActionArgs {
@@ -138,6 +138,11 @@ interface NotifDiscardMachinesArgs {
 }
 
 interface NotifAddWorkshopProjectsArgs {
+    playerId: number;
+    projects: Project[];
+}
+
+interface NotifRemoveProjectsArgs {
     playerId: number;
     projects: Project[];
 }

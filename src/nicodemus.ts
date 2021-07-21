@@ -109,7 +109,10 @@ class Nicodemus implements NicodemusGame {
             this.setHandSelectable(true);
             this.table.setMachineSelectable(true);
 
-            args.disabledMachines.forEach(machine => dojo.addClass(`table-machine-spot-${machine.location_arg}_item_${machine.id}`, 'disabled'));
+            this.getMachineStocks().forEach(stock => stock.items
+                .filter(item => !args.selectableMachines.some(machine => machine.id === Number(item.id)))
+                .forEach(item => dojo.addClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
+            );
         }
     }
 
@@ -250,6 +253,10 @@ class Nicodemus implements NicodemusGame {
             const color = player.color.startsWith('00') ? 'blue' : 'red';
             dojo.addClass('my-hand-label', color);
         }
+    }
+    
+    private getProjectStocks() {
+        return [...this.table.projectStocks.slice(1), ...this.playersTables.map(pt => pt.projectStock)];
     }
     
     private getMachineStocks() {
@@ -624,8 +631,10 @@ class Nicodemus implements NicodemusGame {
         notif.args.machines.forEach(machine => this.table.machineStocks[machine.location_arg].removeFromStockById(''+machine.id));
     }
 
-    notif_removeProjects(notif: Notif<any>) {
-        console.log('TODO');
+    notif_removeProjects(notif: Notif<NotifRemoveProjectsArgs>) {
+        notif.args.projects.forEach(project =>
+            this.getProjectStocks().forEach(stock => stock.removeFromStockById(''+project.id))
+        );
     }
     
     private getMachineColor(color: number) {
@@ -647,6 +656,12 @@ class Nicodemus implements NicodemusGame {
                 if (typeof args.machine_name == 'string' && args.machine_name[0] != '<') {
                     args.machine_name = `<strong style="color: ${this.getMachineColor(args.machine.type)}">${args.machine_name}</strong>`;
                 }
+
+                ['resource', 'resourceFrom', 'resourceTo'].forEach(argNameStart => {
+                    if (typeof args[`${argNameStart}Name`] == 'string' && args[`${argNameStart}Name`][0] != '<') {
+                        args[`${argNameStart}Name`] = formatTextIcons(`[resource${args[`${argNameStart}Type`]}"]`);
+                    }
+                });
             }
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);

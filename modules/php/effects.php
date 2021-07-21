@@ -276,6 +276,7 @@ trait EffectTrait {
 
     function applyMachineEffect(int $playerId, object $machine, object $context) {
         switch ($machine->type) {
+            // TODO log applied effect of machines
             case 1: return $this->applyProductionEffect($playerId, $machine, $context);
             case 2: return $this->applyTransformationEffect($playerId, $machine, $context);
             case 3: return $this->applyAttackEffect($playerId, $machine, $context);

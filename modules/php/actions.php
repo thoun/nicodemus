@@ -92,7 +92,11 @@ trait ActionTrait {
 
         $this->addResource($playerId, $machine->points, 0);
 
-        // TODO notif
+        self::notifyAllPlayers('machinePlayedGetCharcoalium', clienttranslate('${player_name} wins ${charcoalium} charcoalium(s) with played machine'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'charcoalium' => $machine->points,
+        ]);
 
         $this->gamestate->nextState('refillHand');
     }
@@ -110,7 +114,12 @@ trait ActionTrait {
 
         $this->addResource($playerId, 1, $resource);
 
-        // TODO notif
+        self::notifyAllPlayers('machinePlayedGetResource', clienttranslate('${player_name} wins 1 ${resourceName} with played machine'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'resourceName' => $this->getResourceName($resource),
+            'resourceType' => $resource,
+        ]);
 
         $this->gamestate->nextState('refillHand');
     }
@@ -127,20 +136,28 @@ trait ActionTrait {
 
         $transition = $this->applyMachineEffect($playerId, $machine, $context);
 
-        // TODO notif
+        self::notifyAllPlayers('machinePlayedApplyEffect', clienttranslate('${player_name} chooses to apply effect of played machine'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+        ]);
 
         $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
     }
 
-    public function selectProjects(array $ids) {
+    public function selectProjects(array $ids) {   
 
-        // TODO security for selected projects (read args)
+        $playerId = self::getActivePlayerId();     
+
+        // security check
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+        $completeProjects = $this->getCompleteProjects($playerId, $machine);
+        foreach($ids as $id) {
+            if (!$this->array_some($completeProjects, function ($p) use ($id) { return $p->id == $id; })) {
+                throw new Error("Selected project cannot be completed");
+            }
+        }
 
         $projects = $this->getProjectsFromDb($this->projects->getCards($ids));
-
-        $playerId = self::getActivePlayerId();
-
-        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
         $playerMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
 
@@ -161,10 +178,11 @@ trait ActionTrait {
             'machines' => $discardedMachines,
         ]);
 
-        self::notifyAllPlayers('removeProjects', clienttranslate('${player_name} completes projects TODO'), [
+        self::notifyAllPlayers('removeProjects', clienttranslate('${player_name} completes ${number} project(s)'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'projects' => $projects,
+            'number' => count($projects),
         ]);
 
         // TODO handle discarded machine choice (when 3 blue machines for example)
@@ -177,7 +195,10 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        // TODO security for selected machine
+        $selectableMachines = $this->getSelectableMachinesForChooseAction($playerId);
+        if (!$this->array_some($selectableMachines, function ($m) use ($id) { return $m->id == $id; })) {
+            throw new Error("Selected machine cannot be player or repaired");
+        }
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
@@ -197,7 +218,10 @@ trait ActionTrait {
     public function selectProject(int $id) {
         self::checkAction('selectProject'); 
 
-        // TODO security for selected project
+        $projects = $this->getProjectsFromDb($this->projects->getCardsOnTop(2, 'deck'));
+        if (!$this->array_some($projects, function ($p) use ($id) { return $p->id == $id; })) {
+            throw new Error("Selected project cannot be added to workshop");
+        }
         
         $playerId = self::getActivePlayerId();
 
@@ -215,7 +239,10 @@ trait ActionTrait {
     public function selectResource(array $resourcesTypes) {
         self::checkAction('selectResource'); 
 
-        // TODO security for selected ressources
+        $possibleCombinations = $this->getSelectResourceCombinations();
+        if (!$this->array_some($possibleCombinations, function ($comb) use ($resourcesTypes) { return $this->array_identical($comb, $resourcesTypes); })) {
+            throw new Error("Resource(s) cannot be selected");
+        }
         
         $playerId = self::getActivePlayerId();
 
@@ -235,7 +262,10 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        // TODO security for exchanges
+        $possibleExchanges = $this->getPossibleExchanges($playerId);
+        if (!$this->array_some($possibleExchanges, function ($possibleExchange) use ($from, $to) { return $possibleExchange->from == $from && $possibleExchange->to == $to; })) {
+            throw new Error("Exchange cannot be selected");
+        }
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
@@ -247,6 +277,15 @@ trait ActionTrait {
         $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
 
         $transition = $this->applyMachineEffect($playerId, $machine, $context);
+        
+        self::notifyAllPlayers('selectExchangeNotif', clienttranslate('${player_name} exchanges ${resourceFromName} to get ${resourceToName}'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'resourceFromName' => $this->getResourceName($from),
+            'resourceFromType' => $from,
+            'resourceToName' => $this->getResourceName($to),
+            'resourceToType' => $to,
+        ]);
 
         $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
     }

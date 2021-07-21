@@ -541,7 +541,9 @@ var Nicodemus = /** @class */ (function () {
         if (this.isCurrentPlayerActive()) {
             this.setHandSelectable(true);
             this.table.setMachineSelectable(true);
-            args.disabledMachines.forEach(function (machine) { return dojo.addClass("table-machine-spot-" + machine.location_arg + "_item_" + machine.id, 'disabled'); });
+            this.getMachineStocks().forEach(function (stock) { return stock.items
+                .filter(function (item) { return !args.selectableMachines.some(function (machine) { return machine.id === Number(item.id); }); })
+                .forEach(function (item) { return dojo.addClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
         }
     };
     Nicodemus.prototype.onEnteringStateChoosePlayAction = function (args) {
@@ -668,6 +670,9 @@ var Nicodemus = /** @class */ (function () {
             var color = player.color.startsWith('00') ? 'blue' : 'red';
             dojo.addClass('my-hand-label', color);
         }
+    };
+    Nicodemus.prototype.getProjectStocks = function () {
+        return __spreadArray(__spreadArray([], this.table.projectStocks.slice(1)), this.playersTables.map(function (pt) { return pt.projectStock; }));
     };
     Nicodemus.prototype.getMachineStocks = function () {
         return __spreadArray(__spreadArray([this.playerMachineHand], this.table.machineStocks.slice(1)), this.playersTables.map(function (pt) { return pt.machineStock; }));
@@ -887,6 +892,7 @@ var Nicodemus = /** @class */ (function () {
             ['discardHandMachines', ANIMATION_MS],
             ['discardPlayerMachines', ANIMATION_MS],
             ['discardTableMachines', ANIMATION_MS],
+            ['removeProjects', ANIMATION_MS],
             ['addWorkshopProjects', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
@@ -947,6 +953,12 @@ var Nicodemus = /** @class */ (function () {
         var _this = this;
         notif.args.machines.forEach(function (machine) { return _this.table.machineStocks[machine.location_arg].removeFromStockById('' + machine.id); });
     };
+    Nicodemus.prototype.notif_removeProjects = function (notif) {
+        var _this = this;
+        notif.args.projects.forEach(function (project) {
+            return _this.getProjectStocks().forEach(function (stock) { return stock.removeFromStockById('' + project.id); });
+        });
+    };
     Nicodemus.prototype.getMachineColor = function (color) {
         switch (color) {
             case 1: return '#006fa1';
@@ -965,6 +977,11 @@ var Nicodemus = /** @class */ (function () {
                 if (typeof args.machine_name == 'string' && args.machine_name[0] != '<') {
                     args.machine_name = "<strong style=\"color: " + this.getMachineColor(args.machine.type) + "\">" + args.machine_name + "</strong>";
                 }
+                ['resource', 'resourceFrom', 'resourceTo'].forEach(function (argNameStart) {
+                    if (typeof args[argNameStart + "Name"] == 'string' && args[argNameStart + "Name"][0] != '<') {
+                        args[argNameStart + "Name"] = formatTextIcons("[resource" + args[argNameStart + "Type"] + "\"]");
+                    }
+                });
             }
         }
         catch (e) {
