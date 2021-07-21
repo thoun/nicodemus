@@ -543,6 +543,7 @@ class Nicodemus implements NicodemusGame {
             ['discardHandMachines', ANIMATION_MS],
             ['discardPlayerMachines', ANIMATION_MS],
             ['discardTableMachines', ANIMATION_MS],
+            ['removeProjects', ANIMATION_MS],
             ['addWorkshopProjects', ANIMATION_MS],
         ];
 
@@ -621,6 +622,10 @@ class Nicodemus implements NicodemusGame {
 
     notif_discardTableMachines(notif: Notif<NotifDiscardMachinesArgs>) {
         notif.args.machines.forEach(machine => this.table.machineStocks[machine.location_arg].removeFromStockById(''+machine.id));
+    }
+
+    notif_removeProjects(notif: Notif<any>) {
+        console.log('TODO');
     }
     
     private getMachineColor(color: number) {

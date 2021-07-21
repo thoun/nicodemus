@@ -92,6 +92,8 @@ trait ActionTrait {
 
         $this->addResource($playerId, $machine->points, 0);
 
+        // TODO notif
+
         $this->gamestate->nextState('refillHand');
     }
   	
@@ -108,6 +110,8 @@ trait ActionTrait {
 
         $this->addResource($playerId, 1, $resource);
 
+        // TODO notif
+
         $this->gamestate->nextState('refillHand');
     }
   	
@@ -122,6 +126,8 @@ trait ActionTrait {
         $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
 
         $transition = $this->applyMachineEffect($playerId, $machine, $context);
+
+        // TODO notif
 
         $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
     }
@@ -149,7 +155,19 @@ trait ActionTrait {
         }
         $this->machines->moveCards(array_map(function($machine) { return $machine->id; }, $discardedMachines), 'discard');
         $this->projects->moveCards($ids, 'discard');
-        // TODO notif
+
+        
+        self::notifyAllPlayers('discardPlayerMachines', '', [
+            'machines' => $discardedMachines,
+        ]);
+
+        self::notifyAllPlayers('removeProjects', clienttranslate('${player_name} completes projects TODO'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'projects' => $projects,
+        ]);
+
+        // TODO handle discarded machine choice (when 3 blue machines for example)
 
         $this->gamestate->nextState('nextPlayer');
     }
