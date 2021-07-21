@@ -118,7 +118,6 @@ trait ActionTrait {
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
-
         $context = new ApplyEffectContext();
         $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
 
@@ -129,19 +128,27 @@ trait ActionTrait {
 
     public function selectProjects(array $ids) {
 
+        // TODO security for selected projects (read args)
+
         $projects = $this->getProjectsFromDb($this->projects->getCards($ids));
+
+        $playerId = self::getActivePlayerId();
+
+        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+
+        $playerMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
 
         $discardedMachines = [];
 
         foreach ($projects as $project) {
-            //$machinesToCompleteProject = $this->machinesToCompleteProject($project)
+            $machinesToCompleteProject = $this->machinesToCompleteProject($project, $playerMachines, $machine);
 
             $this->incPlayerScore($playerId, $project->points);
 
-            //$discardedMachines = array_merge($discardedMachines, $machinesToCompleteProject);
+            $discardedMachines = array_merge($discardedMachines, $machinesToCompleteProject);
         }
-        // TODO discard $projects
-        // TODO discard $discardedMachines
+        $this->machines->moveCards(array_map(function($machine) { return $machine->id; }, $discardedMachines), 'discard');
+        $this->projects->moveCards($ids, 'discard');
         // TODO notif
 
         $this->gamestate->nextState('nextPlayer');
@@ -151,6 +158,8 @@ trait ActionTrait {
         self::checkAction('selectMachine'); 
         
         $playerId = self::getActivePlayerId();
+
+        // TODO security for selected machine
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
@@ -169,6 +178,8 @@ trait ActionTrait {
 
     public function selectProject(int $id) {
         self::checkAction('selectProject'); 
+
+        // TODO security for selected project
         
         $playerId = self::getActivePlayerId();
 
@@ -185,6 +196,8 @@ trait ActionTrait {
 
     public function selectResource(array $resourcesTypes) {
         self::checkAction('selectResource'); 
+
+        // TODO security for selected ressources
         
         $playerId = self::getActivePlayerId();
 
@@ -203,6 +216,8 @@ trait ActionTrait {
         self::checkAction('selectExchange'); 
         
         $playerId = self::getActivePlayerId();
+
+        // TODO security for exchanges
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 

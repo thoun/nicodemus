@@ -72,7 +72,7 @@ trait ProjectTrait {
     }
 
 
-    function machinesToCompleteProject(int $playerId, object $project, array $playerMachines, object $machine) {
+    function machinesToCompleteProject(object $project, array $playerMachines, object $machine) {
         switch ($project->type) {
             case 1: return $this->machinesToCompleteColorProject($project, $playerMachines, $machine);
             case 2: return $this->machinesToCompletePointProject($project, $playerMachines, $machine);
