@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__.'/objects/payment.php');
+
 trait ArgsTrait {
     
 //////////////////////////////////////////////////////////////////////////////
@@ -19,9 +21,15 @@ trait ArgsTrait {
 
         $selectableMachines = [];
 
-        foreach($tableMachines as $machine) {
+        foreach($tableMachines as &$machine) {
             $cost = $this->getMachineCost($machine, $tableMachines);
             if ($this->canPay($canSpend, $cost)) {
+                $machine->payments = $this->getPossiblePayments($canSpend, $cost);
+
+                foreach($machine->payments as &$payment) {
+                    $payment->flatten();
+                }
+                
                 $selectableMachines[] = $machine;
             }
         }
@@ -165,5 +173,36 @@ trait ArgsTrait {
         return [
             'completeProjects' => $completeProjects,
         ];
+    }
+
+    function getPossiblePayments(array $canSpend, array $cost) {
+        $jokers = array_key_exists(9, $canSpend) ? $canSpend[9] : 0;
+        $possiblePayment = new Payment($cost, $jokers);
+
+        if ($possiblePayment->remainingJokers == 0) {
+            return [$possiblePayment];
+        } else {
+            return $this->computeRemainingPossiblePayments($possiblePayment, 1);
+        }
+    }
+
+    function computeRemainingPossiblePayments(object $possiblePayment, int $lastCheckedResource) {
+        $possiblePayments = [];
+        foreach($possiblePayment->remainingCost as $resource => $number) {
+            if ($resource >= $lastCheckedResource && $number > 0) {
+                $newRemainingCost = $possiblePayment->remainingCost;
+                $newRemainingCost[$resource] -= 1;
+
+                $remainingJokers = $possiblePayment->remainingJokers - 1;
+                $payment = new Payment($newRemainingCost, $remainingJokers, array_merge($possiblePayment->jokers, [$resource]));
+
+                if ($remainingJokers > 0) {
+                    $possiblePayments = array_merge($possiblePayments, $this->computeRemainingPossiblePayments($payment, $resource));
+                } else {
+                    $possiblePayments[] = $payment;
+                }
+            }
+        }
+        return $possiblePayments;
     }
 }

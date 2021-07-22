@@ -19,6 +19,7 @@ class Machine extends MachineCard {
     public $type; // color : 1 = blue, 2 = purple, 3 = red, 4 = yellow
     public $subType; // index (1-based) on rulebook
     public $resources; //array?
+    public $payments; //array?
 
     public function __construct($dbCard, $MACHINES) {
         $this->id = intval($dbCard['id']);

@@ -260,7 +260,7 @@ var Table = /** @class */ (function () {
                     _this.addResources(0, machine.resources);
                 }
             };
-            dojo.connect(this_2.machineStocks[i], 'onChangeSelection', this_2, function () { return _this.onMachineSelectionChanged(_this.machineStocks[i].getSelectedItems()); });
+            dojo.connect(this_2.machineStocks[i], 'onChangeSelection', this_2, function () { return _this.onMachineSelectionChanged(_this.machineStocks[i].getSelectedItems(), _this.machineStocks[i].container_div.id); });
         };
         var this_2 = this;
         for (var i = 1; i <= 10; i++) {
@@ -290,10 +290,11 @@ var Table = /** @class */ (function () {
         var _a;
         (_a = this.onTableProjectSelectionChanged) === null || _a === void 0 ? void 0 : _a.call(this, this.getSelectedProjectsIds());
     };
-    Table.prototype.onMachineSelectionChanged = function (items) {
+    Table.prototype.onMachineSelectionChanged = function (items, stockId) {
         if (items.length == 1) {
-            var card = items[0];
-            this.game.machineClick(card.id, 'table');
+            var cardId = Number(items[0].id);
+            var payments = JSON.parse(document.getElementById(stockId + "_item_" + cardId).dataset.payments);
+            this.game.machineClick(cardId, 'table', payments);
         }
     };
     Table.prototype.setProjectSelectable = function (selectable) {
@@ -597,9 +598,16 @@ var Nicodemus = /** @class */ (function () {
         if (this.isCurrentPlayerActive()) {
             this.setHandSelectable(true);
             this.table.setMachineSelectable(true);
-            this.getMachineStocks().forEach(function (stock) { return stock.items
-                .filter(function (item) { return !args.selectableMachines.some(function (machine) { return machine.id === Number(item.id); }); })
-                .forEach(function (item) { return dojo.addClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
+            this.getMachineStocks().forEach(function (stock) { return stock.items.forEach(function (item) {
+                var machine = args.selectableMachines.find(function (machine) { return machine.id === Number(item.id); });
+                var divId = stock.container_div.id + "_item_" + item.id;
+                if (machine) {
+                    document.getElementById(divId).dataset.payments = JSON.stringify(machine.payments);
+                }
+                else {
+                    dojo.addClass(divId, 'disabled');
+                }
+            }); });
         }
     };
     Nicodemus.prototype.onEnteringStateChoosePlayAction = function (args) {
@@ -646,6 +654,7 @@ var Nicodemus = /** @class */ (function () {
         this.setHandSelectable(false);
         this.table.setMachineSelectable(false);
         dojo.query('.stockitem').removeClass('disabled');
+        dojo.query('.stockitem').forEach(function (div) { return div.dataset.payments = undefined; });
     };
     Nicodemus.prototype.onLeavingChoosePlayAction = function () {
         dojo.query('.stockitem').removeClass('selected');
@@ -819,16 +828,36 @@ var Nicodemus = /** @class */ (function () {
             _this.onProjectSelectionChanged();
         };
     };
-    Nicodemus.prototype.machineClick = function (id, from) {
+    Nicodemus.prototype.machineClick = function (id, from, payments) {
+        var _this = this;
         if (this.clickAction === 'select') {
             this.selectMachine(id);
         }
         else if (this.clickAction === 'play') {
+            /*const paymentDiv = document.getElementById('paymentButtons');
+            if (paymentDiv) {
+                paymentDiv.innerHTML = '';
+            } else {
+                dojo.place(`<div id="paymentButtons"></div>`, 'generalactions')
+            }*/
+            document.querySelectorAll("[id^='selectPaymentButton']").forEach(function (elem) { return dojo.destroy(elem.id); });
             if (from === 'hand') {
                 this.playMachine(id);
             }
             else if (from === 'table') {
-                this.repairMachine(id);
+                if (payments.length > 1) {
+                    payments.forEach(function (payment, index) {
+                        var label = dojo.string.substitute(_('Use ${jokers} as ${unpaidResources} and pay ${paidResources}'), {
+                            jokers: payment.jokers.map(function (_) { return '[resource9]'; }).join(''),
+                            unpaidResources: payment.jokers.map(function (joker) { return "[resource" + joker + "]"; }).join(''),
+                            paidResources: payment.remainingCost.filter(function (resource) { return resource > 0; }).map(function (resource) { return "[resource" + resource + "]"; }).join(''),
+                        });
+                        _this.addActionButton("selectPaymentButton" + index + "-button", formatTextIcons(label), function () { return _this.repairMachine(id, payment); });
+                    });
+                }
+                else {
+                    this.repairMachine(id, payments[0]);
+                }
             }
         }
     };
@@ -840,12 +869,14 @@ var Nicodemus = /** @class */ (function () {
             id: id
         });
     };
-    Nicodemus.prototype.repairMachine = function (id) {
+    Nicodemus.prototype.repairMachine = function (id, payment) {
         if (!this.checkAction('repairMachine')) {
             return;
         }
+        var base64 = btoa(JSON.stringify(payment));
         this.takeAction('repairMachine', {
-            id: id
+            id: id,
+            payment: base64
         });
     };
     Nicodemus.prototype.getCharcoalium = function () {

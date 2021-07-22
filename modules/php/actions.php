@@ -38,7 +38,7 @@ trait ActionTrait {
         $this->gamestate->nextState('choosePlayAction');
     }
   	
-    public function repairMachine(int $id) {
+    public function repairMachine(int $id, object $payment) {
         self::checkAction('repairMachine'); 
         
         $playerId = intval(self::getActivePlayerId());
@@ -55,8 +55,6 @@ trait ActionTrait {
 
         $costForPlayer = $this->getMachineCostForPlayerBeforeJoker($playerId, $machine, $tableMachines);
 
-        // TODO handle jokers
-
         $machineSpot = $machine->location_arg;
         // place charcoalium on cards
         if (array_key_exists(0, $costForPlayer)) {
@@ -65,11 +63,24 @@ trait ActionTrait {
             }
         }
         // pay other resources
-        for ($i=1; $i<=3; $i++) {
+        /*for ($i=1; $i<=3; $i++) {
             if (array_key_exists($i, $costForPlayer)) {
                 $this->removeResource($playerId, $costForPlayer[$i], $i);
             }
+        }*/
+        // handle jokers
+        $remainingCost = [
+            0 => 0,
+            1 => 0,
+            2 => 0,
+            3 => 0,
+        ];
+        foreach($payment->remainingCost as $resource) {
+            $remainingCost[$resource]++;
         }
+        for ($i=1; $i<=3; $i++) {
+            $this->removeResource($playerId, $remainingCost[$i], $i);
+        }        
 
         self::setGameStateValue(PLAYED_MACHINE, $id);
         $this->machines->moveCard($id, 'player', $playerId);

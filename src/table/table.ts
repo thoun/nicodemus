@@ -80,7 +80,7 @@ class Table {
                     this.addResources(0, machine.resources);
                 }
             }
-            dojo.connect(this.machineStocks[i], 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
+            dojo.connect(this.machineStocks[i], 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems(), this.machineStocks[i].container_div.id));
         }
         setupMachineCards(this.machineStocks);
 
@@ -109,10 +109,11 @@ class Table {
         this.onTableProjectSelectionChanged?.(this.getSelectedProjectsIds());
     }
 
-    public onMachineSelectionChanged(items: any) {
+    public onMachineSelectionChanged(items: StockItems[], stockId: string) {
         if (items.length == 1) {
-            const card = items[0];
-            this.game.machineClick(card.id, 'table');
+            const cardId = Number(items[0].id);
+            const payments = JSON.parse(document.getElementById(`${stockId}_item_${cardId}`).dataset.payments);
+            this.game.machineClick(cardId, 'table', payments);
         }
     }
 

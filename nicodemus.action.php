@@ -48,8 +48,9 @@
         self::setAjaxMode();
 
         $id = self::getArg("id", AT_posint, true);
+        $payment = json_decode(base64_decode(self::getArg("payment", AT_base64, true)));
 
-        $this->game->repairMachine($id);
+        $this->game->repairMachine($id, $payment);
 
         self::ajaxResponse();
     }

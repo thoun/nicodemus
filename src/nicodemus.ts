@@ -111,10 +111,15 @@ class Nicodemus implements NicodemusGame {
             this.setHandSelectable(true);
             this.table.setMachineSelectable(true);
 
-            this.getMachineStocks().forEach(stock => stock.items
-                .filter(item => !args.selectableMachines.some(machine => machine.id === Number(item.id)))
-                .forEach(item => dojo.addClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
-            );
+            this.getMachineStocks().forEach(stock => stock.items.forEach(item => {
+                const machine = args.selectableMachines.find(machine => machine.id === Number(item.id));
+                const divId = `${stock.container_div.id}_item_${item.id}`;
+                if (machine) {
+                    document.getElementById(divId).dataset.payments = JSON.stringify(machine.payments);
+                } else {
+                    dojo.addClass(divId, 'disabled');
+                }
+            }));
         }
     }
 
@@ -170,6 +175,7 @@ class Nicodemus implements NicodemusGame {
         this.setHandSelectable(false);
         this.table.setMachineSelectable(false);
         dojo.query('.stockitem').removeClass('disabled');
+        dojo.query('.stockitem').forEach(div => div.dataset.payments = undefined);
     }
 
     onLeavingChoosePlayAction() {
@@ -386,14 +392,33 @@ class Nicodemus implements NicodemusGame {
         };
     }
 
-    public machineClick(id: number, from: 'hand' | 'table') {
+    public machineClick(id: number, from: 'hand' | 'table', payments?: Payment[]) {
         if (this.clickAction === 'select') {
             this.selectMachine(id);
         } else if (this.clickAction === 'play') {
+            /*const paymentDiv = document.getElementById('paymentButtons');
+            if (paymentDiv) {
+                paymentDiv.innerHTML = '';
+            } else {
+                dojo.place(`<div id="paymentButtons"></div>`, 'generalactions')
+            }*/
+            document.querySelectorAll(`[id^='selectPaymentButton']`).forEach(elem => dojo.destroy(elem.id));
+
             if (from === 'hand') {
                 this.playMachine(id);
             } else if (from === 'table') {
-                this.repairMachine(id);
+                if (payments.length > 1) {
+                    payments.forEach((payment, index) => {
+                        const label = dojo.string.substitute(_('Use ${jokers} as ${unpaidResources} and pay ${paidResources}'), {
+                            jokers: payment.jokers.map(_ => '[resource9]').join(''),
+                            unpaidResources: payment.jokers.map(joker => `[resource${joker}]`).join(''),
+                            paidResources: payment.remainingCost.filter(resource => resource > 0).map(resource => `[resource${resource}]`).join(''),
+                        });
+                        (this as any).addActionButton(`selectPaymentButton${index}-button`, formatTextIcons(label), () => this.repairMachine(id, payment))
+                    });
+                } else {
+                    this.repairMachine(id, payments[0]);
+                }
             }
         }
     }
@@ -408,13 +433,16 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
-    private repairMachine(id: number) {
+    private repairMachine(id: number, payment: Payment) {
         if(!(this as any).checkAction('repairMachine')) {
             return;
         }
 
+        const base64 = btoa(JSON.stringify(payment));
+
         this.takeAction('repairMachine', {
-            id
+            id,
+            payment: base64
         });
     }
 

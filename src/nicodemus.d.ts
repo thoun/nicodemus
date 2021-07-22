@@ -5,6 +5,11 @@ interface Resource {
     location_arg: number;
 }
 
+interface Payment {
+    remainingCost: number[];
+    jokers: number[];
+}
+
 interface Machine {
     id: number;
     type: number;
@@ -14,6 +19,7 @@ interface Machine {
     points: number;
     produce: number;
     resources?: Resource[];
+    payments?: Payment[];
 }
 
 interface Project {
@@ -62,7 +68,7 @@ interface NicodemusGamedatas {
 
 interface NicodemusGame extends Game {
     getPlayerId(): number;
-    machineClick(id: number, from: 'hand' | 'table'): void;
+    machineClick(id: number, from: 'hand' | 'table', payments?: Payment[]): void;
 }
 
 interface ChooseActionArgs {
