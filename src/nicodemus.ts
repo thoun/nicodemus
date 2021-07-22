@@ -571,13 +571,13 @@ class Nicodemus implements NicodemusGame {
                 <div id="help-projects" class="help-section">
                     <table><tr><td class="grid">`;
                 PROJECTS_IDS.slice(1, 5).forEach((number, index) => html += `<div id="project${index + 1}" class="project"></div>`);
-                html += `</td><td>${getProjectTooltip(11)}</td></tr>
-                <tr><td><div id="project0" class="project"></div></td><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
+                html += `</td></tr><tr><td>${getProjectTooltip(11)}</td></tr>
+                <tr><td><div id="project0" class="project"></div></td></tr><tr><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
                 PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
-                html += `</td><td>${getProjectTooltip(21)}</td></tr>
-                <tr><td><div id="project5" class="project"></div></td><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
+                html += `</td></tr><tr><td>${getProjectTooltip(21)}</td></tr>
+                <tr><td><div id="project5" class="project"></div></td></tr><tr><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
                 PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);
-                html += `</td><td>${getProjectTooltip(31)}</td></tr></table>
+                html += `</td></tr><tr><td>${getProjectTooltip(31)}</td></tr></table>
                 </div>
             </div>`;
             

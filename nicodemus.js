@@ -975,11 +975,11 @@ var Nicodemus = /** @class */ (function () {
             MACHINES_IDS.forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + index + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
             html += "</table>\n                </div>\n                <h1>" + _("Projects") + "</h1>\n                <div id=\"help-projects\" class=\"help-section\">\n                    <table><tr><td class=\"grid\">";
             PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project" + (index + 1) + "\" class=\"project\"></div>"; });
-            html += "</td><td>" + getProjectTooltip(11) + "</td></tr>\n                <tr><td><div id=\"project0\" class=\"project\"></div></td><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
+            html += "</td></tr><tr><td>" + getProjectTooltip(11) + "</td></tr>\n                <tr><td><div id=\"project0\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
             PROJECTS_IDS.slice(6, 9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 6) + "\" class=\"project\"></div>"; });
-            html += "</td><td>" + getProjectTooltip(21) + "</td></tr>\n                <tr><td><div id=\"project5\" class=\"project\"></div></td><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
+            html += "</td></tr><tr><td>" + getProjectTooltip(21) + "</td></tr>\n                <tr><td><div id=\"project5\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
             PROJECTS_IDS.slice(9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 9) + "\" class=\"project\"></div>"; });
-            html += "</td><td>" + getProjectTooltip(31) + "</td></tr></table>\n                </div>\n            </div>";
+            html += "</td></tr><tr><td>" + getProjectTooltip(31) + "</td></tr></table>\n                </div>\n            </div>";
             // Show the dialog
             this.helpDialog.setContent(html);
         }
