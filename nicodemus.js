@@ -518,11 +518,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     return to;
 };
 var ANIMATION_MS = 500;
-/*const SCORE_MS = 1500;
-
-const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
-const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
-const LOCAL_STORAGE_ZOOM_KEY = 'Nicodemus-zoom';*/
+var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
+var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
+var LOCAL_STORAGE_ZOOM_KEY = 'Nicodemus-zoom';
 var isDebug = window.location.host == 'studio.boardgamearena.com';
 var log = isDebug ? console.log.bind(window.console) : function () { };
 var Nicodemus = /** @class */ (function () {
@@ -536,10 +534,10 @@ var Nicodemus = /** @class */ (function () {
         this.selectedTableProjectsIds = [];
         this.zoom = 1;
         this.clickAction = 'play';
-        /*const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
+        var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
-        } */
+        }
     }
     /*
         setup:
@@ -567,8 +565,13 @@ var Nicodemus = /** @class */ (function () {
         };
         this.createPlayerTables(gamedatas);
         this.addHelp();
-        this.setupPreferences();
         this.setupNotifications();
+        this.setupPreferences();
+        document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
+        document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
+        if (this.zoom !== 1) {
+            this.setZoom(this.zoom);
+        }
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -735,6 +738,39 @@ var Nicodemus = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Nicodemus.prototype.setZoom = function (zoom) {
+        if (zoom === void 0) { zoom = 1; }
+        this.zoom = zoom;
+        localStorage.setItem(LOCAL_STORAGE_ZOOM_KEY, '' + this.zoom);
+        var newIndex = ZOOM_LEVELS.indexOf(this.zoom);
+        dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
+        dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
+        var div = document.getElementById('full-table');
+        if (zoom === 1) {
+            div.style.transform = '';
+            div.style.margin = '';
+        }
+        else {
+            div.style.transform = "scale(" + zoom + ")";
+            div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
+        }
+        document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
+        __spreadArray([this.playerMachineHand], this.playersTables.map(function (pt) { return pt.machineStock; })).forEach(function (stock) { return stock.updateDisplay(); });
+    };
+    Nicodemus.prototype.zoomIn = function () {
+        if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
+            return;
+        }
+        var newIndex = ZOOM_LEVELS.indexOf(this.zoom) + 1;
+        this.setZoom(ZOOM_LEVELS[newIndex]);
+    };
+    Nicodemus.prototype.zoomOut = function () {
+        if (this.zoom === ZOOM_LEVELS[0]) {
+            return;
+        }
+        var newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
+        this.setZoom(ZOOM_LEVELS[newIndex]);
+    };
     Nicodemus.prototype.setupPreferences = function () {
         var _this = this;
         // Extract the ID and value from the UI control
