@@ -567,10 +567,8 @@ var Nicodemus = /** @class */ (function () {
         };
         this.createPlayerTables(gamedatas);
         this.addHelp();
+        this.setupPreferences();
         this.setupNotifications();
-        // TODO TEMP
-        document.getElementById('TODOTEMPbuttonBefore').addEventListener('click', function () { return document.getElementById('full-table').appendChild(document.getElementById('playerstables')); });
-        document.getElementById('TODOTEMPbuttonAfter').addEventListener('click', function () { return document.getElementById('full-table').appendChild(document.getElementById('table-wrapper')); });
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -737,6 +735,32 @@ var Nicodemus = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Nicodemus.prototype.setupPreferences = function () {
+        var _this = this;
+        // Extract the ID and value from the UI control
+        var onchange = function (e) {
+            var match = e.target.id.match(/^preference_control_(\d+)$/);
+            if (!match) {
+                return;
+            }
+            var prefId = +match[1];
+            var prefValue = +e.target.value;
+            _this.prefs[prefId].value = prefValue;
+            _this.onPreferenceChange(prefId, prefValue);
+        };
+        // Call onPreferenceChange() when any value changes
+        dojo.query(".preference_control").connect("onchange", onchange);
+        // Call onPreferenceChange() now
+        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
+    };
+    Nicodemus.prototype.onPreferenceChange = function (prefId, prefValue) {
+        switch (prefId) {
+            // KEEP
+            case 201:
+                document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
+                break;
+        }
+    };
     Nicodemus.prototype.onProjectSelectionChanged = function () {
         var selectionLength = this.selectedPlayerProjectsIds.length + this.selectedTableProjectsIds.length;
         dojo.toggleClass('selectProjects-button', 'disabled', !selectionLength);

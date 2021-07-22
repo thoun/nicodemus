@@ -9,10 +9,6 @@
     <div id="playerstables"></div>
 
     <div id="table-wrapper">
-        <div id="TODOTEMPbuttons">
-            <button id="TODOTEMPbuttonBefore" class="bgabutton bgabutton_blue">Before player tables</button><br>
-            <button id="TODOTEMPbuttonAfter" class="bgabutton bgabutton_blue">After player tables</button><br>
-        </div>
         <div id="table">
             <div class="projects">
                 <div id="project-deck" class="stockitem"></div>

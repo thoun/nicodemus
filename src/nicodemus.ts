@@ -74,11 +74,8 @@ class Nicodemus implements NicodemusGame {
 
         this.addHelp();
 
+        this.setupPreferences();
         this.setupNotifications();
-
-        // TODO TEMP
-        document.getElementById('TODOTEMPbuttonBefore').addEventListener('click', () => document.getElementById('full-table').appendChild(document.getElementById('playerstables')));
-        document.getElementById('TODOTEMPbuttonAfter').addEventListener('click', () => document.getElementById('full-table').appendChild(document.getElementById('table-wrapper')));
 
         log( "Ending game setup" );
     }
@@ -264,6 +261,40 @@ class Nicodemus implements NicodemusGame {
 
 
     ///////////////////////////////////////////////////
+    
+
+    private setupPreferences() {
+        // Extract the ID and value from the UI control
+        const onchange = (e) => {
+          var match = e.target.id.match(/^preference_control_(\d+)$/);
+          if (!match) {
+            return;
+          }
+          var prefId = +match[1];
+          var prefValue = +e.target.value;
+          (this as any).prefs[prefId].value = prefValue;
+          this.onPreferenceChange(prefId, prefValue);
+        }
+        
+        // Call onPreferenceChange() when any value changes
+        dojo.query(".preference_control").connect("onchange", onchange);
+        
+        // Call onPreferenceChange() now
+        dojo.forEach(
+          dojo.query("#ingame_menu_content .preference_control"),
+          el => onchange({ target: el })
+        );
+    }
+      
+    private onPreferenceChange(prefId: number, prefValue: number) {
+        switch (prefId) {
+            // KEEP
+            case 201: 
+                document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
+                break;
+        }
+    }
+
     private onProjectSelectionChanged() {
         const selectionLength = this.selectedPlayerProjectsIds.length + this.selectedTableProjectsIds.length;
         dojo.toggleClass('selectProjects-button', 'disabled', !selectionLength);
