@@ -76,6 +76,10 @@ class Nicodemus implements NicodemusGame {
 
         this.setupNotifications();
 
+        // TODO TEMP
+        document.getElementById('TODOTEMPbuttonBefore').addEventListener('click', () => document.getElementById('full-table').appendChild(document.getElementById('playerstables')));
+        document.getElementById('TODOTEMPbuttonAfter').addEventListener('click', () => document.getElementById('full-table').appendChild(document.getElementById('table-wrapper')));
+
         log( "Ending game setup" );
     }
 
@@ -284,6 +288,7 @@ class Nicodemus implements NicodemusGame {
         if (player) {
             const color = player.color.startsWith('00') ? 'blue' : 'red';
             dojo.addClass('my-hand-label', color);
+            // document.getElementById('myhand-wrap').style.backgroundColor = `#${player.color}40`;
         }
     }
     

@@ -15,7 +15,7 @@ class PlayerTable {
         const color = player.color.startsWith('00') ? 'blue' : 'red';
 
         let html = `
-        <div id="player-table-${this.playerId}" class="player-table whiteblock ${side}">
+        <div id="player-table-${this.playerId}" class="player-table whiteblock ${side}" style="background-color: #${player.color}40;">
             <div class="name-column ${color} ${side}">
                 <div class="player-name">${player.name}</div>
                 <div id="player-icon-${this.playerId}" class="player-icon ${color}"></div>
