@@ -239,7 +239,7 @@ trait ActionTrait {
             throw new Error("This machine cannot be selected for effect");
         }
 
-        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+        $machine = $this->getMachineForEffect();
 
         $context = $this->getApplyEffectContext();
         if ($machine->type == 4 && $machine->subType) {
@@ -264,7 +264,7 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+        $machine = $this->getMachineForEffect();
 
         $context = $this->getApplyEffectContext();
         $context->selectedCardId = $id;
@@ -285,7 +285,7 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+        $machine = $this->getMachineForEffect();
 
         $context = $this->getApplyEffectContext();
         $context->selectedResources = $resourcesTypes;
@@ -306,7 +306,7 @@ trait ActionTrait {
             throw new Error("Exchange cannot be selected");
         }
 
-        $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
+        $machine = $this->getMachineForEffect();
 
         $this->removeResource($playerId, 1, $from);
         $this->addResource($playerId, 1, $to);

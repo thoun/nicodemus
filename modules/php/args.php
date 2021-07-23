@@ -74,7 +74,7 @@ trait ArgsTrait {
             if ($machine->subType == 1) {
                 $selectableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $playerId));
             } else {
-                $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+                $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table', null, 'location_arg'));
 
                 if ($machine->subType == 2 || $machine->subType == 3) {
                     $sliceSize = $machine->subType == 2 ? 3 : 2;

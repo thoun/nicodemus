@@ -802,7 +802,7 @@ class Nicodemus implements NicodemusGame {
         try {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
-                if (typeof args.machine_type == 'string' && args.machine_type[0] != '<') {
+                if (typeof args.machine_type == 'string' && args.machine_type[0] != '<' && typeof args.machine == 'object') {
                     args.machine_type = `<strong style="color: ${this.getMachineColor(args.machine.type)}">${args.machine_type}</strong>`;
                 }
 
@@ -811,7 +811,6 @@ class Nicodemus implements NicodemusGame {
                         args[`${argNameStart}Name`] = formatTextIcons(`[resource${args[`${argNameStart}Type`]}]`);
                     }
                 });
-
                 if (typeof args.machineImage == 'number') {
                     args.machineImage = `<div class="machine machine${MACHINES_IDS.indexOf(args.machineImage)}"></div>`;
                 }
@@ -823,7 +822,7 @@ class Nicodemus implements NicodemusGame {
                 if (typeof args.machineEffect == 'object') {
                     const uniqueId = getUniqueId(args.machineEffect);
                     const id = `action-bar-effect${uniqueId}`;
-                    args.machineEffect = `<div id="${id}" class="effect effect${MACHINES_IDS.indexOf(uniqueId)}"></div>`;
+                    args.machineEffect = `<div id="${id}" class="effect-in-text effect effect${MACHINES_IDS.indexOf(uniqueId)}"></div>`;
                     
                     setTimeout(() => {
                         const effectImage = document.getElementById(id);

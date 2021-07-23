@@ -1168,7 +1168,7 @@ var Nicodemus = /** @class */ (function () {
         try {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
-                if (typeof args.machine_type == 'string' && args.machine_type[0] != '<') {
+                if (typeof args.machine_type == 'string' && args.machine_type[0] != '<' && typeof args.machine == 'object') {
                     args.machine_type = "<strong style=\"color: " + this.getMachineColor(args.machine.type) + "\">" + args.machine_type + "</strong>";
                 }
                 ['resource', 'resourceFrom', 'resourceTo'].forEach(function (argNameStart) {
@@ -1185,7 +1185,7 @@ var Nicodemus = /** @class */ (function () {
                 if (typeof args.machineEffect == 'object') {
                     var uniqueId_1 = getUniqueId(args.machineEffect);
                     var id_1 = "action-bar-effect" + uniqueId_1;
-                    args.machineEffect = "<div id=\"" + id_1 + "\" class=\"effect effect" + MACHINES_IDS.indexOf(uniqueId_1) + "\"></div>";
+                    args.machineEffect = "<div id=\"" + id_1 + "\" class=\"effect-in-text effect effect" + MACHINES_IDS.indexOf(uniqueId_1) + "\"></div>";
                     setTimeout(function () {
                         var effectImage = document.getElementById(id_1);
                         if (effectImage) {

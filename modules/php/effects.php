@@ -247,6 +247,7 @@ trait EffectTrait {
                 self::notifyAllPlayers('applyAttackEffectNotif', clienttranslate('${player_name} uses ${machine_type} effect to steal 1 ${resourceName} and 1 machine with ${machineImage}'), [
                     'playerId' => $playerId,
                     'player_name' => self::getActivePlayerName(),
+                    'machine' => $machine,
                     'machine_type' => $this->getColorName($machine->type),
                     'machineImage' => $this->getUniqueId($machine),
                 ]);
@@ -262,6 +263,7 @@ trait EffectTrait {
                     self::notifyAllPlayers('applyAttackEffectNotif', clienttranslate('${player_name} uses ${machine_type} effect to steal 1 ${resourceName} and 1 machine with ${machineImage}'), [
                         'playerId' => $playerId,
                         'player_name' => self::getActivePlayerName(),
+                        'machine' => $machine,
                         'machine_type' => $this->getColorName($machine->type),
                         'machineImage' => $this->getUniqueId($machine),
                         'resourceName' => $this->getResourceName($resourceType),
@@ -294,6 +296,7 @@ trait EffectTrait {
                 self::notifyAllPlayers('applyAttackEffectNotif', clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard 2 ${resourceName} and machines with ${machineImage}'), [
                     'playerId' => $playerId,
                     'player_name' => self::getActivePlayerName(),
+                    'machine' => $machine,
                     'machine_type' => $this->getColorName($machine->type),
                     'machineImage' => $this->getUniqueId($machine),
                     'resourceName' => $this->getResourceName(0),
@@ -320,6 +323,7 @@ trait EffectTrait {
                     self::notifyAllPlayers('applyAttackEffectNotif', $message, [
                         'playerId' => $playerId,
                         'player_name' => self::getActivePlayerName(),
+                        'machine' => $machine,
                         'machine_type' => $this->getColorName($machine->type),
                         'machineImage' => $this->getUniqueId($machine),                        
                         'resource1Name' => $this->getResourceName($context->selectedResources[0]),
@@ -346,6 +350,7 @@ trait EffectTrait {
                     self::notifyAllPlayers('addWorkshopProjects', clienttranslate('${player_name} uses ${machine_type} effect to copy ${projectImage}'), [
                         'playerId' => $playerId,
                         'projects' => [$project],
+                        'machine' => $machine,
                         'machine_type' => $this->getColorName($machine->type),
                         'projectImage' => $this->getUniqueId($project),
                     ]);
@@ -361,6 +366,7 @@ trait EffectTrait {
                     self::notifyAllPlayers('machineCopied', clienttranslate('${player_name} uses ${machine_type} effect to copy ${machineImage}'), [
                         'playerId' => $playerId,
                         'player_name' => self::getActivePlayerName(),
+                        'machine' => $machine,
                         'machine_type' => $this->getColorName($machine->type),
                         'machineImage' => $this->getUniqueId($copiedMachine),
                     ]);

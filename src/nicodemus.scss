@@ -93,8 +93,15 @@ html {
     margin: -5px 0;
   }
 
-  .effect {
+  .effect-in-text {
     margin-bottom: -10px;
+  }
+
+  #applyEffect-button {
+    .effect {
+      margin-top: -5px;
+      margin-bottom: -5px;
+    }
   }
 }
 

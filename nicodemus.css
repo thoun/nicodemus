@@ -381,8 +381,12 @@ html {
   height: 20px;
   margin: -5px 0;
 }
-#page-title .effect {
+#page-title .effect-in-text {
   margin-bottom: -10px;
+}
+#page-title #applyEffect-button .effect {
+  margin-top: -5px;
+  margin-bottom: -5px;
 }
 
 .log .icon {
