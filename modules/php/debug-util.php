@@ -14,6 +14,12 @@ trait DebugUtilTrait {
         $this->debugSetMachineInHand(2343492, 2, 2);
         $this->debugSetMachineInTable(1, 1);
         $this->debugSetMachineInTable(1, 2);
+        $this->debugSetMachineInTable(1, 3);
+        $this->debugSetMachineInTable(1, 4);
+        $this->debugSetMachineInTable(1, 5);
+        $this->debugSetMachineInTable(2, 1);
+        $this->debugSetMachineInTable(2, 2);
+        $this->debugSetMachineInTable(2, 3);
         //$this->debugSetMachineInWorkshop(2343492, 1, 5);
         //$this->debugSetMachineInWorkshop(2343492, 2, 1);
 

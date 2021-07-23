@@ -744,7 +744,6 @@ class Nicodemus implements NicodemusGame {
         } else if (notif.args.from > 0) {
             from = `player-icon-${from}`;
         }
-        console.log(notif.args.from,from );
         notif.args.machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id, from));
     }
 

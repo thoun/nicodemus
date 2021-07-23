@@ -54,7 +54,7 @@ class Table {
 
         // machines
 
-        html = `<div class="machines">`;
+        html = `<div id="table-machines" class="machines">`;
         for (let i=1; i<=10; i++) {
             const firstRow = i<=5;
             const left = (firstRow ? 204 : 0) + (i-(firstRow ? 1 : 6)) * 204;
@@ -214,14 +214,16 @@ class Table {
 
             const resourceDivId = `resource${type}-${resource.id}`;
             const resourceDiv = document.getElementById(`resource${type}-${resource.id}`);
-            
             if (resourceDiv) {
                 const originDiv = resourceDiv.parentElement;
                 const originPlaced: PlacedTokens[] = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
                 originDiv.dataset.placed = JSON.stringify(originPlaced.filter(place => place.resourceId != resource.id));
 
-                if (originDiv.classList.contains('to_be_destroyed')) {
+                const tableMachinesDiv = document.getElementById('table-machines');
+
+                if ((tableMachinesDiv.contains(originDiv) && tableMachinesDiv.contains(div)) || originDiv.classList.contains('to_be_destroyed')) {
                     div.appendChild(resourceDiv);
+                    console.log('outer', div.outerHTML);
                 } else {
                     slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
                 }

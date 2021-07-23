@@ -236,7 +236,7 @@ var Table = /** @class */ (function () {
             _loop_2(i);
         }
         // machines
-        html = "<div class=\"machines\">";
+        html = "<div id=\"table-machines\" class=\"machines\">";
         for (var i = 1; i <= 10; i++) {
             var firstRow = i <= 5;
             var left = (firstRow ? 204 : 0) + (i - (firstRow ? 1 : 6)) * 204;
@@ -384,8 +384,10 @@ var Table = /** @class */ (function () {
                 var originDiv = resourceDiv.parentElement;
                 var originPlaced = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
                 originDiv.dataset.placed = JSON.stringify(originPlaced.filter(function (place) { return place.resourceId != resource.id; }));
-                if (originDiv.classList.contains('to_be_destroyed')) {
+                var tableMachinesDiv = document.getElementById('table-machines');
+                if ((tableMachinesDiv.contains(originDiv) && tableMachinesDiv.contains(div)) || originDiv.classList.contains('to_be_destroyed')) {
                     div.appendChild(resourceDiv);
+                    console.log('outer', div.outerHTML);
                 }
                 else {
                     slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
@@ -1115,7 +1117,6 @@ var Nicodemus = /** @class */ (function () {
         else if (notif.args.from > 0) {
             from = "player-icon-" + from;
         }
-        console.log(notif.args.from, from);
         notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id, from); });
     };
     Nicodemus.prototype.notif_addWorkshopProjects = function (notif) {

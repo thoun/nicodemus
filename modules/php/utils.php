@@ -292,7 +292,7 @@ trait UtilTrait {
             return;
         }
 
-        $machines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+        $machines = $this->getMachinesWithResourcesFromDb($this->machines->getCardsInLocation('table'));
 
         $row1machines = [];
         $row2machines = [];
@@ -318,8 +318,12 @@ trait UtilTrait {
         foreach($row1machines as &$machine) {
             $this->machines->moveCard($machine->id, 'discard');
         }
+
+        $movedRow2machines = [];
         foreach($row2machines as &$machine) {
+            $originalSpot = $machine->location_arg;
             $machine->location_arg -= 5;
+            $movedRow2machines[$originalSpot] = $machine;
             $this->machines->moveCard($machine->id, 'table', $machine->location_arg);
         }
 
@@ -328,7 +332,7 @@ trait UtilTrait {
         ]);
 
         self::notifyAllPlayers('tableMove', '', [
-            'moved' => $row2machines,
+            'moved' => $movedRow2machines,
         ]);
     }
 
