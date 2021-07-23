@@ -293,7 +293,8 @@ var Table = /** @class */ (function () {
     Table.prototype.onMachineSelectionChanged = function (items, stockId) {
         if (items.length == 1) {
             var cardId = Number(items[0].id);
-            var payments = JSON.parse(document.getElementById(stockId + "_item_" + cardId).dataset.payments);
+            var datasetPayments = document.getElementById(stockId + "_item_" + cardId).dataset.payments;
+            var payments = (datasetPayments === null || datasetPayments === void 0 ? void 0 : datasetPayments.length) && datasetPayments[0] == '[' ? JSON.parse(datasetPayments) : undefined;
             this.game.machineClick(cardId, 'table', payments);
         }
     };
@@ -658,7 +659,7 @@ var Nicodemus = /** @class */ (function () {
         this.setHandSelectable(false);
         this.table.setMachineSelectable(false);
         dojo.query('.stockitem').removeClass('disabled');
-        dojo.query('.stockitem').forEach(function (div) { return div.dataset.payments = undefined; });
+        dojo.query('.stockitem').forEach(function (div) { return div.dataset.payments = ''; });
     };
     Nicodemus.prototype.onLeavingChoosePlayAction = function () {
         dojo.query('.stockitem').removeClass('selected');

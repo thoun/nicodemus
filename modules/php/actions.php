@@ -21,6 +21,11 @@ trait ActionTrait {
         
         $playerId = intval(self::getActivePlayerId());
 
+        $selectableMachines = $this->getSelectableMachinesForChooseAction($playerId);
+        if (!$this->array_some($selectableMachines, function ($m) use ($id) { return $m->id == $id; })) {
+            throw new Error("This machine cannot be played");
+        }
+
         $freeTableSpot = $this->countMachinesOnTable() + 1;
         $this->machines->moveCard($id, 'table', $freeTableSpot);
         self::setGameStateValue(PLAYED_MACHINE, $id);
@@ -42,6 +47,11 @@ trait ActionTrait {
         self::checkAction('repairMachine'); 
         
         $playerId = intval(self::getActivePlayerId());
+
+        $selectableMachines = $this->getSelectableMachinesForChooseAction($playerId);
+        if (!$this->array_some($selectableMachines, function ($m) use ($id) { return $m->id == $id; })) {
+            throw new Error("This machine cannot be repaired");
+        }
 
         $machine = $this->getMachineFromDb($this->machines->getCard($id));
 
@@ -218,9 +228,9 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        $selectableMachines = $this->getSelectableMachinesForChooseAction($playerId);
+        $selectableMachines = $this->selectableMachinesForEffect();
         if (!$this->array_some($selectableMachines, function ($m) use ($id) { return $m->id == $id; })) {
-            throw new Error("Selected machine cannot be player or repaired");
+            throw new Error("This machine cannot be selected for effect");
         }
 
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));

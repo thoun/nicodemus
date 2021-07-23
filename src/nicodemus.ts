@@ -181,7 +181,7 @@ class Nicodemus implements NicodemusGame {
         this.setHandSelectable(false);
         this.table.setMachineSelectable(false);
         dojo.query('.stockitem').removeClass('disabled');
-        dojo.query('.stockitem').forEach(div => div.dataset.payments = undefined);
+        dojo.query('.stockitem').forEach(div => div.dataset.payments = '');
     }
 
     onLeavingChoosePlayAction() {

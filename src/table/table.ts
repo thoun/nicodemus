@@ -112,7 +112,9 @@ class Table {
     public onMachineSelectionChanged(items: StockItems[], stockId: string) {
         if (items.length == 1) {
             const cardId = Number(items[0].id);
-            const payments = JSON.parse(document.getElementById(`${stockId}_item_${cardId}`).dataset.payments);
+
+            const datasetPayments = document.getElementById(`${stockId}_item_${cardId}`).dataset.payments;
+            const payments = datasetPayments?.length && datasetPayments[0] == '[' ? JSON.parse(datasetPayments) : undefined;
             this.game.machineClick(cardId, 'table', payments);
         }
     }

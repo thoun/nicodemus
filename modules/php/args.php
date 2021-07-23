@@ -59,7 +59,8 @@ trait ArgsTrait {
         ];
     }
 
-    function argSelectMachine() {
+    function selectableMachinesForEffect() {
+
         $playerId = self::getActivePlayerId();
 
         $machine = $this->getMachineForEffect();
@@ -89,6 +90,12 @@ trait ArgsTrait {
         if ($selectableMachines == null) {
             throw new Error("Impossible to determinate cards to select");
         }
+
+        return $selectableMachines;
+    }
+
+    function argSelectMachine() {
+        $selectableMachines = $this->selectableMachinesForEffect();
 
         return [
             'selectableMachines' => $selectableMachines,
