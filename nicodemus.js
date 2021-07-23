@@ -594,6 +594,7 @@ var Nicodemus = /** @class */ (function () {
                 this.clickAction = 'select';
                 this.onEnteringStateSelectMachine(args.args);
                 break;
+            case 'selectProject':
             case 'chooseProject':
                 this.onEnteringStateChooseProject(args.args);
                 break;
@@ -631,7 +632,7 @@ var Nicodemus = /** @class */ (function () {
             this.getPlayerTable(this.getPlayerId()).setProjectSelectable(true);
             this.table.setProjectSelectable(true);
             this.getProjectStocks().forEach(function (stock) { return stock.items
-                .filter(function (item) { return !args.completeProjects.some(function (project) { return project.id === Number(item.id); }); })
+                .filter(function (item) { return !args.projects.some(function (project) { return project.id === Number(item.id); }); })
                 .forEach(function (item) { return dojo.addClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
         }
     };
@@ -650,8 +651,9 @@ var Nicodemus = /** @class */ (function () {
             case 'selectMachine':
                 this.clickAction = 'select';
                 this.onLeavingStateSelectMachine();
+            case 'selectProject':
             case 'chooseProject':
-                this.table.setProjectSelectable(false);
+                this.onLeavingChooseProject();
                 break;
         }
     };
@@ -672,7 +674,7 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.onLeavingChooseProject = function () {
         var _a;
-        this.setHandSelectable(false);
+        this.table.setProjectSelectable(false);
         (_a = this.getPlayerTable(this.getPlayerId())) === null || _a === void 0 ? void 0 : _a.setProjectSelectable(false);
         dojo.query('.stockitem').removeClass('disabled');
     };
@@ -729,7 +731,7 @@ var Nicodemus = /** @class */ (function () {
                     break;
                 case 'chooseProject':
                     this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects(_this.table.getSelectedProjectsIds()); });
-                    this.addActionButton('skipProjects-button', _('Skip'), function () { return _this.selectProjects([]); }, null, null, 'red');
+                    this.addActionButton('skipProjects-button', _('Skip'), function () { return _this.skipSelectProjects(); }, null, null, 'red');
                     dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
                     dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);
                     break;
@@ -755,8 +757,8 @@ var Nicodemus = /** @class */ (function () {
             div.style.transform = "scale(" + zoom + ")";
             div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
         }
-        document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
         __spreadArray([this.playerMachineHand], this.playersTables.map(function (pt) { return pt.machineStock; })).forEach(function (stock) { return stock.updateDisplay(); });
+        document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
     };
     Nicodemus.prototype.zoomIn = function () {
         if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
@@ -972,6 +974,12 @@ var Nicodemus = /** @class */ (function () {
             ids: ids.join(',')
         });
     };
+    Nicodemus.prototype.skipSelectProjects = function () {
+        if (!this.checkAction('skipSelectProjects')) {
+            return;
+        }
+        this.takeAction('skipSelectProjects');
+    };
     Nicodemus.prototype.selectResource = function (resourcesTypes) {
         if (!this.checkAction('selectResource')) {
             return;
@@ -1107,6 +1115,7 @@ var Nicodemus = /** @class */ (function () {
         else if (notif.args.from > 0) {
             from = "player-icon-" + from;
         }
+        console.log(notif.args.from, from);
         notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id, from); });
     };
     Nicodemus.prototype.notif_addWorkshopProjects = function (notif) {

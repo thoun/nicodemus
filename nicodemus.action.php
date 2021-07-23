@@ -90,6 +90,14 @@
         self::ajaxResponse();
     }
 
+    public function skipSelectProjects() {
+        self::setAjaxMode();
+
+        $this->game->skipSelectProjects();
+
+        self::ajaxResponse();
+    }
+
     public function selectMachine() {
         self::setAjaxMode();     
 

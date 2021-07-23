@@ -70,6 +70,7 @@ trait EffectTrait {
         ]);
         self::notifyPlayer($playerId, 'addMachinesToHand', '', [
             'machines' => [$stolenMachine],
+            'from' => $opponentId,
         ]);
     }
 

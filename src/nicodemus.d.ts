@@ -80,10 +80,6 @@ interface ChoosePlayActionArgs {
     canApplyEffect: boolean;
 }
 
-interface ChooseProjectArgs {
-    completeProjects: Project[];
-}
-
 interface SelectMachineArgs {
     selectableMachines: Machine[];
 }

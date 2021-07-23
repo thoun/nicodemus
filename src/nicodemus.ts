@@ -106,8 +106,8 @@ class Nicodemus implements NicodemusGame {
                 this.clickAction = 'select';
                 this.onEnteringStateSelectMachine(args.args as SelectMachineArgs);
                 break;
-            case 'chooseProject':
-                this.onEnteringStateChooseProject(args.args as ChooseProjectArgs);
+                case 'selectProject': case 'chooseProject':
+                this.onEnteringStateChooseProject(args.args as SelectProjectArgs);
                 break;
         }
     }
@@ -142,14 +142,14 @@ class Nicodemus implements NicodemusGame {
         stocks.forEach(stock => stock.setSelectionMode(1));
     }
 
-    private onEnteringStateChooseProject(args: ChooseProjectArgs) {
+    private onEnteringStateChooseProject(args: SelectProjectArgs) {
         if((this as any).isCurrentPlayerActive()) {
             this.setHandSelectable(true);
             this.getPlayerTable(this.getPlayerId()).setProjectSelectable(true);
             this.table.setProjectSelectable(true);
 
             this.getProjectStocks().forEach(stock => stock.items
-                .filter(item => !args.completeProjects.some(project => project.id === Number(item.id)))
+                .filter(item => !args.projects.some(project => project.id === Number(item.id)))
                 .forEach(item => dojo.addClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
             );
         }
@@ -171,8 +171,8 @@ class Nicodemus implements NicodemusGame {
             case 'selectMachine':
                 this.clickAction = 'select';
                 this.onLeavingStateSelectMachine();
-            case 'chooseProject':
-                this.table.setProjectSelectable(false);
+            case 'selectProject': case 'chooseProject':
+                this.onLeavingChooseProject();
                 break;
         }
     }
@@ -197,7 +197,7 @@ class Nicodemus implements NicodemusGame {
     }
 
     onLeavingChooseProject() {
-        this.setHandSelectable(false);
+        this.table.setProjectSelectable(false);
         this.getPlayerTable(this.getPlayerId())?.setProjectSelectable(false);
         dojo.query('.stockitem').removeClass('disabled');
     }
@@ -253,7 +253,7 @@ class Nicodemus implements NicodemusGame {
 
                 case 'chooseProject':
                     (this as any).addActionButton('selectProjects-button', _('Complete projects'), () => this.selectProjects(this.table.getSelectedProjectsIds()));
-                    (this as any).addActionButton('skipProjects-button', _('Skip'), () => this.selectProjects([]), null, null, 'red');
+                    (this as any).addActionButton('skipProjects-button', _('Skip'), () => this.skipSelectProjects(), null, null, 'red');
                     dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
                     dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);
                     break;
@@ -284,9 +284,9 @@ class Nicodemus implements NicodemusGame {
             div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
         }
 
-        document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
-
         [this.playerMachineHand,  ...this.playersTables.map(pt => pt.machineStock)].forEach(stock => stock.updateDisplay());
+
+        document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
     }
 
     public zoomIn() {
@@ -560,6 +560,14 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
+    public skipSelectProjects() {
+        if(!(this as any).checkAction('skipSelectProjects')) {
+            return;
+        }
+
+        this.takeAction('skipSelectProjects');
+    }
+
     public selectResource(resourcesTypes: number[]) {
         if(!(this as any).checkAction('selectResource')) {
             return;
@@ -736,6 +744,7 @@ class Nicodemus implements NicodemusGame {
         } else if (notif.args.from > 0) {
             from = `player-icon-${from}`;
         }
+        console.log(notif.args.from,from );
         notif.args.machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id, from));
     }
 

@@ -307,7 +307,11 @@ trait UtilTrait {
         }
 
         foreach($row1machines as &$machine) {
-            $charcoaliums = $this->getResourcesFromDb($this->resources->moveAllCardsInLocation('machine', 'table', $machine->id));
+            $charcoaliums = $this->getResourcesFromDb($this->resources->getCardsInLocation('machine', $machine->id));
+            $this->resources->moveAllCardsInLocation('machine', 'table', $machine->id);
+            foreach($charcoaliums as &$charcoalium) {
+                $charcoalium->location = 'table';
+            }
             $removedCharcoaliums = $removedCharcoaliums + $charcoaliums;
         }
 
@@ -387,10 +391,19 @@ trait UtilTrait {
         return $produced;
     }
 
+    function getPlayerResources(int $playerId) {
+        $playerResources = [0, 0, 0, 0];
+        for ($i=0; $i<=3; $i++) {
+            $playerResources[$i] += count($this->getResources($i, $playerId));
+        }
+        return $playerResources;
+    }
+
     function getCanSpend(int $playerId) {
         $canSpend = $this->getProducedResources($playerId);
+        $playerResources = $this->getPlayerResources($playerId);
         for ($i=0; $i<=3; $i++) {
-            $canSpend[$i] += count($this->getResources($i, $playerId));
+            $canSpend[$i] += $playerResources[$i];
         }
         return $canSpend;
     }
@@ -417,7 +430,7 @@ trait UtilTrait {
 
     function getMachineCostForPlayerBeforeJoker(int $playerId, object $machine, array $tableMachines) {
         $producedResources = $this->getProducedResources($playerId);
-        $cost = $this->getMachineCost($machine,$tableMachines);
+        $cost = $this->getMachineCost($machine, $tableMachines);
 
         for ($i=1; $i<=3; $i++) {
             if (array_key_exists($i, $machine->cost)) {

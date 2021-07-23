@@ -31,6 +31,7 @@ trait StateTrait {
 
             self::notifyPlayer($playerId, 'addMachinesToHand', '', [
                 'machines' => $machines,
+                'from' => 0,
             ]);
         }
 

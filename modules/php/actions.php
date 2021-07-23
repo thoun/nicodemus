@@ -223,6 +223,12 @@ trait ActionTrait {
         $this->gamestate->nextState('nextPlayer');
     }
 
+    public function skipSelectProjects() {
+        self::checkAction('skipSelectProjects'); 
+
+        $this->gamestate->nextState('nextPlayer');
+    }
+
     public function selectMachine(int $id) {
         self::checkAction('selectMachine'); 
         

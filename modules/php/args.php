@@ -16,6 +16,8 @@ trait ArgsTrait {
 
     function getSelectableMachinesForChooseAction(int $playerId) {
         $canSpend = $this->getCanSpend($playerId);
+        $playerResources = $this->getPlayerResources($playerId);        
+        $jokers = array_key_exists(9, $canSpend) ? $canSpend[9] : 0;
 
         $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
 
@@ -24,7 +26,8 @@ trait ArgsTrait {
         foreach($tableMachines as &$machine) {
             $cost = $this->getMachineCost($machine, $tableMachines);
             if ($this->canPay($canSpend, $cost)) {
-                $machine->payments = $this->getPossiblePayments($canSpend, $cost);
+                $costForPlayer = $this->getMachineCostForPlayerBeforeJoker($playerId, $machine, $tableMachines);
+                $machine->payments = $this->getPossiblePayments($jokers, $costForPlayer, $playerResources);
 
                 foreach($machine->payments as &$payment) {
                     $payment->flatten();
@@ -178,23 +181,36 @@ trait ArgsTrait {
         $completeProjects = $this->getCompleteProjects($playerId, $machine);
     
         return [
-            'completeProjects' => $completeProjects,
+            'projects' => $completeProjects,
         ];
     }
 
-    function getPossiblePayments(array $canSpend, array $cost) {
-        $jokers = array_key_exists(9, $canSpend) ? $canSpend[9] : 0;
+    function getPossiblePayments(int $jokers, array $cost, array $playerResources) {
         $possiblePayment = new Payment($cost, $jokers);
 
         if ($possiblePayment->remainingJokers == 0) {
             return [$possiblePayment];
         } else {
-            return $this->computeRemainingPossiblePayments($possiblePayment, 1);
+            $possiblePayments = $this->computeRemainingPossiblePayments($possiblePayment, 1);
+            $possiblePaymentsForPlayerResources = [];
+
+            foreach($possiblePayments as $possiblePayment) {
+                if ($this->canPay($playerResources, $possiblePayment->remainingCost)) {
+                    $possiblePaymentsForPlayerResources[] = $possiblePayment;
+                }
+            }
+
+            return $possiblePaymentsForPlayerResources;
         }
     }
 
     function computeRemainingPossiblePayments(object $possiblePayment, int $lastCheckedResource) {
         $possiblePayments = [];
+
+        if ($possiblePayment->remainingCost[1] === 0 && $possiblePayment->remainingCost[2] === 0 && $possiblePayment->remainingCost[3] === 0) {
+            $possiblePayments[] = $possiblePayment;
+        }
+
         foreach($possiblePayment->remainingCost as $resource => $number) {
             if ($resource >= $lastCheckedResource && $number > 0) {
                 $newRemainingCost = $possiblePayment->remainingCost;
@@ -203,7 +219,7 @@ trait ArgsTrait {
                 $remainingJokers = $possiblePayment->remainingJokers - 1;
                 $payment = new Payment($newRemainingCost, $remainingJokers, array_merge($possiblePayment->jokers, [$resource]));
 
-                if ($remainingJokers > 0) {
+                if ($remainingJokers > 0 ) {
                     $possiblePayments = array_merge($possiblePayments, $this->computeRemainingPossiblePayments($payment, $resource));
                 } else {
                     $possiblePayments[] = $payment;

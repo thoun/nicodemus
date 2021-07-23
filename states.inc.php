@@ -199,6 +199,7 @@ $playerActionsGameStates = [
         "args" => "argChooseProject",
         "possibleactions" => [ 
             "selectProjects",
+            "skipSelectProjects",
         ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER,

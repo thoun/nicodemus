@@ -426,7 +426,7 @@ html {
   box-shadow: 0 0 5px 6px white;
 }
 .stockitem.disabled {
-  filter: contrast(0.6);
+  filter: contrast(0.5);
   cursor: not-allowed;
 }
 

@@ -148,7 +148,7 @@ html {
   }
     
   &.disabled {
-      filter: contrast(0.6);
+      filter: contrast(0.5);
       cursor: not-allowed;
       // pointer-events: none;
   }
