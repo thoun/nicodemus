@@ -107,8 +107,8 @@ $playerActionsGameStates = [
 
     ST_PLAYER_CHOOSE_PLAY_ACTION => [
         "name" => "choosePlayAction",
-        "description" => clienttranslate('${actplayer} must choose action for played card'),
-        "descriptionmyturn" => clienttranslate('${you} must choose action for played card'),
+        "description" => clienttranslate('${actplayer} must choose an action for played card'),
+        "descriptionmyturn" => clienttranslate('${you} must choose an action for played card'),
         "type" => "activeplayer",        
         "args" => "argChoosePlayAction",
         "possibleactions" => [ 
@@ -128,8 +128,8 @@ $playerActionsGameStates = [
 
     ST_PLAYER_SELECT_MACHINE => [
         "name" => "selectMachine",
-        "description" => clienttranslate('${actplayer} must choose a machine TODO FOR WHAT ?'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a machine TODO FOR WHAT ?'),
+        "description" => clienttranslate('${actplayer} must choose a machine for effect ${machineEffect}'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a machine for effect ${machineEffect}'),
         "type" => "activeplayer",        
         "args" => "argSelectMachine",
         "possibleactions" => [ 
@@ -146,8 +146,8 @@ $playerActionsGameStates = [
 
     ST_PLAYER_SELECT_PROJECT => [
         "name" => "selectProject",
-        "description" => clienttranslate('${actplayer} must choose a project TODO FOR WHAT ?'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a project TODO FOR WHAT ?'),
+        "description" => clienttranslate('${actplayer} must choose a project for effect ${machineEffect}'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a project for effect ${machineEffect}'),
         "type" => "activeplayer",        
         "args" => "argSelectProject",
         "possibleactions" => [ 
@@ -161,8 +161,8 @@ $playerActionsGameStates = [
 
     ST_PLAYER_SELECT_RESOURCE => [
         "name" => "selectResource",
-        "description" => clienttranslate('${actplayer} must choose resource(s) TODO FOR WHAT ?'),
-        "descriptionmyturn" => clienttranslate('${you} must choose resource(s) TODO FOR WHAT ?'),
+        "description" => clienttranslate('${actplayer} must choose resource(s) for effect ${machineEffect}'),
+        "descriptionmyturn" => clienttranslate('${you} must choose resource(s) for effect ${machineEffect}'),
         "type" => "activeplayer",        
         "args" => "argSelectResource",
         "possibleactions" => [ 
@@ -193,8 +193,8 @@ $playerActionsGameStates = [
 
     ST_PLAYER_CHOOSE_PROJECT => [
         "name" => "chooseProject",
-        "description" => clienttranslate('${actplayer} can select project(s)'),
-        "descriptionmyturn" => clienttranslate('${you} can select project(s)'),
+        "description" => clienttranslate('${actplayer} can select complete project(s)'),
+        "descriptionmyturn" => clienttranslate('${you} can select complete project(s)'),
         "type" => "activeplayer",
         "args" => "argChooseProject",
         "possibleactions" => [ 

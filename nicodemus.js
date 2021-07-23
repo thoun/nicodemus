@@ -1164,6 +1164,7 @@ var Nicodemus = /** @class */ (function () {
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     Nicodemus.prototype.format_string_recursive = function (log, args) {
+        var _this = this;
         try {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
@@ -1180,6 +1181,17 @@ var Nicodemus = /** @class */ (function () {
                 }
                 if (typeof args.projectImage == 'number') {
                     args.projectImage = "<div class=\"project project" + PROJECTS_IDS.indexOf(args.projectImage) + "\"></div>";
+                }
+                if (typeof args.machineEffect == 'object') {
+                    var uniqueId_1 = getUniqueId(args.machineEffect);
+                    var id_1 = "action-bar-effect" + uniqueId_1;
+                    args.machineEffect = "<div id=\"" + id_1 + "\" class=\"effect effect" + MACHINES_IDS.indexOf(uniqueId_1) + "\"></div>";
+                    setTimeout(function () {
+                        var effectImage = document.getElementById(id_1);
+                        if (effectImage) {
+                            _this.addTooltipHtml(id_1, getMachineTooltip(uniqueId_1));
+                        }
+                    }, 200);
                 }
             }
         }

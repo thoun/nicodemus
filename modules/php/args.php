@@ -100,16 +100,22 @@ trait ArgsTrait {
     function argSelectMachine() {
         $selectableMachines = $this->selectableMachinesForEffect();
 
+        $machine = $this->getMachineForEffect();
+
         return [
             'selectableMachines' => $selectableMachines,
+            'machineEffect' => $machine,
         ];
     }
 
     function argSelectProject() {
         $projects = $this->getProjectsFromDb($this->projects->getCardsOnTop(2, 'deck'));
 
+        $machine = $this->getMachineForEffect();
+
         return [
             'projects' => $projects,
+            'machineEffect' => $machine,
         ];
     }
 
@@ -151,12 +157,15 @@ trait ArgsTrait {
     function argSelectResource() {
         $possibleCombinations = $this->getSelectResourceCombinations();
 
+        $machine = $this->getMachineForEffect();
+
         if ($possibleCombinations == null) {
             throw new Error("Impossible to determinate resources to select");
         }
 
         return [
             'possibleCombinations' => $possibleCombinations,
+            'machineEffect' => $machine,
         ];
     }
 

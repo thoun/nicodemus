@@ -381,6 +381,9 @@ html {
   height: 20px;
   margin: -5px 0;
 }
+#page-title .effect {
+  margin-bottom: -10px;
+}
 
 .log .icon {
   width: 16px;

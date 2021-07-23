@@ -819,6 +819,19 @@ class Nicodemus implements NicodemusGame {
                 if (typeof args.projectImage == 'number') {
                     args.projectImage = `<div class="project project${PROJECTS_IDS.indexOf(args.projectImage)}"></div>`;
                 }
+
+                if (typeof args.machineEffect == 'object') {
+                    const uniqueId = getUniqueId(args.machineEffect);
+                    const id = `action-bar-effect${uniqueId}`;
+                    args.machineEffect = `<div id="${id}" class="effect effect${MACHINES_IDS.indexOf(uniqueId)}"></div>`;
+                    
+                    setTimeout(() => {
+                        const effectImage = document.getElementById(id);
+                        if (effectImage) {
+                            (this as any).addTooltipHtml(id, getMachineTooltip(uniqueId));
+                        }
+                    }, 200);
+                }
             }
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);
