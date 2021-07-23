@@ -252,7 +252,7 @@ class Nicodemus implements NicodemusGame {
                     break;
 
                 case 'chooseProject':
-                    (this as any).addActionButton('selectProjects-button', _('Complete projects'), () => this.selectProjects(this.table.getSelectedProjectsIds()));
+                    (this as any).addActionButton('selectProjects-button', _('Complete projects'), () => this.selectProjects(this.selectedPlayerProjectsIds.concat(this.selectedTableProjectsIds)));
                     (this as any).addActionButton('skipProjects-button', _('Skip'), () => this.skipSelectProjects(), null, null, 'red');
                     dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
                     dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);

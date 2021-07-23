@@ -347,8 +347,9 @@ trait EffectTrait {
                     $this->projects->shuffle('deck');
 
                     $project = $this->getProjectFromDb($this->projects->getCard($context->selectedCardId));
-                    self::notifyAllPlayers('addWorkshopProjects', clienttranslate('${player_name} uses ${machine_type} effect to copy ${projectImage}'), [
+                    self::notifyAllPlayers('addWorkshopProjects', clienttranslate('${player_name} uses ${machine_type} effect to pick project ${projectImage}'), [
                         'playerId' => $playerId,
+                        'player_name' => self::getActivePlayerName(),
                         'projects' => [$project],
                         'machine' => $machine,
                         'machine_type' => $this->getColorName($machine->type),

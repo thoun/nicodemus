@@ -639,6 +639,8 @@ html {
   width: 134px;
   height: 93px;
   background-image: url("img/projects.jpg");
+  border-radius: 10px;
+  margin: 5px;
 }
 .project.project0 {
   background-position: 0% 0%;

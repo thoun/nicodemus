@@ -255,6 +255,9 @@ html {
   width: $project-width; 
   height: $project-height;
   background-image: url('img/projects.jpg');
+  
+  border-radius: 10px;
+  margin: 5px;
 
   @for $i from 0 through 16 {
     &.project#{$i} {

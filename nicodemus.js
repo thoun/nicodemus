@@ -732,7 +732,7 @@ var Nicodemus = /** @class */ (function () {
                     this.addActionButton('skipExchange-button', _('Skip'), function () { return _this.skipExchange(); }, null, null, 'red');
                     break;
                 case 'chooseProject':
-                    this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects(_this.table.getSelectedProjectsIds()); });
+                    this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects(_this.selectedPlayerProjectsIds.concat(_this.selectedTableProjectsIds)); });
                     this.addActionButton('skipProjects-button', _('Skip'), function () { return _this.skipSelectProjects(); }, null, null, 'red');
                     dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
                     dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);
