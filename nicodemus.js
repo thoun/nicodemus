@@ -171,6 +171,15 @@ function moveToAnotherStock(sourceStock, destinationStock, uniqueId, cardId) {
         console.warn(sourceStockItemId + " not found in ", sourceStock);
         destinationStock.addToStockWithId(uniqueId, cardId, sourceStock.container_div.id);
     }
+    var destinationDiv = document.getElementById(destinationStock.container_div.id + "_item_" + cardId);
+    destinationDiv.style.zIndex = '10';
+    setTimeout(function () { return destinationDiv.style.zIndex = 'unset'; }, 1000);
+}
+function addToStockWithId(destinationStock, uniqueId, cardId, from) {
+    destinationStock.addToStockWithId(uniqueId, cardId, from);
+    var destinationDiv = document.getElementById(destinationStock.container_div.id + "_item_" + cardId);
+    destinationDiv.style.zIndex = '10';
+    setTimeout(function () { return destinationDiv.style.zIndex = 'unset'; }, 1000);
 }
 function formatTextIcons(rawText) {
     return rawText
@@ -524,7 +533,7 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.addWorkshopProjects = function (projects) {
         var _this = this;
-        projects.forEach(function (project) { return _this.projectStock.addToStockWithId(getUniqueId(project), '' + project.id, 'page-title'); });
+        projects.forEach(function (project) { return addToStockWithId(_this.projectStock, getUniqueId(project), '' + project.id, 'page-title'); });
         this.setProjectStockWidth();
     };
     PlayerTable.prototype.setProjectStockWidth = function () {
@@ -1159,7 +1168,7 @@ var Nicodemus = /** @class */ (function () {
         else if (notif.args.from > 0) {
             from = "player-icon-" + from;
         }
-        notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id, from); });
+        notif.args.machines.forEach(function (machine) { return addToStockWithId(_this.playerMachineHand, getUniqueId(machine), '' + machine.id, from); });
     };
     Nicodemus.prototype.notif_addWorkshopProjects = function (notif) {
         this.getPlayerTable(notif.args.playerId).addWorkshopProjects(notif.args.projects);

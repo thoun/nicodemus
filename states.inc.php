@@ -202,6 +202,22 @@ $playerActionsGameStates = [
             "skipSelectProjects",
         ],
         "transitions" => [
+            "chooseProjectDiscardedMachine" => ST_PLAYER_CHOOSE_PROJECT_DISCARDED_MACHINE,
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_CHOOSE_PROJECT_DISCARDED_MACHINE => [
+        "name" => "chooseProjectDiscardedMachine",
+        "description" => clienttranslate('${actplayer} must choose machines to discard for completed project(s)'),
+        "descriptionmyturn" => clienttranslate('${you} must choose machines to discard for completed project(s)'),
+        "type" => "activeplayer",
+        "args" => "argChooseProjectDiscardedMachine",
+        "possibleactions" => [ 
+            "chooseProjectDiscardedMachine",
+        ],
+        "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]

@@ -157,7 +157,8 @@ function moveToAnotherStock(sourceStock: Stock, destinationStock: Stock, uniqueI
         return;
     }
     
-    const sourceStockItemId = `${sourceStock.container_div.id}_item_${cardId}`;
+    const sourceStockItemId = `${sourceStock.container_div.id}_item_${cardId}`;    
+
     if (document.getElementById(sourceStockItemId)) {        
         destinationStock.addToStockWithId(uniqueId, cardId, sourceStockItemId);
         sourceStock.removeFromStockById(cardId);
@@ -165,4 +166,17 @@ function moveToAnotherStock(sourceStock: Stock, destinationStock: Stock, uniqueI
         console.warn(`${sourceStockItemId} not found in `, sourceStock);
         destinationStock.addToStockWithId(uniqueId, cardId, sourceStock.container_div.id);
     }
+
+    const destinationDiv = document.getElementById(`${destinationStock.container_div.id}_item_${cardId}`);
+    destinationDiv.style.zIndex = '10';
+    setTimeout(() => destinationDiv.style.zIndex = 'unset', 1000);
+}
+
+function addToStockWithId(destinationStock: Stock, uniqueId: number, cardId: string, from: string) {  
+
+    destinationStock.addToStockWithId(uniqueId, cardId, from);
+
+    const destinationDiv = document.getElementById(`${destinationStock.container_div.id}_item_${cardId}`);
+    destinationDiv.style.zIndex = '10';
+    setTimeout(() => destinationDiv.style.zIndex = 'unset', 1000);
 }

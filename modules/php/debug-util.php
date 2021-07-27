@@ -9,14 +9,14 @@ trait DebugUtilTrait {
     function debugSetup() {
         //self::DbQuery("UPDATE card SET `card_location_arg` = card_location_arg + 200 where `card_type` = 117");
         //$this->addResource(2343492, 4, 0);
-        $this->debugSetPoints(19);
+        //$this->debugSetPoints(19);
         $this->debugAddResources(2343492, 3);
         $this->debugAddResources(2343493, 2);
-        $this->debugSetMachineInHand(2343492, 4, 1);
+        //$this->debugSetMachineInHand(2343492, 4, 1);
         $this->debugSetMachineInTable(1, 1);
         $this->debugSetMachineInTable(1, 2);
-        $this->debugSetMachineInWorkshop(2343492, 1, 1);
-        $this->debugSetProjectInWorkshop(2343492, 1, 1);
+        //$this->debugSetMachineInWorkshop(2343492, 1, 1);
+        //$this->debugSetProjectInWorkshop(2343492, 1, 1);
 
         // Activate first player must be commented in setup if this is used
         $this->gamestate->changeActivePlayer(2343492);

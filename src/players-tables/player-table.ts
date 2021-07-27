@@ -141,7 +141,7 @@ class PlayerTable {
     }
 
     public addWorkshopProjects(projects: Project[]) {
-        projects.forEach(project => this.projectStock.addToStockWithId(getUniqueId(project), ''+project.id, 'page-title'));
+        projects.forEach(project => addToStockWithId(this.projectStock, getUniqueId(project), ''+project.id, 'page-title'));
         this.setProjectStockWidth();
     }
     
