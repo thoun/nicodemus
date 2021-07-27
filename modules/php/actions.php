@@ -4,6 +4,7 @@ require_once(__DIR__.'/objects/machine.php');
 require_once(__DIR__.'/objects/project.php');
 require_once(__DIR__.'/objects/resource.php');
 require_once(__DIR__.'/objects/apply-effect-context.php');
+require_once(__DIR__.'/objects/complete-project.php');
 
 trait ActionTrait {
 
@@ -196,31 +197,23 @@ trait ActionTrait {
 
         $discardedMachines = [];
 
+        $completeProjectsData = [];
+
+        $canAutoResolveProjects = true;
         foreach ($projects as $project) {
             $machinesToCompleteProject = $this->machinesToCompleteProject($project, $playerMachines, $machine);
+            $machinesNumberToCompleteProject = $this->machinesNumberToCompleteProject($project, $playerMachines, $machine);
 
-            $this->incPlayerScore($playerId, $project->points);
+            $completeProjectsData[] = new CompleteProject($project, $machine, $machinesToCompleteProject, $machinesNumberToCompleteProject);
 
-            $discardedMachines = array_merge($discardedMachines, $machinesToCompleteProject);
-
-            self::notifyAllPlayers('removeProject', clienttranslate('${player_name} completes project ${projectImage}'), [
-                'playerId' => $playerId,
-                'player_name' => self::getActivePlayerName(),
-                'project' => $project,
-                'projectImage' => $this->getUniqueId($project),
-            ]);
+            if (count($machinesToCompleteProject) > $machinesNumberToCompleteProject) {
+                $canAutoResolveProjects = false;
+            }
         }
-        $this->machines->moveCards(array_map(function($machine) { return $machine->id; }, $discardedMachines), 'discard');
-        $this->projects->moveCards($ids, 'discard');
 
-        
-        self::notifyAllPlayers('discardPlayerMachines', '', [
-            'machines' => $discardedMachines,
-        ]);
+        $this->setGlobalVariable(COMPLETED_PROJECTS, $completeProjectsData);
 
-        // TODO handle discarded machine choice (when 3 blue machines for example)
-
-        $this->gamestate->nextState('nextPlayer');
+        $this->gamestate->nextState($canAutoResolveProjects ? 'completeProjects' : 'chooseProjectDiscardedMachine');
     }
 
     public function skipSelectProjects() {

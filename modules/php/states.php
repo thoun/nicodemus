@@ -42,6 +42,45 @@ trait StateTrait {
         $this->gamestate->nextState('nextPlayer');
     }
 
+    function stCompleteProjects() {         
+
+        $playerId = self::getActivePlayerId();     
+
+        // security check
+        // TODO
+
+        $completeProjectsData = $this->getGlobalVariable(COMPLETED_PROJECTS);
+
+        $discardedMachines = [];
+        $dicardedProjects = [];
+
+        foreach ($completeProjectsData as $completeProjectData) {
+            $project = $completeProjectData->project;
+            $dicardedProjects[] = $project;
+            $this->incPlayerScore($playerId, $project->points);
+
+            // TODO handle discarded machine choice (when 3 blue machines for example)
+            $machinesToCompleteProject = $completeProjectData->machines;
+            $discardedMachines = array_merge($discardedMachines, $machinesToCompleteProject);
+
+            self::notifyAllPlayers('removeProject', clienttranslate('${player_name} completes project ${projectImage}'), [
+                'playerId' => $playerId,
+                'player_name' => self::getActivePlayerName(),
+                'project' => $project,
+                'projectImage' => $this->getUniqueId($project),
+            ]);
+        }
+        $this->machines->moveCards(array_map(function($machine) { return $machine->id; }, $discardedMachines), 'discard');
+        $this->projects->moveCards(array_map(function($project) { return $project->id; }, $dicardedProjects), 'discard');
+
+        
+        self::notifyAllPlayers('discardPlayerMachines', '', [
+            'machines' => $discardedMachines,
+        ]);
+        
+        $this->gamestate->nextState('nextPlayer');
+    }
+
     function stNextPlayer() {
         $this->clearTableRowIfNecessary();
 

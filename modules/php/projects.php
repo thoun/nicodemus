@@ -80,6 +80,14 @@ trait ProjectTrait {
         }
     }
 
+    function machinesNumberToCompleteProject(object $project, array $playerMachines, object $machine) {
+        switch ($project->type) {
+            case 1: return array_reduce(array_values($project->colors), function ($carry, $item) { return $carry + $item; });
+            case 2: return 2;
+            case 3: return array_reduce(array_values($project->resources), function ($carry, $item) { return $carry + $item; });
+        }
+    }
+
     function getCompleteProjects(int $playerId, object $machine) {
         $playerMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
 

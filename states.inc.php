@@ -203,7 +203,7 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "chooseProjectDiscardedMachine" => ST_PLAYER_CHOOSE_PROJECT_DISCARDED_MACHINE,
-            "nextPlayer" => ST_NEXT_PLAYER,
+            "completeProjects" => ST_COMPLETE_PROJECTS,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -218,7 +218,7 @@ $playerActionsGameStates = [
             "chooseProjectDiscardedMachine",
         ],
         "transitions" => [
-            "nextPlayer" => ST_NEXT_PLAYER,
+            "completeProjects" => ST_COMPLETE_PROJECTS,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -235,6 +235,17 @@ $gameGameStates = [
         "action" => "stRefillHand",
         "transitions" => [ 
             "nextPlayer" => ST_NEXT_PLAYER,
+        ],
+    ],
+
+    ST_COMPLETE_PROJECTS =>  [
+        "name" => "completeProjects",
+        "description" => "",
+        "type" => "game",
+        "action" => "stCompleteProjects",
+        "transitions" => [ 
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "zombiePass" => ST_NEXT_PLAYER,
         ],
     ],
 ];

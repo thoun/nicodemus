@@ -16,6 +16,7 @@ define('ST_PLAYER_SELECT_PROJECT', 33);
 
 define('ST_PLAYER_CHOOSE_PROJECT', 60);
 define('ST_PLAYER_CHOOSE_PROJECT_DISCARDED_MACHINE', 61);
+define('ST_COMPLETE_PROJECTS', 65);
 
 define('ST_REFILL_HAND', 85);
 
@@ -35,4 +36,5 @@ define('LAST_TURN', 'LAST_TURN');
  * Global variables
  */
 define('APPLY_EFFECT_CONTEXT', 'ApplyEffectContext');
+define('COMPLETED_PROJECTS', 'CompletedProjects');
 ?>

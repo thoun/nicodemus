@@ -237,4 +237,12 @@ trait ArgsTrait {
         }
         return $possiblePayments;
     }
+
+    function argChooseProjectDiscardedMachine() {
+        $completeProjectsData = $this->getGlobalVariable(COMPLETED_PROJECTS);
+
+        return [
+           'completeProjects' =>  $completeProjectsData,
+        ];
+    }
 }

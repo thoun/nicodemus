@@ -13,10 +13,11 @@ trait DebugUtilTrait {
         $this->debugAddResources(2343492, 3);
         $this->debugAddResources(2343493, 2);
         //$this->debugSetMachineInHand(2343492, 4, 1);
-        $this->debugSetMachineInTable(1, 1);
+        $this->debugSetMachineInTable(1, 4);
         $this->debugSetMachineInTable(1, 2);
-        //$this->debugSetMachineInWorkshop(2343492, 1, 1);
-        //$this->debugSetProjectInWorkshop(2343492, 1, 1);
+        $this->debugSetMachineInWorkshop(2343492, 1, 1);
+        $this->debugSetMachineInWorkshop(2343492, 1, 3);
+        $this->debugSetProjectInWorkshop(2343492, 1, 1);
 
         // Activate first player must be commented in setup if this is used
         $this->gamestate->changeActivePlayer(2343492);
