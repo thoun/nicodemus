@@ -71,6 +71,10 @@ class Nicodemus implements NicodemusGame {
         };
         this.createPlayerTables(gamedatas);
 
+        if (gamedatas.endTurn) {
+            this.notif_lastTurn();
+        }
+
         this.addHelp();
         this.setupNotifications();
 
@@ -217,7 +221,8 @@ class Nicodemus implements NicodemusGame {
                         }
                     } else {
                         (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.machine.produce}])`), () => this.getResource(choosePlayActionArgs.machine.produce));
-                        if (choosePlayActionArgs.machine.produce == 0) {
+                        if (choosePlayActionArgs.machine.type == 1 || choosePlayActionArgs.machine.produce == 0) {
+                            // for those machines, getting 1 resource is not the best option, so we "unlight" them
                             dojo.removeClass('getResource-button', 'bgabutton_blue');
                             dojo.addClass('getResource-button', 'bgabutton_gray');
                         }
@@ -386,6 +391,14 @@ class Nicodemus implements NicodemusGame {
 
     public getPlayerId(): number {
         return Number((this as any).player_id);
+    }
+
+    public getOpponentId(playerId: number): number {
+        return Number(Object.values(this.gamedatas.players).find(player => Number(player.id) != playerId).id);
+    }
+
+    public getPlayerScore(playerId: number): number {
+        return (this as any).scoreCtrl[playerId]?.getValue() ?? Number(this.gamedatas.players[playerId].score);
     }
 
     private getPlayerTable(playerId: number): PlayerTable {
@@ -690,12 +703,13 @@ class Nicodemus implements NicodemusGame {
             ['tableMove', ANIMATION_MS],
             ['addMachinesToHand', ANIMATION_MS],
             ['points', 1],
+            ['lastTurn', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
             ['discardHandMachines', ANIMATION_MS],
             ['discardPlayerMachines', ANIMATION_MS],
             ['discardTableMachines', ANIMATION_MS],
-            ['removeProjects', ANIMATION_MS],
+            ['removeProject', ANIMATION_MS],
             ['addWorkshopProjects', ANIMATION_MS],
         ];
 
@@ -737,7 +751,7 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
-    notif_addMachinesToHand(notif: Notif<NotifAddMachinesToHandArgs>) {
+    notif_addMachinesToHand(notif: Notif<NotifAddMachinesToHandArgs>) { console.log(notif.args, $( `player-icon-${notif.args.from}`));
         let from = undefined;
         if (notif.args.from === 0) {
             from = 'machine-deck';
@@ -780,10 +794,18 @@ class Nicodemus implements NicodemusGame {
         notif.args.machines.forEach(machine => this.table.machineStocks[machine.location_arg].removeFromStockById(''+machine.id));
     }
 
-    notif_removeProjects(notif: Notif<NotifRemoveProjectsArgs>) {
-        notif.args.projects.forEach(project =>
-            this.getProjectStocks().forEach(stock => stock.removeFromStockById(''+project.id))
-        );
+    notif_removeProject(notif: Notif<NotifRemoveProjectArgs>) {
+            this.getProjectStocks().forEach(stock => stock.removeFromStockById(''+notif.args.project.id));
+    }
+
+    notif_lastTurn() {
+        if (document.getElementById('last-round')) {
+            return;
+        }
+        
+        dojo.place(`<div id="last-round">
+            ${_("This is the last round of the game!")}
+        </div>`, 'page-title');
     }
     
     private getMachineColor(color: number) {

@@ -146,7 +146,12 @@ class PlayerTable {
     }
     
     private setProjectStockWidth() {
-        document.getElementById(`player-table-${this.playerId}-projects`).style.width = this.projectStock.items.length ? `${PROJECT_WIDTH + 10}px` : undefined;
+        const newWidth = this.projectStock.items.length ? `${PROJECT_WIDTH + 10}px` : undefined;
+        const div = document.getElementById(`player-table-${this.playerId}-projects`);
+        if (div.style.width !== newWidth) {
+            div.style.width = newWidth;
+            this.machineStock?.updateDisplay();
+        }
     }
     public setProjectSelectable(selectable: boolean) {
         this.projectStock.setSelectionMode(selectable ? 2 : 0);

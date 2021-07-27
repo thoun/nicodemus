@@ -9,6 +9,7 @@ trait DebugUtilTrait {
     function debugSetup() {
         //self::DbQuery("UPDATE card SET `card_location_arg` = card_location_arg + 200 where `card_type` = 117");
         //$this->addResource(2343492, 4, 0);
+        $this->debugSetPoints(19);
         $this->debugAddResources(2343492, 3);
         $this->debugAddResources(2343493, 2);
         $this->debugSetMachineInHand(2343492, 4, 1);
@@ -21,11 +22,18 @@ trait DebugUtilTrait {
         $this->gamestate->changeActivePlayer(2343492);
     }
 
+    private function debugSetPlayerPoints(int $playerId, int $score) {
+        self::DbQuery("UPDATE player SET `player_score` = $score where `player_id` = $playerId");
+    }
+
+    private function debugSetPoints(int $score) {
+        self::DbQuery("UPDATE player SET `player_score` = $score");
+    }
+
     private function debugAddResources(int $playerId, int $number) {
         for ($i=0; $i<=3; $i++) {
             $this->addResource($playerId, $number, $i);
         }
-
     }
 
     private function debugGetMachineByTypes($type, $subType) {

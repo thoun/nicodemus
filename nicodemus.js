@@ -312,9 +312,18 @@ var Table = /** @class */ (function () {
     };
     Table.prototype.setPoints = function (playerId, points, firstPosition) {
         if (firstPosition === void 0) { firstPosition = false; }
+        var opponentId = this.game.getOpponentId(playerId);
+        var opponentScore = this.game.getPlayerScore(opponentId);
+        var equality = opponentScore === points;
+        var playerShouldShift = equality && playerId > opponentId;
+        var opponentShouldShift = equality && !playerShouldShift;
         var markerDiv = document.getElementById("player-" + playerId + "-point-marker");
         var top = points % 2 ? 40 : 52;
         var left = 16 + points * 46.2;
+        if (playerShouldShift) {
+            top -= 5;
+            left -= 5;
+        }
         if (firstPosition) {
             markerDiv.style.top = top + "px";
             markerDiv.style.left = left + "px";
@@ -329,6 +338,20 @@ var Table = /** @class */ (function () {
                 easing: dojo.fx.easing.cubicInOut,
                 unit: "px"
             }).play();
+        }
+        if (opponentShouldShift) {
+            var opponentMarkerDiv = document.getElementById("player-" + opponentId + "-point-marker");
+            if (opponentMarkerDiv) {
+                dojo.fx.slideTo({
+                    node: opponentMarkerDiv,
+                    top: top - 5,
+                    left: left - 5,
+                    delay: 0,
+                    duration: ANIMATION_MS,
+                    easing: dojo.fx.easing.cubicInOut,
+                    unit: "px"
+                }).play();
+            }
         }
     };
     Table.prototype.machinePlayed = function (playerId, machine) {
@@ -505,7 +528,13 @@ var PlayerTable = /** @class */ (function () {
         this.setProjectStockWidth();
     };
     PlayerTable.prototype.setProjectStockWidth = function () {
-        document.getElementById("player-table-" + this.playerId + "-projects").style.width = this.projectStock.items.length ? PROJECT_WIDTH + 10 + "px" : undefined;
+        var _a;
+        var newWidth = this.projectStock.items.length ? PROJECT_WIDTH + 10 + "px" : undefined;
+        var div = document.getElementById("player-table-" + this.playerId + "-projects");
+        if (div.style.width !== newWidth) {
+            div.style.width = newWidth;
+            (_a = this.machineStock) === null || _a === void 0 ? void 0 : _a.updateDisplay();
+        }
     };
     PlayerTable.prototype.setProjectSelectable = function (selectable) {
         this.projectStock.setSelectionMode(selectable ? 2 : 0);
@@ -567,6 +596,9 @@ var Nicodemus = /** @class */ (function () {
             _this.onProjectSelectionChanged();
         };
         this.createPlayerTables(gamedatas);
+        if (gamedatas.endTurn) {
+            this.notif_lastTurn();
+        }
         this.addHelp();
         this.setupNotifications();
         this.setupPreferences();
@@ -701,7 +733,8 @@ var Nicodemus = /** @class */ (function () {
                     }
                     else {
                         this.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + choosePlayActionArgs_1.machine.produce + "])"), function () { return _this.getResource(choosePlayActionArgs_1.machine.produce); });
-                        if (choosePlayActionArgs_1.machine.produce == 0) {
+                        if (choosePlayActionArgs_1.machine.type == 1 || choosePlayActionArgs_1.machine.produce == 0) {
+                            // for those machines, getting 1 resource is not the best option, so we "unlight" them
                             dojo.removeClass('getResource-button', 'bgabutton_blue');
                             dojo.addClass('getResource-button', 'bgabutton_gray');
                         }
@@ -843,6 +876,13 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.getPlayerId = function () {
         return Number(this.player_id);
+    };
+    Nicodemus.prototype.getOpponentId = function (playerId) {
+        return Number(Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) != playerId; }).id);
+    };
+    Nicodemus.prototype.getPlayerScore = function (playerId) {
+        var _a, _b;
+        return (_b = (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) !== null && _b !== void 0 ? _b : Number(this.gamedatas.players[playerId].score);
     };
     Nicodemus.prototype.getPlayerTable = function (playerId) {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
@@ -1076,12 +1116,13 @@ var Nicodemus = /** @class */ (function () {
             ['tableMove', ANIMATION_MS],
             ['addMachinesToHand', ANIMATION_MS],
             ['points', 1],
+            ['lastTurn', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
             ['discardHandMachines', ANIMATION_MS],
             ['discardPlayerMachines', ANIMATION_MS],
             ['discardTableMachines', ANIMATION_MS],
-            ['removeProjects', ANIMATION_MS],
+            ['removeProject', ANIMATION_MS],
             ['addWorkshopProjects', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
@@ -1110,6 +1151,7 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.notif_addMachinesToHand = function (notif) {
         var _this = this;
+        console.log(notif.args, $("player-icon-" + notif.args.from));
         var from = undefined;
         if (notif.args.from === 0) {
             from = 'machine-deck';
@@ -1146,11 +1188,14 @@ var Nicodemus = /** @class */ (function () {
         var _this = this;
         notif.args.machines.forEach(function (machine) { return _this.table.machineStocks[machine.location_arg].removeFromStockById('' + machine.id); });
     };
-    Nicodemus.prototype.notif_removeProjects = function (notif) {
-        var _this = this;
-        notif.args.projects.forEach(function (project) {
-            return _this.getProjectStocks().forEach(function (stock) { return stock.removeFromStockById('' + project.id); });
-        });
+    Nicodemus.prototype.notif_removeProject = function (notif) {
+        this.getProjectStocks().forEach(function (stock) { return stock.removeFromStockById('' + notif.args.project.id); });
+    };
+    Nicodemus.prototype.notif_lastTurn = function () {
+        if (document.getElementById('last-round')) {
+            return;
+        }
+        dojo.place("<div id=\"last-round\">\n            " + _("This is the last round of the game!") + "\n        </div>", 'page-title');
     };
     Nicodemus.prototype.getMachineColor = function (color) {
         switch (color) {

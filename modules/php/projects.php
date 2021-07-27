@@ -24,7 +24,7 @@ trait ProjectTrait {
 
     function machinesToCompletePointProject(object $project, array $playerMachines, object $machine) {
         $machines = [];
-        if ($project->points == 0) {
+        if ($project->machinePoints == 0) {
             $groups = [];
             foreach ($playerMachines as $machine) {
                 $groups[$machine->points][] = $machine;
@@ -36,7 +36,7 @@ trait ProjectTrait {
                 }
             }
         } else {
-            $machines = array_values(array_filter($playerMachines, function($m) use ($project) { return $m->points == $project->points; }));
+            $machines = array_values(array_filter($playerMachines, function($m) use ($project) { return $m->points == $project->machinePoints; }));
             if (count($machines) < 2) {
                 return null;
             }

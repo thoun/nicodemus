@@ -64,10 +64,14 @@ interface NicodemusGamedatas {
     tableMachines: Machine[];
     tableProjects: Project[];
     resources: Resource[][];
+
+    endTurn: boolean;
 }
 
 interface NicodemusGame extends Game {
     getPlayerId(): number;
+    getOpponentId(playerId: number): number;
+    getPlayerScore(playerId: number): number;
     machineClick(id: number, from: 'hand' | 'table', payments?: Payment[]): void;
 }
 
@@ -145,7 +149,7 @@ interface NotifAddWorkshopProjectsArgs {
     projects: Project[];
 }
 
-interface NotifRemoveProjectsArgs {
+interface NotifRemoveProjectArgs {
     playerId: number;
-    projects: Project[];
+    project: Project;
 }

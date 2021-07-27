@@ -134,10 +134,21 @@ class Table {
     }
 
     public setPoints(playerId: number, points: number, firstPosition = false) {
+        const opponentId = this.game.getOpponentId(playerId);
+        const opponentScore = this.game.getPlayerScore(opponentId);
+        const equality = opponentScore === points;
+        const playerShouldShift = equality && playerId > opponentId;
+        const opponentShouldShift = equality && !playerShouldShift;
+
         const markerDiv = document.getElementById(`player-${playerId}-point-marker`);
 
-        const top = points % 2 ? 40 : 52;
-        const left = 16 + points*46.2;
+        let top = points % 2 ? 40 : 52;
+        let left = 16 + points*46.2;
+
+        if (playerShouldShift) {
+            top -= 5;
+            left -= 5;
+        }
 
         if (firstPosition) {
             markerDiv.style.top = `${top}px`;
@@ -152,6 +163,21 @@ class Table {
                 easing: dojo.fx.easing.cubicInOut,
                 unit: "px"
             }).play();
+        }
+
+        if (opponentShouldShift) {
+            const opponentMarkerDiv = document.getElementById(`player-${opponentId}-point-marker`);
+            if (opponentMarkerDiv) {
+                dojo.fx.slideTo({
+                    node: opponentMarkerDiv,
+                    top: top - 5,
+                    left: left - 5,
+                    delay: 0,
+                    duration: ANIMATION_MS,
+                    easing: dojo.fx.easing.cubicInOut,
+                    unit: "px"
+                }).play();
+            }
         }
     }
 

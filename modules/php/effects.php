@@ -18,7 +18,7 @@ trait EffectTrait {
                     return false;
             }
         } else if ($machine->type == 4 && $machine->subType == 2) {
-            return $this->countMachinesOnTable() >= 2;
+            return $this->countMachinesOnTable() >= 2; // TODO for subType 1 check remaining projects on deck >2, for subType 2 canApplyEffect of 1+ table machines
         }
         return true;
     }
@@ -317,7 +317,7 @@ trait EffectTrait {
                     }
 
                     $message = count($context->selectedResources) >= 2 ?
-                        clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard ${resource1Name} and {resource2Name} with ${machineImage}') :
+                        clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard ${resource1Name} and ${resource2Name} with ${machineImage}') :
                         clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard ${resource1Name} with ${machineImage}');
 
                     self::notifyAllPlayers('applyAttackEffectNotif', $message, [

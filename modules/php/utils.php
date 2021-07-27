@@ -257,6 +257,10 @@ trait UtilTrait {
 
         if ($this->getMaxPlayerScore() >= 20) {
             self::setGameStateValue(LAST_TURN, 1);
+            self::notifyAllPlayers('lastTurn', clienttranslate("There is not enough machines left on the deck, it's last turn !"), [
+                'playerId' => $playerId,
+                'points' => $this->getPlayerScore($playerId),
+            ]);
         }
 
         self::notifyAllPlayers('points', '', [

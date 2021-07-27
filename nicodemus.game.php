@@ -115,7 +115,7 @@ class Nicodemus extends Table {
         $this->activeNextPlayer();
 
         // TODO TEMP card to test
-        //$this->debugSetup();
+        $this->debugSetup();
 
         /************ End of the game initialization *****/
     }
@@ -156,6 +156,12 @@ class Nicodemus extends Table {
         $result['resources'] = [];
         for ($i=0;$i<=3;$i++) {
             $result['resources'][$i] = $this->getResources($i, 0);
+        }
+
+        $stateName = $this->gamestate->state()['name'];
+        if ($stateName !== 'gameEnd') {
+            $result['endTurn'] = self::getGameStateValue(LAST_TURN) > 0;
+            
         }
   
         return $result;

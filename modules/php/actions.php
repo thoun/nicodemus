@@ -202,6 +202,13 @@ trait ActionTrait {
             $this->incPlayerScore($playerId, $project->points);
 
             $discardedMachines = array_merge($discardedMachines, $machinesToCompleteProject);
+
+            self::notifyAllPlayers('removeProject', clienttranslate('${player_name} completes project ${projectImage}'), [
+                'playerId' => $playerId,
+                'player_name' => self::getActivePlayerName(),
+                'project' => $project,
+                'projectImage' => $this->getUniqueId($project),
+            ]);
         }
         $this->machines->moveCards(array_map(function($machine) { return $machine->id; }, $discardedMachines), 'discard');
         $this->projects->moveCards($ids, 'discard');
@@ -209,13 +216,6 @@ trait ActionTrait {
         
         self::notifyAllPlayers('discardPlayerMachines', '', [
             'machines' => $discardedMachines,
-        ]);
-
-        self::notifyAllPlayers('removeProjects', clienttranslate('${player_name} completes ${number} project(s)'), [
-            'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
-            'projects' => $projects,
-            'number' => count($projects),
         ]);
 
         // TODO handle discarded machine choice (when 3 blue machines for example)

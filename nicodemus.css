@@ -697,3 +697,10 @@ html {
 .spectatorMode #myhand-wrap {
   display: none;
 }
+
+#last-round {
+  margin: 5px -5px -5px;
+  text-align: center;
+  background: #a1311f;
+  color: white;
+}
