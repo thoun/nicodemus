@@ -751,12 +751,12 @@ class Nicodemus implements NicodemusGame {
         });
     }
 
-    notif_addMachinesToHand(notif: Notif<NotifAddMachinesToHandArgs>) { console.log(notif.args, $( `player-icon-${notif.args.from}`));
+    notif_addMachinesToHand(notif: Notif<NotifAddMachinesToHandArgs>) {
         let from = undefined;
         if (notif.args.from === 0) {
             from = 'machine-deck';
         } else if (notif.args.from > 0) {
-            from = `player-icon-${from}`;
+            from = `player-icon-${notif.args.from}`;
         }
         notif.args.machines.forEach(machine => addToStockWithId(this.playerMachineHand, getUniqueId(machine), ''+machine.id, from));
     }

@@ -1160,13 +1160,12 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.notif_addMachinesToHand = function (notif) {
         var _this = this;
-        console.log(notif.args, $("player-icon-" + notif.args.from));
         var from = undefined;
         if (notif.args.from === 0) {
             from = 'machine-deck';
         }
         else if (notif.args.from > 0) {
-            from = "player-icon-" + from;
+            from = "player-icon-" + notif.args.from;
         }
         notif.args.machines.forEach(function (machine) { return addToStockWithId(_this.playerMachineHand, getUniqueId(machine), '' + machine.id, from); });
     };
