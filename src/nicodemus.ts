@@ -24,6 +24,7 @@ class Nicodemus implements NicodemusGame {
     private crystalCounters: Counter[] = [];
     private helpDialog: any;
 
+    private discardedMachineSelector: DiscardedMachineSelector;
     private playerMachineHand: Stock;
     private table: Table;
     private playersTables: PlayerTable[] = [];
@@ -110,8 +111,11 @@ class Nicodemus implements NicodemusGame {
                 this.clickAction = 'select';
                 this.onEnteringStateSelectMachine(args.args as SelectMachineArgs);
                 break;
-                case 'selectProject': case 'chooseProject':
+            case 'selectProject': case 'chooseProject':
                 this.onEnteringStateChooseProject(args.args as SelectProjectArgs);
+                break;
+            case 'chooseProjectDiscardedMachine':
+                this.onEnteringStateChooseProjectDiscardedMachine(args.args as ChooseProjectDiscardedMachineArgs);
                 break;
         }
     }
@@ -159,6 +163,12 @@ class Nicodemus implements NicodemusGame {
         }
     }
 
+    private onEnteringStateChooseProjectDiscardedMachine(args: ChooseProjectDiscardedMachineArgs) {
+        if((this as any).isCurrentPlayerActive()) {
+            this.discardedMachineSelector = new DiscardedMachineSelector(this, args.completeProjects);
+        }
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -177,6 +187,9 @@ class Nicodemus implements NicodemusGame {
                 this.onLeavingStateSelectMachine();
             case 'selectProject': case 'chooseProject':
                 this.onLeavingChooseProject();
+                break;
+            case 'chooseProjectDiscardedMachine':
+                this.discardedMachineSelector?.destroy();
                 break;
         }
     }
@@ -261,6 +274,10 @@ class Nicodemus implements NicodemusGame {
                     (this as any).addActionButton('skipProjects-button', _('Skip'), () => this.skipSelectProjects(), null, null, 'red');
                     dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
                     dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);
+                    break;
+
+                case 'chooseProjectDiscardedMachine':
+                    (this as any).addActionButton('selectProjectDiscardedMachine-button', _('Discard selected machines'), () => this.discardSelectedMachines());
                     break;
             }
         }
@@ -625,6 +642,18 @@ class Nicodemus implements NicodemusGame {
         }
 
         this.takeAction('skipExchange');
+    }
+
+    public discardSelectedMachines() {
+        if(!(this as any).checkAction('discardSelectedMachines')) {
+            return;
+        }
+
+        const base64 = btoa(JSON.stringify(this.discardedMachineSelector.getCompleteProjects()));
+
+        this.takeAction('discardSelectedMachines', {
+            completeProjects: base64
+        });        
     }
 
     public takeAction(action: string, data?: any) {

@@ -242,7 +242,7 @@ trait ArgsTrait {
         $completeProjectsData = $this->getGlobalVariable(COMPLETED_PROJECTS);
 
         return [
-           'completeProjects' =>  $completeProjectsData,
+           'completeProjects' => $completeProjectsData,
         ];
     }
 }

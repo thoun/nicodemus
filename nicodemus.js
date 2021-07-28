@@ -467,7 +467,6 @@ var PlayerTable = /** @class */ (function () {
         this.machineStock.setSelectionMode(0);
         this.machineStock.centerItems = true;
         this.machineStock.onItemCreate = function (cardDiv, type) { return setupMachineCard(game, cardDiv, type); };
-        //dojo.connect(this.machineStock, 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems()));
         setupMachineCards([this.machineStock]);
         player.machines.forEach(function (machine) { return _this.machineStock.addToStockWithId(getUniqueId(machine), '' + machine.id); });
         // resources
@@ -552,6 +551,77 @@ var PlayerTable = /** @class */ (function () {
         }
     };
     return PlayerTable;
+}());
+var DiscardedMachineSelector = /** @class */ (function () {
+    //public onDiscardedMachinesSelectionChanged: (completeProjects: CompleteProject[]) => any;
+    function DiscardedMachineSelector(game, completeProjects) {
+        var _this = this;
+        this.game = game;
+        this.completeProjects = completeProjects;
+        this.machineStocks = [];
+        var html = "<div id=\"discarded-machines-selector\" class=\"whiteblock\">";
+        completeProjects.forEach(function (completeProject) {
+            html += "\n            <div class=\"complete-project\">\n                <div class=\"project-infos\">\n                    <div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(completeProject.project)) + "\"></div>\n                    <div><span id=\"discarded-machines-selector-" + completeProject.project.id + "-counter\" class=\"machine-counter\">1</span> / " + completeProject.machinesNumber + "</div>\n                </div>\n                <div id=\"discarded-machines-selector-" + completeProject.project.id + "-machines\" class=\"machines\"></div>\n            </div>";
+        });
+        html += "</div>";
+        dojo.place(html, 'myhand-wrap', 'before');
+        // machines
+        completeProjects.forEach(function (completeProject) {
+            var projectId = completeProject.project.id;
+            _this.machineStocks[projectId] = new ebg.stock();
+            _this.machineStocks[projectId].setSelectionAppearance('class');
+            _this.machineStocks[projectId].selectionClass = 'selected';
+            _this.machineStocks[projectId].create(_this.game, $("discarded-machines-selector-" + projectId + "-machines"), MACHINE_WIDTH, MACHINE_HEIGHT);
+            _this.machineStocks[projectId].setSelectionMode(2);
+            _this.machineStocks[projectId].centerItems = true;
+            _this.machineStocks[projectId].onItemCreate = function (cardDiv, type) { return setupMachineCard(game, cardDiv, type); };
+            dojo.connect(_this.machineStocks[projectId], 'onChangeSelection', _this, function (_, item_id) { return _this.onMachineSelectionChanged(projectId, item_id); });
+        });
+        setupMachineCards(this.machineStocks);
+        completeProjects.forEach(function (completeProject) {
+            var projectId = completeProject.project.id;
+            completeProject.machines.forEach(function (machine) { return _this.machineStocks[projectId].addToStockWithId(getUniqueId(machine), '' + machine.id); });
+            completeProject.selectedMachinesIds = [completeProject.mandatoryMachine.id];
+            _this.machineStocks[projectId].selectItem('' + completeProject.mandatoryMachine.id);
+            dojo.addClass("discarded-machines-selector-" + projectId + "-machines_item_" + completeProject.mandatoryMachine.id, 'disabled');
+        });
+    }
+    DiscardedMachineSelector.prototype.destroy = function () {
+        dojo.destroy('discarded-machines-selector');
+    };
+    DiscardedMachineSelector.prototype.onMachineSelectionChanged = function (projectId, itemId) {
+        var completeProject = this.completeProjects.find(function (cp) { return cp.project; });
+        // can't deselect mandatory machine
+        if (Number(itemId) === completeProject.mandatoryMachine.id) {
+            this.machineStocks[projectId].selectItem(itemId);
+            return;
+        }
+        var selected = dojo.hasClass("discarded-machines-selector-" + projectId + "-machines_item_" + itemId, 'selected');
+        if (selected) {
+            this.machineStocks.forEach(function (stock) { return stock.selectItem(itemId); });
+        }
+        else {
+            this.machineStocks.forEach(function (stock) { return stock.unselectItem(itemId); });
+        }
+        this.updateCounters();
+    };
+    DiscardedMachineSelector.prototype.updateCounters = function () {
+        var _this = this;
+        this.completeProjects.forEach(function (completeProject) {
+            var projectId = completeProject.project.id;
+            completeProject.selectedMachinesIds = _this.machineStocks[projectId].getSelectedItems().map(function (item) { return Number(item.id); });
+            var validProject = completeProject.machinesNumber == completeProject.selectedMachinesIds.length;
+            document.getElementById("discarded-machines-selector-" + projectId + "-counter").innerHTML = '' + completeProject.selectedMachinesIds.length;
+            dojo.toggleClass("discarded-machines-selector-" + projectId + "-counter", 'valid', validProject);
+        });
+        //this.onDiscardedMachinesSelectionChanged?.(this.completeProjects);
+        var allValidSelection = this.completeProjects.every(function (cp) { return cp.machinesNumber == cp.selectedMachinesIds.length; });
+        dojo.toggleClass('selectProjectDiscardedMachine-button', 'disabled', !allValidSelection);
+    };
+    DiscardedMachineSelector.prototype.getCompleteProjects = function () {
+        return this.completeProjects;
+    };
+    return DiscardedMachineSelector;
 }());
 var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
@@ -641,6 +711,9 @@ var Nicodemus = /** @class */ (function () {
             case 'chooseProject':
                 this.onEnteringStateChooseProject(args.args);
                 break;
+            case 'chooseProjectDiscardedMachine':
+                this.onEnteringStateChooseProjectDiscardedMachine(args.args);
+                break;
         }
     };
     Nicodemus.prototype.onEnteringStateChooseAction = function (args) {
@@ -679,10 +752,16 @@ var Nicodemus = /** @class */ (function () {
                 .forEach(function (item) { return dojo.addClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
         }
     };
+    Nicodemus.prototype.onEnteringStateChooseProjectDiscardedMachine = function (args) {
+        if (this.isCurrentPlayerActive()) {
+            this.discardedMachineSelector = new DiscardedMachineSelector(this, args.completeProjects);
+        }
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
     Nicodemus.prototype.onLeavingState = function (stateName) {
+        var _a;
         log('Leaving state: ' + stateName);
         switch (stateName) {
             case 'chooseAction':
@@ -697,6 +776,9 @@ var Nicodemus = /** @class */ (function () {
             case 'selectProject':
             case 'chooseProject':
                 this.onLeavingChooseProject();
+                break;
+            case 'chooseProjectDiscardedMachine':
+                (_a = this.discardedMachineSelector) === null || _a === void 0 ? void 0 : _a.destroy();
                 break;
         }
     };
@@ -778,6 +860,9 @@ var Nicodemus = /** @class */ (function () {
                     this.addActionButton('skipProjects-button', _('Skip'), function () { return _this.skipSelectProjects(); }, null, null, 'red');
                     dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
                     dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);
+                    break;
+                case 'chooseProjectDiscardedMachine':
+                    this.addActionButton('selectProjectDiscardedMachine-button', _('Discard selected machines'), function () { return _this.discardSelectedMachines(); });
                     break;
             }
         }
@@ -1066,6 +1151,15 @@ var Nicodemus = /** @class */ (function () {
             return;
         }
         this.takeAction('skipExchange');
+    };
+    Nicodemus.prototype.discardSelectedMachines = function () {
+        if (!this.checkAction('discardSelectedMachines')) {
+            return;
+        }
+        var base64 = btoa(JSON.stringify(this.discardedMachineSelector.getCompleteProjects()));
+        this.takeAction('discardSelectedMachines', {
+            completeProjects: base64
+        });
     };
     Nicodemus.prototype.takeAction = function (action, data) {
         data = data || {};

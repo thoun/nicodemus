@@ -202,13 +202,19 @@ trait ActionTrait {
         $canAutoResolveProjects = true;
         foreach ($projects as $project) {
             $machinesToCompleteProject = $this->machinesToCompleteProject($project, $playerMachines, $machine);
-            $machinesNumberToCompleteProject = $this->machinesNumberToCompleteProject($project, $playerMachines, $machine);
+            $machinesNumberToCompleteProject = $this->machinesNumberToCompleteProject($project);
 
             $completeProjectsData[] = new CompleteProject($project, $machine, $machinesToCompleteProject, $machinesNumberToCompleteProject);
 
             if (count($machinesToCompleteProject) > $machinesNumberToCompleteProject) {
                 $canAutoResolveProjects = false;
             }
+        }
+
+        // if it's only "2 equals machines" project, it's useless to ask player which to discard
+        if (count($completeProjectsData) == 1 && $completeProjectsData[0]->project->type == 2 && $completeProjectsData[0]->project->subType == 0 && count($completeProjectsData[0]->machines) > $completeProjectsData[0]->machinesNumber) {
+            $completeProjectsData[0]->machines = array_slice($completeProjectsData[0]->machines, 0, $completeProjectsData[0]->machinesNumber);
+            $canAutoResolveProjects = true;
         }
 
         $this->setGlobalVariable(COMPLETED_PROJECTS, $completeProjectsData);
@@ -326,5 +332,36 @@ trait ActionTrait {
         self::checkAction('skipExchange'); 
 
         $this->gamestate->nextState('refillHand');
+    }
+
+    public function discardSelectedMachines(array $completeProjectsParameter) {
+        self::checkAction('discardSelectedMachines'); 
+
+        $completeProjects = $this->getGlobalVariable(COMPLETED_PROJECTS);
+
+        foreach ($completeProjects as &$project) {
+            // we only keep $selectedMachinesIds from parameter
+            $completeProjectParameter = $this->array_find($completeProjectsParameter, function ($cp) use ($project) { return $cp->project->id == $project->project->id; });
+            if ($completeProjectParameter == null) {
+                throw new Error("Missing project informations");
+            }
+            
+            $selectedMachinesIds = $completeProjectParameter->selectedMachinesIds;
+            if (count($selectedMachinesIds) != $project->machinesNumber) {
+                throw new Error("Should select $project->machinesNumber, but only selected ".count($selectedMachinesIds));
+            }
+            if (!$this->array_some($selectedMachinesIds, function ($id) use ($project) { return $project->mandatoryMachine->id == $id; })) {
+                throw new Error("Last played machine should be on selection");
+            }
+
+            // we update machines linked to project with selectedMachinesIds
+            $project->machines = array_values(array_filter($project->machines, function($machine) use ($selectedMachinesIds) {
+                return $this->array_some($selectedMachinesIds, function($id) use ($machine) {  return $machine->id == $id; });
+            }));
+        }
+
+        $this->setGlobalVariable(COMPLETED_PROJECTS, $completeProjects);
+
+        $this->gamestate->nextState('completeProjects');
     }
 }

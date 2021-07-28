@@ -2,7 +2,7 @@
 
 trait ProjectTrait {
 
-    function machinesToCompleteColorProject(object $project, array $playerMachines, object $machine) {
+    function machinesToCompleteColorProject(object $project, array $playerMachines, object $mandatoryMachine) {
 
         $machines = [];
         foreach($project->colors as $color => $number) {
@@ -14,7 +14,7 @@ trait ProjectTrait {
         }
 
         foreach($machines as $m) {
-            if ($m->id == $machine->id) {
+            if ($m->id == $mandatoryMachine->id) {
                 return $machines;
             }
         }
@@ -22,16 +22,16 @@ trait ProjectTrait {
         return null;
     }
 
-    function machinesToCompletePointProject(object $project, array $playerMachines, object $machine) {
+    function machinesToCompletePointProject(object $project, array $playerMachines, object $mandatoryMachine) {
         $machines = [];
         if ($project->machinePoints == 0) {
             $groups = [];
             foreach ($playerMachines as $machine) {
-                $groups[$machine->points][] = $machine;
+                $groups[$machine->type*10 + $machine->subType][] = $machine;
             }
 
             foreach($groups as $type => $group) {
-                if (count($group) >= 2 && $this->array_some($group, function($m) use ($machine) { return $m->id == $machine->id; })) {
+                if (count($group) >= 2 && $this->array_some($group, function($m) use ($mandatoryMachine) { return $m->id == $mandatoryMachine->id; })) {
                     $machines = array_merge($machines, $group);
                 }
             }
@@ -41,9 +41,9 @@ trait ProjectTrait {
                 return null;
             }
         } 
-
+        
         foreach($machines as $m) {
-            if ($m->id == $machine->id) {
+            if ($m->id == $mandatoryMachine->id) {
                 return $machines;
             }
         }
@@ -51,7 +51,7 @@ trait ProjectTrait {
         return null;       
     }
 
-    function machinesToCompleteResourceProject(object $project, array $playerMachines, object $machine) {
+    function machinesToCompleteResourceProject(object $project, array $playerMachines, object $mandatoryMachine) {
 
         $machines = [];
         foreach($project->resources as $resource => $number) {
@@ -63,7 +63,7 @@ trait ProjectTrait {
         }
 
         foreach($machines as $m) {
-            if ($m->id == $machine->id) {
+            if ($m->id == $mandatoryMachine->id) {
                 return $machines;
             }
         }
@@ -72,15 +72,15 @@ trait ProjectTrait {
     }
 
 
-    function machinesToCompleteProject(object $project, array $playerMachines, object $machine) {
+    function machinesToCompleteProject(object $project, array $playerMachines, object $mandatoryMachine) {
         switch ($project->type) {
-            case 1: return $this->machinesToCompleteColorProject($project, $playerMachines, $machine);
-            case 2: return $this->machinesToCompletePointProject($project, $playerMachines, $machine);
-            case 3: return $this->machinesToCompleteResourceProject($project, $playerMachines, $machine);
+            case 1: return $this->machinesToCompleteColorProject($project, $playerMachines, $mandatoryMachine);
+            case 2: return $this->machinesToCompletePointProject($project, $playerMachines, $mandatoryMachine);
+            case 3: return $this->machinesToCompleteResourceProject($project, $playerMachines, $mandatoryMachine);
         }
     }
 
-    function machinesNumberToCompleteProject(object $project, array $playerMachines, object $machine) {
+    function machinesNumberToCompleteProject(object $project) {
         switch ($project->type) {
             case 1: return array_reduce(array_values($project->colors), function ($carry, $item) { return $carry + $item; });
             case 2: return 2;

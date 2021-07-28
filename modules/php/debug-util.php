@@ -13,11 +13,12 @@ trait DebugUtilTrait {
         $this->debugAddResources(2343492, 3);
         $this->debugAddResources(2343493, 2);
         //$this->debugSetMachineInHand(2343492, 4, 1);
-        $this->debugSetMachineInTable(1, 4);
         $this->debugSetMachineInTable(1, 2);
-        $this->debugSetMachineInWorkshop(2343492, 1, 1);
-        $this->debugSetMachineInWorkshop(2343492, 1, 3);
+        $this->debugSetMachineInTable(1, 1);
+        $this->debugSetMachineInWorkshop(2343492, 1, 1, 1);
+        $this->debugSetMachineInWorkshop(2343492, 1, 1, 2);
         $this->debugSetProjectInWorkshop(2343492, 1, 1);
+        $this->debugSetProjectInWorkshop(2343492, 2, 1);
 
         // Activate first player must be commented in setup if this is used
         $this->gamestate->changeActivePlayer(2343492);
@@ -37,8 +38,8 @@ trait DebugUtilTrait {
         }
     }
 
-    private function debugGetMachineByTypes($type, $subType) {
-        return $this->getMachinesFromDb($this->machines->getCardsOfType($type, $subType))[0];
+    private function debugGetMachineByTypes($type, $subType, $index = 0) {
+        return $this->getMachinesFromDb($this->machines->getCardsOfType($type, $subType))[$index];
     }
 
     private function debugSetMachineInTable($type, $subType) {
@@ -51,8 +52,8 @@ trait DebugUtilTrait {
         $this->machines->moveCard($card->id, 'hand', $playerId);
     }
 
-    private function debugSetMachineInWorkshop($playerId, $type, $subType) {
-        $card = $this->debugGetMachineByTypes($type, $subType);
+    private function debugSetMachineInWorkshop($playerId, $type, $subType, $index = 0) {
+        $card = $this->debugGetMachineByTypes($type, $subType, $index);
         $this->machines->moveCard($card->id, 'player', $playerId);
     }
 

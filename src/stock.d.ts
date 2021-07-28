@@ -27,6 +27,7 @@ interface Stock {
     addToStockWithId: (cardUniqueId: number, cardId: string, from?: string) => void;
     addItemType: (cardUniqueId: number, cardWeight: number, cardsurl: string, imagePosition: number) => void;	
     getSelectedItems: () => StockItems[];
+    selectItem(id: string): void;
     unselectAll: () => void;
     removeAll: () => void;
     removeFromStockById: (id: string, to?: string) => void;

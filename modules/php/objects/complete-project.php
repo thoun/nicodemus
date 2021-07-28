@@ -3,8 +3,9 @@
 class CompleteProject {
     public $project;
     public $mandatoryMachine;
-    public $otherMachines;
+    public $machines;
     public $machinesNumber;
+    public $selectedMachinesIds;
 
     public function __construct(object $project, object $machine, array $machines, int $machinesNumber) {
         $this->project = $project;

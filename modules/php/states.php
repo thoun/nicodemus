@@ -44,10 +44,7 @@ trait StateTrait {
 
     function stCompleteProjects() {         
 
-        $playerId = self::getActivePlayerId();     
-
-        // security check
-        // TODO
+        $playerId = self::getActivePlayerId();
 
         $completeProjectsData = $this->getGlobalVariable(COMPLETED_PROJECTS);
 
@@ -59,7 +56,6 @@ trait StateTrait {
             $dicardedProjects[] = $project;
             $this->incPlayerScore($playerId, $project->points);
 
-            // TODO handle discarded machine choice (when 3 blue machines for example)
             $machinesToCompleteProject = $completeProjectData->machines;
             $discardedMachines = array_merge($discardedMachines, $machinesToCompleteProject);
 

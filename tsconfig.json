@@ -17,6 +17,7 @@
         "src/text-icons-formatter.ts",
         "src/table/table.ts",
         "src/players-tables/player-table.ts",
+        "src/discarded-machines-selector/discarded-machines-selector.ts",
         "src/nicodemus.ts",
         "src/define.ts"
     ]

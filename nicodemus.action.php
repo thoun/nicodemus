@@ -142,4 +142,14 @@
 
         self::ajaxResponse();
     }
+
+    public function discardSelectedMachines() {
+        self::setAjaxMode();
+
+        $completeProjects = json_decode(base64_decode(self::getArg("completeProjects", AT_base64, true)));
+
+        $this->game->discardSelectedMachines($completeProjects);
+
+        self::ajaxResponse();
+    }
   }

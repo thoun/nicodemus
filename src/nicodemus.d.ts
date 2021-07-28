@@ -30,6 +30,14 @@ interface Project {
     location_arg: number;
 }
 
+interface CompleteProject {    
+    project: Project;
+    mandatoryMachine: Machine;
+    machines: Machine[];
+    machinesNumber: number;
+    selectedMachinesIds?: number[];
+}
+
 interface PlacedTokens {
     resourceId: number;
     x: number;
@@ -104,6 +112,10 @@ interface Exchange {
 interface SelectExchangeArgs {
     number: number;
     possibleExchanges: Exchange[];
+}
+
+interface ChooseProjectDiscardedMachineArgs {
+    completeProjects: CompleteProject[];
 }
 
 interface NotifMachinePlayedArgs {

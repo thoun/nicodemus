@@ -14,6 +14,15 @@ trait UtilTrait {
         return $card->type * 10 + $card->subType;
     }
 
+    function array_find(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if($fn($value)) {
+                return $value;
+            }
+        }
+        return null;
+    }
+
     function array_some(array $array, callable $fn) {
         foreach ($array as $value) {
             if($fn($value)) {

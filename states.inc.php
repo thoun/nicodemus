@@ -215,7 +215,7 @@ $playerActionsGameStates = [
         "type" => "activeplayer",
         "args" => "argChooseProjectDiscardedMachine",
         "possibleactions" => [ 
-            "chooseProjectDiscardedMachine",
+            "discardSelectedMachines",
         ],
         "transitions" => [
             "completeProjects" => ST_COMPLETE_PROJECTS,

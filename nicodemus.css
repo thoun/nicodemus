@@ -132,6 +132,32 @@
   flex: 1;
 }
 
+#discarded-machines-selector .complete-project {
+  display: flex;
+}
+#discarded-machines-selector .project-infos {
+  width: 142px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+}
+#discarded-machines-selector .project-infos span {
+  font-weight: bold;
+}
+#discarded-machines-selector .project-infos .machine-counter {
+  color: red;
+}
+#discarded-machines-selector .project-infos .machine-counter.valid {
+  color: green;
+}
+#discarded-machines-selector .machines {
+  flex: 1;
+}
+#discarded-machines-selector .stockitem.selected {
+  box-shadow: 0 0 5px 6px red;
+}
+
 #nicodemus-help-button {
   position: fixed;
   bottom: 75px;
