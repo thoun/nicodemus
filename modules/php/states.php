@@ -29,13 +29,14 @@ trait StateTrait {
             ]);
         }
 
-        if ($remainingCardsInDeck > 0) {
+        if ($remainingCardsInDeck > 0 && $machineCountInHand < 5) {
 
             $machines = $this->getMachinesFromDb($this->machines->pickCards(min($remainingCardsInDeck, $cardNumberToRefill), 'deck', $playerId));
 
             self::notifyPlayer($playerId, 'addMachinesToHand', '', [
                 'machines' => $machines,
                 'from' => 0,
+                'remainingMachines' => $this->getRemainingMachines(),
             ]);
         }
 

@@ -816,6 +816,10 @@ class Nicodemus implements NicodemusGame {
             from = `player-icon-${notif.args.from}`;
         }
         notif.args.machines.forEach(machine => addToStockWithId(this.playerMachineHand, getUniqueId(machine), ''+machine.id, from));
+
+        if (notif.args.remainingMachines !== undefined) {
+            this.setRemainingMachines(notif.args.remainingMachines);
+        }
     }
 
     notif_addWorkshopProjects(notif: Notif<NotifAddWorkshopProjectsArgs>) {

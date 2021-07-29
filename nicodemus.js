@@ -1283,6 +1283,9 @@ var Nicodemus = /** @class */ (function () {
             from = "player-icon-" + notif.args.from;
         }
         notif.args.machines.forEach(function (machine) { return addToStockWithId(_this.playerMachineHand, getUniqueId(machine), '' + machine.id, from); });
+        if (notif.args.remainingMachines !== undefined) {
+            this.setRemainingMachines(notif.args.remainingMachines);
+        }
     };
     Nicodemus.prototype.notif_addWorkshopProjects = function (notif) {
         this.getPlayerTable(notif.args.playerId).addWorkshopProjects(notif.args.projects);

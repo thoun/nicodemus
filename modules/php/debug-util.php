@@ -14,7 +14,7 @@ trait DebugUtilTrait {
         $this->debugAddResources(2343493, 2);
         $this->debugSetMachineInHand(2343492, 4, 1);
         $this->debugSetMachineInHand(2343492, 4, 2, 1);
-        $this->machines->moveAllCardsInLocation('table', 'discard');
+        $this->machines->moveAllCardsInLocation('deck', 'discard');
         //$this->debugSetMachineInTable(1, 2);
         $this->debugSetMachineInTable(4, 2);
         $this->debugSetMachineInWorkshop(2343492, 1, 1, 1);

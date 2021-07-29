@@ -104,7 +104,7 @@ interface SelectResourceArgs {
 
 interface SelectProjectArgs {
     projects: Project[];
-    remainingProjects: number;
+    remainingProjects?: number;
 }
 
 interface Exchange {
@@ -153,6 +153,7 @@ interface NotifResourcesArgs {
 interface NotifAddMachinesToHandArgs {
     machines: Machine[];
     from: number;
+    remainingMachines?: number;
 }
 
 interface NotifDiscardMachinesArgs {
