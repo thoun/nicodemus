@@ -72,3 +72,10 @@ $this->PROJECTS = [
   37 => new ProjectCard(3, null, null, [3 => 2]),
   38 => new ProjectCard(3, null, null, [1 => 1, 2 => 1, 3 => 1]),
 ];
+
+$this->COLLECTED_STAT_BY_TYPE = [
+  0 => "collectedCharcoalium",
+  1 => "collectedWood",
+  2 => "collectedCopper",
+  3 => "collectedCrystal",
+];

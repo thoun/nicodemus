@@ -57,6 +57,9 @@ trait StateTrait {
             $dicardedProjects[] = $project;
             $this->incPlayerScore($playerId, $project->points);
 
+            self::incStat($project->points, 'pointsWithCompletedProjects');
+            self::incStat($project->points, 'pointsWithCompletedProjects', $playerId);
+
             $machinesToCompleteProject = $completeProjectData->machines;
             $discardedMachines = array_merge($discardedMachines, $machinesToCompleteProject);
 
@@ -70,6 +73,10 @@ trait StateTrait {
         $this->machines->moveCards(array_map(function($machine) { return $machine->id; }, $discardedMachines), 'discard');
         $this->projects->moveCards(array_map(function($project) { return $project->id; }, $dicardedProjects), 'discard');
 
+        $projectsNumber = count($completeProjectsData);
+        self::incStat($projectsNumber, 'completedProjects');
+        self::incStat($projectsNumber, 'completedProjects', $playerId);
+
         
         self::notifyAllPlayers('discardPlayerMachines', '', [
             'machines' => $discardedMachines,
@@ -78,10 +85,15 @@ trait StateTrait {
         $this->gamestate->nextState('nextPlayer');
     }
 
-    function stNextPlayer() {
+    function stNextPlayer() {     
+        $playerId = self::getActivePlayerId();
+
+        self::incStat(1, 'turnsNumber');
+        self::incStat(1, 'turnsNumber', $playerId);
+
         $this->clearTableRowIfNecessary();
 
-        if (intval(self::getGameStateValue(LAST_TURN)) == 1 && self::getActivePlayerId() != $this->getFirstPlayerId()) {
+        if (intval(self::getGameStateValue(LAST_TURN)) == 1 && $playerId != $this->getFirstPlayerId()) {
             $this->gamestate->nextState('endGame');
         } else {
             $this->activeNextPlayer();

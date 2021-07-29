@@ -237,14 +237,19 @@ trait UtilTrait {
 
         $opponentId = $this->getOpponentId($playerId);
 
+        $count = count($this->getResources($type, $playerId));
         self::notifyAllPlayers('addResources', '', [
             'playerId' => $playerId,
             'resourceType' => $type,
             'resources' => $this->getResourcesFromDb($this->resources->getCards($resourcesIds)),
-            'count' => count($this->getResources($type, $playerId)),
+            'count' => $count,
             'opponentId' => $opponentId,
             'opponentCount' => count($this->getResources($type, $opponentId)),
         ]);
+
+        $collectedStat = $this->COLLECTED_STAT_BY_TYPE[$type];
+        self::incStat($count, $collectedStat);
+        self::incStat($count, $collectedStat, $playerId);
     }
 
     function removeResource(int $playerId, int $number, int $type, $tableSpotDestination = null) {

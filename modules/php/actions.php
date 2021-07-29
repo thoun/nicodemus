@@ -41,6 +41,9 @@ trait ActionTrait {
             'machineImage' => $this->getUniqueId($machine),
         ]);
 
+        self::incStat(1, 'playedMachines');
+        self::incStat(1, 'playedMachines', $playerId);
+
         $this->gamestate->nextState('choosePlayAction');
     }
   	
@@ -109,6 +112,12 @@ trait ActionTrait {
             'machineSpot' => $machineSpot,
             'machineImage' => $this->getUniqueId($machine),
         ]);
+
+        self::incStat(1, 'repairedMachines');
+        self::incStat(1, 'repairedMachines', $playerId);
+
+        self::incStat($machine->points, 'pointsWithRepairedMachines');
+        self::incStat($machine->points, 'pointsWithRepairedMachines', $playerId);
         
         $this->removeEmptySpaceFromTable();
         
@@ -131,6 +140,9 @@ trait ActionTrait {
             'player_name' => self::getActivePlayerName(),
             'charcoalium' => $machine->points,
         ]);
+
+        self::incStat(1, 'playedMachinesForCharcoalium');
+        self::incStat(1, 'playedMachinesForCharcoalium', $playerId);
 
         $this->gamestate->nextState('refillHand');
     }
@@ -155,6 +167,9 @@ trait ActionTrait {
             'resourceType' => $resource,
         ]);
 
+        self::incStat(1, 'playedMachinesForResource');
+        self::incStat(1, 'playedMachinesForResource', $playerId);
+
         $this->gamestate->nextState('refillHand');
     }
   	
@@ -174,6 +189,9 @@ trait ActionTrait {
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
         ]);
+
+        self::incStat(1, 'playedMachinesForWithEffect');
+        self::incStat(1, 'playedMachinesForWithEffect', $playerId);
 
         $this->gamestate->nextState($transition != null ? $transition : 'refillHand');
     }

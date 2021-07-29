@@ -202,6 +202,7 @@ $playerActionsGameStates = [
             "skipSelectProjects",
         ],
         "transitions" => [
+            "nextPlayer" => ST_NEXT_PLAYER, // for skip
             "chooseProjectDiscardedMachine" => ST_PLAYER_CHOOSE_PROJECT_DISCARDED_MACHINE,
             "completeProjects" => ST_COMPLETE_PROJECTS,
             "zombiePass" => ST_NEXT_PLAYER,

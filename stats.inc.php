@@ -47,49 +47,80 @@
     
 */
 
-$stats_type = array(
+$commonStats = [
+    "turnsNumber" => [
+        "id" => 10,
+        "name" => totranslate("Number of turns"),
+        "type" => "int"
+    ], 
+    "playedMachines" => [
+        "id" => 11,
+        "name" => totranslate("Machines played"),
+        "type" => "int"
+    ],
+    "playedMachinesForCharcoalium" => [
+        "id" => 12,
+        "name" => totranslate("Played machines for charcoalium"),
+        "type" => "int"
+    ],
+    "playedMachinesForResource" => [
+        "id" => 13,
+        "name" => totranslate("Played machines for resource"),
+        "type" => "int"
+    ],
+    "playedMachinesForWithEffect" => [
+        "id" => 14,
+        "name" => totranslate("Played machines with effect"),
+        "type" => "int"
+    ],
+    "repairedMachines" => [
+        "id" => 15,
+        "name" => totranslate("Repaired machines"),
+        "type" => "int"
+    ],
+    "completedProjects" => [
+        "id" => 16,
+        "name" => totranslate("Completed projects"),
+        "type" => "int"
+    ],
+    "pointsWithRepairedMachines" => [
+        "id" => 17,
+        "name" => totranslate("Points with repaired machines"),
+        "type" => "int"
+    ],
+    "pointsWithCompletedProjects" => [
+        "id" => 18,
+        "name" => totranslate("Points with completed projects"),
+        "type" => "int"
+    ],
+    "collectedCharcoalium" => [
+        "id" => 20,
+        "name" => totranslate("Collected charcoalium"),
+        "type" => "int"
+    ],
+    "collectedWood" => [
+        "id" => 21,
+        "name" => totranslate("Collected wood"),
+        "type" => "int"
+    ],
+    "collectedCopper" => [
+        "id" => 22,
+        "name" => totranslate("Collected copper"),
+        "type" => "int"
+    ],
+    "collectedCrystal" => [
+        "id" => 23,
+        "name" => totranslate("Collected crystal"),
+        "type" => "int"
+    ],
+];
+
+$stats_type = [
 
     // Statistics global to table
-    "table" => array(
-
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
-
-/*
-        Examples:
-
-
-        "table_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("table test stat 1"), 
-                                "type" => "int" ),
-                                
-        "table_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("table test stat 2"), 
-                                "type" => "float" )
-*/  
-    ),
+    "table" => $commonStats,
     
     // Statistics existing for each player
-    "player" => array(
+    "player" => $commonStats,
 
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
-    
-/*
-        Examples:    
-        
-        
-        "player_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("player test stat 1"), 
-                                "type" => "int" ),
-                                
-        "player_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("player test stat 2"), 
-                                "type" => "float" )
-
-*/    
-    )
-
-);
+];
