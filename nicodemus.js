@@ -440,7 +440,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var color = player.color.startsWith('00') ? 'blue' : 'red';
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n            </div>\n            <div class=\"player-resources " + side + "\">\n                <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                <div id=\"player" + this.playerId + "-resources1\"></div>\n                <div id=\"player" + this.playerId + "-resources2\"></div>\n                <div id=\"player" + this.playerId + "-resources3\"></div>\n            </div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n            <div id=\"player-table-" + this.playerId + "-projects\" class=\"projects\"></div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n\n                <div class=\"player-resources " + side + "\">\n                    <div id=\"player" + this.playerId + "-resources1\"></div>\n                    <div id=\"player" + this.playerId + "-resources2\"></div>\n                    <div id=\"player" + this.playerId + "-resources3\"></div>\n                    <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                </div>\n            </div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n            <div id=\"player-table-" + this.playerId + "-projects\" class=\"projects\"></div>\n        </div>";
         dojo.place(html, 'playerstables');
         // projects        
         this.projectStock = new ebg.stock();
@@ -482,18 +482,18 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
     };
-    PlayerTable.prototype.getPlaceOnCard = function (placed, type) {
+    PlayerTable.prototype.getPlaceOnPlayerBoard = function (placed, type) {
         var _this = this;
         var xMaxShift = type ? 28 : 148;
-        var yMaxShift = type ? 82 : 32;
+        var yMaxShift = type ? 84 : 32;
         var newPlace = {
-            x: Math.random() * xMaxShift + 16,
-            y: Math.random() * yMaxShift + 16,
+            x: Math.random() * xMaxShift,
+            y: Math.random() * yMaxShift,
         };
         var protection = 0;
         while (protection < 1000 && placed.some(function (place) { return _this.getDistance(newPlace, place) < 32; })) {
-            newPlace.x = Math.random() * xMaxShift + 16;
-            newPlace.y = Math.random() * yMaxShift + 16;
+            newPlace.x = Math.random() * xMaxShift;
+            newPlace.y = Math.random() * yMaxShift;
             protection++;
         }
         return newPlace;
@@ -508,7 +508,7 @@ var PlayerTable = /** @class */ (function () {
         var placed = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
         // add tokens
         resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
-            var newPlace = _this.getPlaceOnCard(placed, type);
+            var newPlace = _this.getPlaceOnPlayerBoard(placed, type);
             placed.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
             var resourceDivId = "resource" + type + "-" + resource.id;
             var resourceDiv = document.getElementById("resource" + type + "-" + resource.id);
@@ -520,11 +520,11 @@ var PlayerTable = /** @class */ (function () {
                     div.appendChild(resourceDiv);
                 }
                 else {
-                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
+                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
                 }
             }
             else {
-                var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + (newPlace.x - 16) + "px; top: " + (newPlace.y - 16) + "px;\"\n                ></div>";
+                var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + newPlace.x + "px; top: " + newPlace.y + "px;\"\n                ></div>";
                 dojo.place(html, divId);
             }
         });

@@ -34,4 +34,3 @@ Make sure ftp-sync.json and node_modules are in .gitignore
 
 ## TODO
 Real game images for Game page => ask erwan
-more compact player board

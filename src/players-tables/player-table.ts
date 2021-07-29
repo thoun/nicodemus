@@ -19,12 +19,13 @@ class PlayerTable {
             <div class="name-column ${color} ${side}">
                 <div class="player-name">${player.name}</div>
                 <div id="player-icon-${this.playerId}" class="player-icon ${color}"></div>
-            </div>
-            <div class="player-resources ${side}">
-                <div id="player${this.playerId}-resources0" class="top"></div>
-                <div id="player${this.playerId}-resources1"></div>
-                <div id="player${this.playerId}-resources2"></div>
-                <div id="player${this.playerId}-resources3"></div>
+
+                <div class="player-resources ${side}">
+                    <div id="player${this.playerId}-resources1"></div>
+                    <div id="player${this.playerId}-resources2"></div>
+                    <div id="player${this.playerId}-resources3"></div>
+                    <div id="player${this.playerId}-resources0" class="top"></div>
+                </div>
             </div>
             <div id="player-table-${this.playerId}-machines" class="machines"></div>
             <div id="player-table-${this.playerId}-projects" class="projects"></div>
@@ -82,17 +83,17 @@ class PlayerTable {
         return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
     }
 
-    private getPlaceOnCard(placed: PlacedTokens[], type: number): Partial<PlacedTokens> {
+    private getPlaceOnPlayerBoard(placed: PlacedTokens[], type: number): Partial<PlacedTokens> {
         const xMaxShift = type ? 28 : 148;
-        const yMaxShift = type ? 82 : 32;
+        const yMaxShift = type ? 84 : 32;
         const newPlace = {
-            x: Math.random() * xMaxShift + 16,
-            y: Math.random() * yMaxShift + 16,
+            x: Math.random() * xMaxShift,
+            y: Math.random() * yMaxShift,
         };
         let protection = 0;
         while (protection < 1000 && placed.some(place => this.getDistance(newPlace, place) < 32)) {
-            newPlace.x = Math.random() * xMaxShift + 16;
-            newPlace.y = Math.random() * yMaxShift + 16;
+            newPlace.x = Math.random() * xMaxShift;
+            newPlace.y = Math.random() * yMaxShift;
             protection++;
         }
 
@@ -109,7 +110,7 @@ class PlayerTable {
 
         // add tokens
         resources.filter(resource => !placed.some(place => place.resourceId == resource.id)).forEach(resource => {
-            const newPlace = this.getPlaceOnCard(placed, type);
+            const newPlace = this.getPlaceOnPlayerBoard(placed, type);
             placed.push({
                 ...newPlace, 
                 resourceId: resource.id,
@@ -125,12 +126,12 @@ class PlayerTable {
                 if (originDiv.classList.contains('to_be_destroyed')) {
                     div.appendChild(resourceDiv);
                 } else {
-                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
+                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x , newPlace.y);
                 }
             } else {
                 let html = `<div id="${resourceDivId}"
                     class="cube resource${type} aspect${resource.id % (type == 0 ? 8 : 4)}" 
-                    style="left: ${newPlace.x - 16}px; top: ${newPlace.y - 16}px;"
+                    style="left: ${newPlace.x}px; top: ${newPlace.y}px;"
                 ></div>`;
                 dojo.place(html, divId);
             }

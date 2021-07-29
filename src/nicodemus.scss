@@ -177,6 +177,10 @@ html {
     }
   }
 
+  &.resource3 {
+    opacity: 0.8;
+  }
+
   @for $i from 0 through 3 {
     &.aspect#{$i} {
         background-position: ($i * 100% / 3) 100%;
