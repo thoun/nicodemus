@@ -127,6 +127,12 @@ class Nicodemus implements NicodemusGame {
             case 'chooseProjectDiscardedMachine':
                 this.onEnteringStateChooseProjectDiscardedMachine(args.args as ChooseProjectDiscardedMachineArgs);
                 break;
+            case 'gameEnd':                
+                const lastTurnBar = document.getElementById('last-round');
+                if (lastTurnBar) {
+                    lastTurnBar.style.display = 'none';
+                }
+                break;
         }
     }
 

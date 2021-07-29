@@ -720,6 +720,12 @@ var Nicodemus = /** @class */ (function () {
             case 'chooseProjectDiscardedMachine':
                 this.onEnteringStateChooseProjectDiscardedMachine(args.args);
                 break;
+            case 'gameEnd':
+                var lastTurnBar = document.getElementById('last-round');
+                if (lastTurnBar) {
+                    lastTurnBar.style.display = 'none';
+                }
+                break;
         }
     };
     Nicodemus.prototype.onEnteringStateChooseAction = function (args) {
