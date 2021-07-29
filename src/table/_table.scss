@@ -94,3 +94,27 @@
     }
   }
 }
+
+.remaining-counter {
+  position: absolute;
+  width: 16px;
+  text-align: center;
+  //text-shadow: 1px 1px 1px white;
+  background-color: #FFFFFF88;
+  box-shadow: 0 0 5px 6px #ffffff88;
+  border-radius: 50%;
+}
+
+#remaining-project-counter {
+  top: 73px;
+  left: 144px;
+}
+
+#remaining-machine-counter {
+  top: 408px;
+  left: 1193px;
+}
+
+.deck {
+  z-index: 1;
+}

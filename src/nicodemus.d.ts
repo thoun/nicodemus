@@ -72,6 +72,8 @@ interface NicodemusGamedatas {
     tableMachines: Machine[];
     tableProjects: Project[];
     resources: Resource[][];
+    remainingMachines: number;
+    remainingProjects: number;
 
     endTurn: boolean;
 }
@@ -102,6 +104,7 @@ interface SelectResourceArgs {
 
 interface SelectProjectArgs {
     projects: Project[];
+    remainingProjects: number;
 }
 
 interface Exchange {

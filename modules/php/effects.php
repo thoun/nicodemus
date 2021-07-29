@@ -18,7 +18,13 @@ trait EffectTrait {
                     return false;
             }
         } else if ($machine->type == 4 && $machine->subType == 2) {
-            return $this->countMachinesOnTable() >= 2; // TODO for subType 1 check remaining projects on deck >2, for subType 2 canApplyEffect of 1+ table machines
+            switch ($machine->subType) {
+                case 1: return $this->getRemainingProjects >= 1;
+                case 2: 
+                    $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+                    $nonCopyMachines = array_values(array_filter($tableMachines, function ($m) { return $m->type != 4 || $m->subType != 2; }));
+                    return $this->array_some($nonCopyMachines, function($m) use ($playerId) { return $this->canApplyEffect($playerId, $m); });
+            }
         }
         return true;
     }
@@ -344,7 +350,8 @@ trait EffectTrait {
             case 1: 
                 if ($context->selectedCardId !== null) {
                     $this->projects->moveCard($context->selectedCardId, 'player', $playerId);
-                    $this->projects->shuffle('deck');
+                    $this->projects->moveAllCardsInLocation('projectSelection', 'discard');
+                    //$this->projects->shuffle('deck');
 
                     $project = $this->getProjectFromDb($this->projects->getCard($context->selectedCardId));
                     self::notifyAllPlayers('addWorkshopProjects', clienttranslate('${player_name} uses ${machine_type} effect to pick project ${projectImage}'), [
@@ -357,6 +364,7 @@ trait EffectTrait {
                     ]);
 
                 } else {
+                    $this->projects->pickCardsForLocation(2, 'deck', 'projectSelection');
                     return "selectProject";
                 }
                 break;

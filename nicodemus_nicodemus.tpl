@@ -12,7 +12,8 @@
         <div id="table-wrapper">
             <div id="table">
                 <div class="projects">
-                    <div id="project-deck" class="stockitem"></div>
+                    <div id="project-deck" class="stockitem deck"></div>
+                    <div id="remaining-project-counter" class="remaining-counter"></div>
                     <div id="table-projects"></div>
                 </div>
             </div>

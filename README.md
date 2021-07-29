@@ -33,3 +33,8 @@ Also add one auto-FTP upload extension (for example https://marketplace.visualst
 Make sure ftp-sync.json and node_modules are in .gitignore
 
 ## TODO
+Stats
+Real game images for Game page => ask erwan
+more compact player board
+show empty pile (+ counter ?)
+case of 1 remaining project ? => probably can play it, no need for selection

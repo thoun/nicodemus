@@ -22,6 +22,8 @@ class Nicodemus implements NicodemusGame {
     private woodCounters: Counter[] = [];
     private copperCounters: Counter[] = [];
     private crystalCounters: Counter[] = [];
+    private machineCounter: Counter;
+    private projectCounter: Counter;
     private helpDialog: any;
 
     private discardedMachineSelector: DiscardedMachineSelector;
@@ -71,6 +73,14 @@ class Nicodemus implements NicodemusGame {
             this.onProjectSelectionChanged();
         };
         this.createPlayerTables(gamedatas);
+
+        this.machineCounter = new ebg.counter();
+        this.machineCounter.create('remaining-machine-counter');
+        this.setRemainingMachines(gamedatas.remainingMachines);
+
+        this.projectCounter = new ebg.counter();
+        this.projectCounter.create('remaining-project-counter');
+        this.setRemainingProjects(gamedatas.remainingProjects);
 
         if (gamedatas.endTurn) {
             this.notif_lastTurn();
@@ -151,6 +161,10 @@ class Nicodemus implements NicodemusGame {
     }
 
     private onEnteringStateChooseProject(args: SelectProjectArgs) {
+        if (args.remainingProjects !== undefined) {
+            this.setRemainingProjects(args.remainingProjects);
+        }
+
         if((this as any).isCurrentPlayerActive()) {
             this.setHandSelectable(true);
             this.getPlayerTable(this.getPlayerId()).setProjectSelectable(true);
@@ -709,6 +723,20 @@ class Nicodemus implements NicodemusGame {
         }
 
         this.helpDialog.show();
+    }
+
+    private setRemainingMachines(remainingMachines: number) {
+        this.machineCounter.setValue(remainingMachines);
+        const visibility = remainingMachines > 0 ? 'visible' : 'hidden';
+        document.getElementById('machine-deck').style.visibility = visibility;
+        document.getElementById('remaining-machine-counter').style.visibility = visibility;
+    }
+
+    private setRemainingProjects(remainingProjects: number) {
+        this.projectCounter.setValue(remainingProjects);
+        const visibility = remainingProjects > 0 ? 'visible' : 'hidden';
+        document.getElementById('project-deck').style.visibility = visibility;
+        document.getElementById('remaining-project-counter').style.visibility = visibility;
     }
 
     ///////////////////////////////////////////////////

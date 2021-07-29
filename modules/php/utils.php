@@ -145,6 +145,14 @@ trait UtilTrait {
         }
     }
 
+    function getRemainingMachines() {
+        return $this->machines->countCardInLocation('deck');
+    }
+
+    function getRemainingProjects() {
+        return $this->projects->countCardInLocation('deck');
+    }
+
     function getMachineFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new Error("machine doesn't exists ".json_encode($dbObject));

@@ -256,7 +256,7 @@ trait ActionTrait {
     public function selectProject(int $id) {
         self::checkAction('selectProject'); 
 
-        $projects = $this->getProjectsFromDb($this->projects->getCardsOnTop(2, 'deck'));
+        $projects = $this->getProjectsFromDb($this->projects->getCardsInLocation('projectSelection'));
         if (!$this->array_some($projects, function ($p) use ($id) { return $p->id == $id; })) {
             throw new Error("Selected project cannot be added to workshop");
         }

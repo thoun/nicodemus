@@ -252,7 +252,7 @@ var Table = /** @class */ (function () {
             var top_1 = firstRow ? 0 : 210;
             html += "<div id=\"table-machine-spot-" + i + "\" class=\"machine-spot\" style=\"left: " + left + "px; top: " + top_1 + "px\"></div>";
         }
-        html += "<div id=\"machine-deck\" class=\"stockitem\"></div></div>";
+        html += "\n            <div id=\"machine-deck\" class=\"stockitem deck\"></div>\n            <div id=\"remaining-machine-counter\" class=\"remaining-counter\"></div>\n        </div>";
         dojo.place(html, 'table');
         var _loop_3 = function (i) {
             this_2.machineStocks[i] = new ebg.stock();
@@ -675,6 +675,12 @@ var Nicodemus = /** @class */ (function () {
             _this.onProjectSelectionChanged();
         };
         this.createPlayerTables(gamedatas);
+        this.machineCounter = new ebg.counter();
+        this.machineCounter.create('remaining-machine-counter');
+        this.setRemainingMachines(gamedatas.remainingMachines);
+        this.projectCounter = new ebg.counter();
+        this.projectCounter.create('remaining-project-counter');
+        this.setRemainingProjects(gamedatas.remainingProjects);
         if (gamedatas.endTurn) {
             this.notif_lastTurn();
         }
@@ -743,6 +749,9 @@ var Nicodemus = /** @class */ (function () {
         stocks.forEach(function (stock) { return stock.setSelectionMode(1); });
     };
     Nicodemus.prototype.onEnteringStateChooseProject = function (args) {
+        if (args.remainingProjects !== undefined) {
+            this.setRemainingProjects(args.remainingProjects);
+        }
         if (this.isCurrentPlayerActive()) {
             this.setHandSelectable(true);
             this.getPlayerTable(this.getPlayerId()).setProjectSelectable(true);
@@ -1198,6 +1207,18 @@ var Nicodemus = /** @class */ (function () {
             this.helpDialog.setContent(html);
         }
         this.helpDialog.show();
+    };
+    Nicodemus.prototype.setRemainingMachines = function (remainingMachines) {
+        this.machineCounter.setValue(remainingMachines);
+        var visibility = remainingMachines > 0 ? 'visible' : 'hidden';
+        document.getElementById('machine-deck').style.visibility = visibility;
+        document.getElementById('remaining-machine-counter').style.visibility = visibility;
+    };
+    Nicodemus.prototype.setRemainingProjects = function (remainingProjects) {
+        this.projectCounter.setValue(remainingProjects);
+        var visibility = remainingProjects > 0 ? 'visible' : 'hidden';
+        document.getElementById('project-deck').style.visibility = visibility;
+        document.getElementById('remaining-project-counter').style.visibility = visibility;
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications

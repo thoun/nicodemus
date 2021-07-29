@@ -109,13 +109,14 @@ trait ArgsTrait {
     }
 
     function argSelectProject() {
-        $projects = $this->getProjectsFromDb($this->projects->getCardsOnTop(2, 'deck'));
+        $projects = $this->getProjectsFromDb($this->projects->getCardsInLocation('projectSelection'));
 
         $machine = $this->getMachineForEffect();
 
         return [
             'projects' => $projects,
             'machineEffect' => $machine,
+            'remainingProjects' => $this->getRemainingProjects(),
         ];
     }
 
