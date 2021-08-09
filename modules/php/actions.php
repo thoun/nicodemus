@@ -120,8 +120,6 @@ trait ActionTrait {
         self::incStat($machine->points, 'pointsWithRepairedMachines', $playerId);
         
         $this->removeEmptySpaceFromTable();
-        
-        $this->checkPlayerWorkshopMachinesLimit($playerId);
 
         $this->gamestate->nextState(count($this->getCompleteProjects($playerId, $machine)) > 0 ? 'chooseProject' : 'nextPlayer');
     }

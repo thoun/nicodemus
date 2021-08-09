@@ -163,8 +163,11 @@
 #playerstables .player-table.right {
   flex-direction: row-reverse;
 }
-#playerstables .player-table .machines {
+#playerstables .player-table .machines-and-projects {
   flex: 1;
+}
+#playerstables .player-table .machines-and-projects .empty {
+  display: none;
 }
 
 #discarded-machines-selector .complete-project {

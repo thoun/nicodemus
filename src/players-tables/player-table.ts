@@ -27,8 +27,10 @@ class PlayerTable {
                     <div id="player${this.playerId}-resources0" class="top"></div>
                 </div>
             </div>
-            <div id="player-table-${this.playerId}-machines" class="machines"></div>
-            <div id="player-table-${this.playerId}-projects" class="projects"></div>
+            <div class="machines-and-projects">
+                <div id="player-table-${this.playerId}-projects"></div>
+                <div id="player-table-${this.playerId}-machines"></div>
+            </div>
         </div>`;
 
         dojo.place(html, 'playerstables');
@@ -53,7 +55,7 @@ class PlayerTable {
         setupProjectCards([this.projectStock]);
 
         player.projects.forEach(project => this.projectStock.addToStockWithId(getUniqueId(project), ''+project.id));
-        this.setProjectStockWidth();
+        this.setProjectStockVisibility();
 
         // machines
 
@@ -142,16 +144,11 @@ class PlayerTable {
 
     public addWorkshopProjects(projects: Project[]) {
         projects.forEach(project => addToStockWithId(this.projectStock, getUniqueId(project), ''+project.id, 'page-title'));
-        this.setProjectStockWidth();
+        this.setProjectStockVisibility();
     }
     
-    private setProjectStockWidth() {
-        const newWidth = this.projectStock.items.length ? `${PROJECT_WIDTH + 10}px` : undefined;
-        const div = document.getElementById(`player-table-${this.playerId}-projects`);
-        if (div.style.width !== newWidth) {
-            div.style.width = newWidth;
-            this.machineStock?.updateDisplay();
-        }
+    private setProjectStockVisibility() {
+        dojo.toggleClass(`player-table-${this.playerId}-projects`, 'empty', !this.projectStock.items.length);
     }
     public setProjectSelectable(selectable: boolean) {
         this.projectStock.setSelectionMode(selectable ? 2 : 0);

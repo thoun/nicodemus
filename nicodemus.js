@@ -417,7 +417,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var color = player.color.startsWith('00') ? 'blue' : 'red';
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n\n                <div class=\"player-resources " + side + "\">\n                    <div id=\"player" + this.playerId + "-resources1\"></div>\n                    <div id=\"player" + this.playerId + "-resources2\"></div>\n                    <div id=\"player" + this.playerId + "-resources3\"></div>\n                    <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                </div>\n            </div>\n            <div id=\"player-table-" + this.playerId + "-machines\" class=\"machines\"></div>\n            <div id=\"player-table-" + this.playerId + "-projects\" class=\"projects\"></div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n\n                <div class=\"player-resources " + side + "\">\n                    <div id=\"player" + this.playerId + "-resources1\"></div>\n                    <div id=\"player" + this.playerId + "-resources2\"></div>\n                    <div id=\"player" + this.playerId + "-resources3\"></div>\n                    <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                </div>\n            </div>\n            <div class=\"machines-and-projects\">\n                <div id=\"player-table-" + this.playerId + "-projects\"></div>\n                <div id=\"player-table-" + this.playerId + "-machines\"></div>\n            </div>\n        </div>";
         dojo.place(html, 'playerstables');
         // projects        
         this.projectStock = new ebg.stock();
@@ -435,7 +435,7 @@ var PlayerTable = /** @class */ (function () {
         });
         setupProjectCards([this.projectStock]);
         player.projects.forEach(function (project) { return _this.projectStock.addToStockWithId(getUniqueId(project), '' + project.id); });
-        this.setProjectStockWidth();
+        this.setProjectStockVisibility();
         // machines
         this.machineStock = new ebg.stock();
         this.machineStock.setSelectionAppearance('class');
@@ -510,16 +510,10 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.addWorkshopProjects = function (projects) {
         var _this = this;
         projects.forEach(function (project) { return addToStockWithId(_this.projectStock, getUniqueId(project), '' + project.id, 'page-title'); });
-        this.setProjectStockWidth();
+        this.setProjectStockVisibility();
     };
-    PlayerTable.prototype.setProjectStockWidth = function () {
-        var _a;
-        var newWidth = this.projectStock.items.length ? PROJECT_WIDTH + 10 + "px" : undefined;
-        var div = document.getElementById("player-table-" + this.playerId + "-projects");
-        if (div.style.width !== newWidth) {
-            div.style.width = newWidth;
-            (_a = this.machineStock) === null || _a === void 0 ? void 0 : _a.updateDisplay();
-        }
+    PlayerTable.prototype.setProjectStockVisibility = function () {
+        dojo.toggleClass("player-table-" + this.playerId + "-projects", 'empty', !this.projectStock.items.length);
     };
     PlayerTable.prototype.setProjectSelectable = function (selectable) {
         this.projectStock.setSelectionMode(selectable ? 2 : 0);

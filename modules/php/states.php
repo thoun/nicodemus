@@ -92,6 +92,7 @@ trait StateTrait {
         self::incStat(1, 'turnsNumber', $playerId);
 
         $this->clearTableRowIfNecessary();
+        $this->checkPlayerWorkshopMachinesLimit($playerId);
 
         if (intval(self::getGameStateValue(LAST_TURN)) == 1 && $playerId != $this->getFirstPlayerId()) {
             $this->gamestate->nextState('endGame');

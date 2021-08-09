@@ -66,8 +66,12 @@ $red: #a1311f;
             flex-direction: row-reverse;
         }
 
-        .machines {
+        .machines-and-projects {
             flex: 1;
+
+            .empty {
+                display: none;
+            }
         }
     }
 }

@@ -56,6 +56,7 @@ trait ProjectTrait {
         $machines = [];
         foreach($project->resources as $resource => $number) {
             $machinesOfResource = array_values(array_filter($playerMachines, function($m) use ($resource) { return $m->produce == $resource; }));
+
             if (count($machinesOfResource) < $number) {
                 return null;
             }

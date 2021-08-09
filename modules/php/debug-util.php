@@ -12,15 +12,16 @@ trait DebugUtilTrait {
         //$this->debugSetPoints(19);
         $this->debugAddResources(2343492, 6);
         //$this->debugAddResources(2343493, 2);
-        $this->debugSetMachineInHand(2343492, 4, 2);
-        $this->debugSetMachineInHand(2343492, 2, 4, 1);
+        //$this->debugSetMachineInHand(2343492, 1, 2);
         //$this->debugSetMachineInHand(2343492, 4, 1, 1);
         //$this->machines->moveAllCardsInLocation('deck', 'discard');
-        //$this->debugSetMachineInTable(1, 2);
-        //$this->debugSetMachineInTable(4, 2);
+        $this->debugSetMachineInTable(1, 2);
         $this->debugSetMachineInTable(2, 4);
-        //$this->debugSetProjectInWorkshop(2343492, 1, 1);
+        $this->debugSetMachineInWorkshop(2343492, 2, 1);
+        $this->debugSetMachineInWorkshop(2343492, 2, 2);
+        $this->debugSetMachineInWorkshop(2343492, 4, 2);
         //$this->debugSetProjectInWorkshop(2343492, 2, 1);
+        $this->debugSetProjectInWorkshop(2343492, 3, 4);
 
         // Activate first player must be commented in setup if this is used
         $this->gamestate->changeActivePlayer(2343492);
