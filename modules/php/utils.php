@@ -55,7 +55,7 @@ trait UtilTrait {
 
     function setGlobalVariable(string $name, /*object|array*/ $obj) {
         /*if ($obj == null) {
-            throw new \Error('Global Variable null');
+            throw new \BgaSystemException('Global Variable null');
         }*/
         $jsonObj = json_encode($obj);
         self::DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('$name', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
@@ -155,7 +155,7 @@ trait UtilTrait {
 
     function getMachineFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
-            throw new Error("machine doesn't exists ".json_encode($dbObject));
+            throw new BgaSystemException("machine doesn't exists ".json_encode($dbObject));
         }
         return new Machine($dbObject, $this->MACHINES);
     }
@@ -176,7 +176,7 @@ trait UtilTrait {
 
     function getProjectFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
-            throw new Error("project doesn't exists ".json_encode($dbObject));
+            throw new BgaSystemException("project doesn't exists ".json_encode($dbObject));
         }
         return new Project($dbObject, $this->PROJECTS);
     }
@@ -187,7 +187,7 @@ trait UtilTrait {
 
     function getResourceFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
-            throw new Error("resource doesn't exists ".json_encode($dbObject));
+            throw new BgaSystemException("resource doesn't exists ".json_encode($dbObject));
         }
         return new Resource($dbObject);
     }

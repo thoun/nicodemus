@@ -139,6 +139,7 @@ $playerActionsGameStates = [
             "selectMachine" => ST_PLAYER_SELECT_MACHINE,
             "selectProject" => ST_PLAYER_SELECT_PROJECT,
             "selectResource" => ST_PLAYER_SELECT_RESOURCE,
+            "selectExchange" => ST_PLAYER_SELECT_EXCHANGE,
             "refillHand" => ST_REFILL_HAND,
             "zombiePass" => ST_NEXT_PLAYER,
         ]

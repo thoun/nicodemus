@@ -177,7 +177,7 @@ trait EffectTrait {
         ));
 
         if (count($machines) < 2) {
-            throw new Error("No previous machine");
+            throw new BgaSystemException("No previous machine");
         }
 
         if ($context->selectedCardId == null && count($machines) == ($from == 0 ? 2 : 1)) {
@@ -231,7 +231,7 @@ trait EffectTrait {
                         return "selectResource";
                     }
                 } else {
-                    throw new Error("No previous machine");
+                    throw new BgaSystemException("No previous machine");
                 }
                 break;
         }

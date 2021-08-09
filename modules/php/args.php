@@ -91,7 +91,7 @@ trait ArgsTrait {
         }
 
         if ($selectableMachines == null) {
-            throw new Error("Impossible to determinate cards to select");
+            throw new BgaSystemException("Impossible to determinate cards to select");
         }
 
         return $selectableMachines;
@@ -161,7 +161,7 @@ trait ArgsTrait {
         $machine = $this->getMachineForEffect();
 
         if ($possibleCombinations == null) {
-            throw new Error("Impossible to determinate resources to select");
+            throw new BgaSystemException("Impossible to determinate resources to select");
         }
 
         return [
