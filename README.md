@@ -34,5 +34,4 @@ Make sure ftp-sync.json and node_modules are in .gitignore
 
 ## TODO
 Real game images for Game page => ask erwan
-coup 106 => il devrait pouvoir acheter la 3e machine https://boardgamearena.com/2/nicodemus?table=193052492 
 show discarded cards

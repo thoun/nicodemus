@@ -1317,7 +1317,7 @@ var Nicodemus = /** @class */ (function () {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
                 if (typeof args.machine_type == 'string' && args.machine_type[0] != '<' && typeof args.machine == 'object') {
-                    args.machine_type = "<strong style=\"color: " + this.getMachineColor(args.machine.type) + "\">" + args.machine_type + "</strong>";
+                    args.machine_type = "<strong style=\"color: " + this.getMachineColor(args.machine.type) + "\">" + _(args.machine_type) + "</strong>";
                 }
                 ['resource', 'resourceFrom', 'resourceTo'].forEach(function (argNameStart) {
                     if (typeof args[argNameStart + "Name"] == 'string' && typeof args[argNameStart + "Type"] == 'number' && args[argNameStart + "Name"][0] != '<') {

@@ -462,8 +462,8 @@ trait UtilTrait {
         $producedResources = $this->getProducedResources($playerId);
         $cost = $this->getMachineCost($machine, $tableMachines);
 
-        for ($i=1; $i<=3; $i++) {
-            if (array_key_exists($i, $machine->cost)) {
+        for ($i=0; $i<=3; $i++) {
+            if (array_key_exists($i, $cost)) {
                 $cost[$i] -= $producedResources[$i];
             }
         }
