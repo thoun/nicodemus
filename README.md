@@ -34,3 +34,7 @@ Make sure ftp-sync.json and node_modules are in .gitignore
 
 ## TODO
 Real game images for Game page => ask erwan
+coup 106 => il devrait pouvoir acheter la 3e machine https://boardgamearena.com/2/nicodemus?table=193052492
+coup 122 => Arf, re-Bug. Je ne peux pas copier les machines violettes d'échange de ressources       15:56
+Erreur inattendue : This transaction (selectExchange) is impossible at this state (32)      
+coup 127 => il aurait du valider son projet ?

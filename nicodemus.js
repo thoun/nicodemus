@@ -212,7 +212,7 @@ var Table = /** @class */ (function () {
             return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker " + (player.color.startsWith('00') ? 'blue' : 'red') + "\"></div>";
         });
         dojo.place(html, 'table');
-        players.forEach(function (player) { return _this.setPoints(Number(player.id), Number(player.score), true); });
+        players.forEach(function (player) { return _this.setPoints(Number(player.id), Number(player.score)); });
         // projects
         html = '';
         for (var i = 1; i <= 6; i++) {
@@ -319,8 +319,7 @@ var Table = /** @class */ (function () {
             this.machineStocks.forEach(function (stock) { return stock.unselectAll(); });
         }
     };
-    Table.prototype.setPoints = function (playerId, points, firstPosition) {
-        if (firstPosition === void 0) { firstPosition = false; }
+    Table.prototype.setPoints = function (playerId, points) {
         var opponentId = this.game.getOpponentId(playerId);
         var opponentScore = this.game.getPlayerScore(opponentId);
         var equality = opponentScore === points;
@@ -333,33 +332,11 @@ var Table = /** @class */ (function () {
             top -= 5;
             left -= 5;
         }
-        if (firstPosition) {
-            markerDiv.style.top = top + "px";
-            markerDiv.style.left = left + "px";
-        }
-        else {
-            dojo.fx.slideTo({
-                node: markerDiv,
-                top: top,
-                left: left,
-                delay: 0,
-                duration: ANIMATION_MS,
-                easing: dojo.fx.easing.cubicInOut,
-                unit: "px"
-            }).play();
-        }
+        markerDiv.style.transform = "translateX(" + left + "px) translateY(" + top + "px)";
         if (opponentShouldShift) {
             var opponentMarkerDiv = document.getElementById("player-" + opponentId + "-point-marker");
             if (opponentMarkerDiv) {
-                dojo.fx.slideTo({
-                    node: opponentMarkerDiv,
-                    top: top - 5,
-                    left: left - 5,
-                    delay: 0,
-                    duration: ANIMATION_MS,
-                    easing: dojo.fx.easing.cubicInOut,
-                    unit: "px"
-                }).play();
+                opponentMarkerDiv.style.transform = "translateX(" + (left - 5) + "px) translateY(" + (top - 5) + "px)";
             }
         }
     };

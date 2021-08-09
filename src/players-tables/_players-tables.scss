@@ -51,6 +51,15 @@ $red: #a1311f;
             &>div {
                 position: relative;
             }
+
+            
+
+            .cube {
+                background-color: #FFFFFFAA;
+                box-shadow: 0 0 5px 6px #ffffffAA;
+                border-radius: 50%;
+                z-index: 12;
+            }
         }
 
         &.right {

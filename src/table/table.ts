@@ -18,7 +18,7 @@ class Table {
             html += `<div id="player-${player.id}-point-marker" class="point-marker ${player.color.startsWith('00') ? 'blue' : 'red'}"></div>`
         );
         dojo.place(html, 'table');
-        players.forEach(player => this.setPoints(Number(player.id), Number(player.score), true));
+        players.forEach(player => this.setPoints(Number(player.id), Number(player.score)));
 
         // projects
 
@@ -136,7 +136,7 @@ class Table {
         }
     }
 
-    public setPoints(playerId: number, points: number, firstPosition = false) {
+    public setPoints(playerId: number, points: number) {
         const opponentId = this.game.getOpponentId(playerId);
         const opponentScore = this.game.getPlayerScore(opponentId);
         const equality = opponentScore === points;
@@ -153,33 +153,12 @@ class Table {
             left -= 5;
         }
 
-        if (firstPosition) {
-            markerDiv.style.top = `${top}px`;
-            markerDiv.style.left = `${left}px`;
-        } else {
-            dojo.fx.slideTo({
-                node: markerDiv,
-                top: top,
-                left: left,
-                delay: 0,
-                duration: ANIMATION_MS,
-                easing: dojo.fx.easing.cubicInOut,
-                unit: "px"
-            }).play();
-        }
+        markerDiv.style.transform = `translateX(${left}px) translateY(${top}px)`;
 
         if (opponentShouldShift) {
             const opponentMarkerDiv = document.getElementById(`player-${opponentId}-point-marker`);
             if (opponentMarkerDiv) {
-                dojo.fx.slideTo({
-                    node: opponentMarkerDiv,
-                    top: top - 5,
-                    left: left - 5,
-                    delay: 0,
-                    duration: ANIMATION_MS,
-                    easing: dojo.fx.easing.cubicInOut,
-                    unit: "px"
-                }).play();
+                opponentMarkerDiv.style.transform = `translateX(${left - 5}px) translateY(${top - 5}px)`;
             }
         }
     }
