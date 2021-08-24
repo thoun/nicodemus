@@ -357,6 +357,32 @@
   background-position: 100% 0%;
 }
 
+#popin_nicodemusDiscardedDialog {
+  background: url("img/background.jpg") #eae3d3;
+  background-repeat: repeat;
+  max-width: 100vw;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+#discarded-popin {
+  max-width: 35rem;
+  max-height: calc(80vh - 80px);
+  overflow: auto;
+}
+#discarded-popin h1 {
+  color: black;
+}
+#discarded-popin .discarded-cards {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+#discarded-popin .discarded-cards .message {
+  padding: 10px;
+  font-style: italic;
+}
+
 .player-board .counters {
   display: flex;
   align-items: center;
@@ -373,6 +399,13 @@
 .player-board .first-player {
   width: 48px;
   height: 48px;
+}
+.player-board .bgabutton_gray {
+  background: none;
+}
+
+#player_boards.hide-buttons .discarded-button {
+  display: none;
 }
 
 html {

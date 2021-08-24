@@ -1,20 +1,34 @@
-.counters {
-  display: flex;
-  align-items: center;
-  margin: 5px 0;
-
-  .charcoalium-counter, .wood-counter, .copper-counter, .crystal-counter {
-    flex: 1;
+.player-board {
+  .counters {
     display: flex;
     align-items: center;
+    margin: 5px 0;
+
+    .charcoalium-counter, .wood-counter, .copper-counter, .crystal-counter {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .icon {
+      margin-right: 5px;
+    }
   }
 
-  .icon {
-    margin-right: 5px;
+  .first-player {
+    width: 48px;
+    height: 48px;
+  }
+
+  .bgabutton_gray {
+    background: none;
   }
 }
 
-.first-player {
-  width: 48px;
-  height: 48px;
+#player_boards {
+  &.hide-buttons {
+    .discarded-button {
+      display: none;;
+    }
+  }
 }

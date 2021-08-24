@@ -48,6 +48,10 @@ interface NicodemusPlayer extends Player {
     playerNo: number;
     machines: Machine[];
     projects: Project[];
+
+    discardedProjects: Project[];
+    discardedMachines: Machine[];
+
     resources: Resource[][];
 }
 
@@ -168,4 +172,5 @@ interface NotifAddWorkshopProjectsArgs {
 interface NotifRemoveProjectArgs {
     playerId: number;
     project: Project;
+    discardedMachines: Machine[];
 }

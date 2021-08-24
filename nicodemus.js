@@ -909,9 +909,11 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.onPreferenceChange = function (prefId, prefValue) {
         switch (prefId) {
-            // KEEP
             case 201:
                 document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
+                break;
+            case 202:
+                dojo.toggleClass('player_boards', 'hide-buttons', prefValue == 2);
                 break;
         }
     };
@@ -993,6 +995,8 @@ var Nicodemus = /** @class */ (function () {
                 dojo.place("<div id=\"player-icon-first-player\" class=\"player-icon first-player\"></div>", "player_board_" + player.id);
                 _this.addTooltipHtml('player-icon-first-player', _("First player"));
             }
+            dojo.place("<button class=\"bgabutton bgabutton_gray discarded-button\" id=\"discarded-button-" + player.id + "\">" + _('Complete projects') + "</button>", "player_board_" + player.id);
+            document.getElementById("discarded-button-" + player.id).addEventListener('click', function () { return _this.showDiscarded(playerId); });
         });
         this.addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
         this.addTooltipHtmlToClass('wood-counter', _("Wood"));
@@ -1167,23 +1171,44 @@ var Nicodemus = /** @class */ (function () {
         dojo.connect($('nicodemus-help-button'), 'onclick', this, function () { return _this.showHelp(); });
     };
     Nicodemus.prototype.showHelp = function () {
-        if (!this.helpDialog) {
-            this.helpDialog = new ebg.popindialog();
-            this.helpDialog.create('nicodemusHelpDialog');
-            this.helpDialog.setTitle(_("Cards help"));
-            var html = "<div id=\"help-popin\">\n                <h1>" + _("Machines effects") + "</h1>\n                <div id=\"help-machines\" class=\"help-section\">\n                    <table>";
-            MACHINES_IDS.forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + index + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
-            html += "</table>\n                </div>\n                <h1>" + _("Projects") + "</h1>\n                <div id=\"help-projects\" class=\"help-section\">\n                    <table><tr><td class=\"grid\">";
-            PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project" + (index + 1) + "\" class=\"project\"></div>"; });
-            html += "</td></tr><tr><td>" + getProjectTooltip(11) + "</td></tr>\n                <tr><td><div id=\"project0\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
-            PROJECTS_IDS.slice(6, 9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 6) + "\" class=\"project\"></div>"; });
-            html += "</td></tr><tr><td>" + getProjectTooltip(21) + "</td></tr>\n                <tr><td><div id=\"project5\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
-            PROJECTS_IDS.slice(9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 9) + "\" class=\"project\"></div>"; });
-            html += "</td></tr><tr><td>" + getProjectTooltip(31) + "</td></tr></table>\n                </div>\n            </div>";
-            // Show the dialog
-            this.helpDialog.setContent(html);
+        var helpDialog = new ebg.popindialog();
+        helpDialog.create('nicodemusHelpDialog');
+        helpDialog.setTitle(_("Cards help"));
+        var html = "<div id=\"help-popin\">\n            <h1>" + _("Machines effects") + "</h1>\n            <div id=\"help-machines\" class=\"help-section\">\n                <table>";
+        MACHINES_IDS.forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + index + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
+        html += "</table>\n            </div>\n            <h1>" + _("Projects") + "</h1>\n            <div id=\"help-projects\" class=\"help-section\">\n                <table><tr><td class=\"grid\">";
+        PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project" + (index + 1) + "\" class=\"project\"></div>"; });
+        html += "</td></tr><tr><td>" + getProjectTooltip(11) + "</td></tr>\n            <tr><td><div id=\"project0\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
+        PROJECTS_IDS.slice(6, 9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 6) + "\" class=\"project\"></div>"; });
+        html += "</td></tr><tr><td>" + getProjectTooltip(21) + "</td></tr>\n            <tr><td><div id=\"project5\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
+        PROJECTS_IDS.slice(9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 9) + "\" class=\"project\"></div>"; });
+        html += "</td></tr><tr><td>" + getProjectTooltip(31) + "</td></tr></table>\n            </div>\n        </div>";
+        // Show the dialog
+        helpDialog.setContent(html);
+        helpDialog.show();
+    };
+    Nicodemus.prototype.showDiscarded = function (playerId) {
+        var discardedDialog = new ebg.popindialog();
+        discardedDialog.create('nicodemusDiscardedDialog');
+        discardedDialog.setTitle('');
+        var html = "<div id=\"discarded-popin\">\n            <h1>" + _("Complete projects") + "</h1>\n            <div class=\"discarded-cards\">";
+        if (this.gamedatas.players[playerId].discardedProjects.length) {
+            this.gamedatas.players[playerId].discardedProjects.forEach(function (project) { return html += "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\"></div>"; });
         }
-        this.helpDialog.show();
+        else {
+            html += "<div class=\"message\">" + _('No complete projects') + "</div>";
+        }
+        html += "</div>\n            <h1>" + _("Discarded machines") + "</h1>\n            <div class=\"discarded-cards\">";
+        if (this.gamedatas.players[playerId].discardedMachines.length) {
+            this.gamedatas.players[playerId].discardedMachines.forEach(function (machine) { return html += "<div class=\"machine machine" + MACHINES_IDS.indexOf(getUniqueId(machine)) + "\"></div>"; });
+        }
+        else {
+            html += "<div class=\"message\">" + _('No discarded machines') + "</div>";
+        }
+        html += "</div>\n        </div>";
+        // Show the dialog
+        discardedDialog.setContent(html);
+        discardedDialog.show();
     };
     Nicodemus.prototype.setRemainingMachines = function (remainingMachines) {
         this.machineCounter.setValue(remainingMachines);
@@ -1292,7 +1317,11 @@ var Nicodemus = /** @class */ (function () {
         notif.args.machines.forEach(function (machine) { return _this.table.machineStocks[machine.location_arg].removeFromStockById('' + machine.id); });
     };
     Nicodemus.prototype.notif_removeProject = function (notif) {
+        var _a;
         this.getProjectStocks().forEach(function (stock) { return stock.removeFromStockById('' + notif.args.project.id); });
+        var player = this.gamedatas.players[this.getPlayerId()];
+        player.discardedProjects.push(notif.args.project);
+        (_a = player.discardedMachines).push.apply(_a, notif.args.discardedMachines);
     };
     Nicodemus.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

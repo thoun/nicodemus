@@ -143,6 +143,8 @@ class Nicodemus extends Table {
             $player['playerNo'] = intval($player['playerNo']);
             $player['projects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('player', $playerId));
             $player['machines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('player', $playerId));
+            $player['discardedProjects'] = $this->getProjectsFromDb($this->projects->getCardsInLocation('discard', $playerId));
+            $player['discardedMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('discard', $playerId));
             $player['resources'] = [];
             for ($i=0;$i<=3;$i++) {
                 $player['resources'][$i] = $this->getResources($i, $playerId);

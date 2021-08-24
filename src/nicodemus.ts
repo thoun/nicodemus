@@ -24,7 +24,6 @@ class Nicodemus implements NicodemusGame {
     private crystalCounters: Counter[] = [];
     private machineCounter: Counter;
     private projectCounter: Counter;
-    private helpDialog: any;
 
     private discardedMachineSelector: DiscardedMachineSelector;
     private playerMachineHand: Stock;
@@ -127,7 +126,7 @@ class Nicodemus implements NicodemusGame {
             case 'chooseProjectDiscardedMachine':
                 this.onEnteringStateChooseProjectDiscardedMachine(args.args as ChooseProjectDiscardedMachineArgs);
                 break;
-            case 'gameEnd':                
+            case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
                     lastTurnBar.style.display = 'none';
@@ -372,9 +371,11 @@ class Nicodemus implements NicodemusGame {
       
     private onPreferenceChange(prefId: number, prefValue: number) {
         switch (prefId) {
-            // KEEP
             case 201: 
                 document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
+                break;
+            case 202:
+                dojo.toggleClass('player_boards', 'hide-buttons', prefValue == 2);
                 break;
         }
     }
@@ -493,6 +494,9 @@ class Nicodemus implements NicodemusGame {
                 dojo.place(`<div id="player-icon-first-player" class="player-icon first-player"></div>`, `player_board_${player.id}`);
                 (this as any).addTooltipHtml('player-icon-first-player', _("First player"));
             }
+
+            dojo.place(`<button class="bgabutton bgabutton_gray discarded-button" id="discarded-button-${player.id}">${_('Complete projects')}</button>`, `player_board_${player.id}`);
+            document.getElementById(`discarded-button-${player.id}`).addEventListener('click', () => this.showDiscarded(playerId));
         });
 
         (this as any).addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
@@ -698,37 +702,69 @@ class Nicodemus implements NicodemusGame {
     }
 
     private showHelp() {
-        if (!this.helpDialog) {
-            this.helpDialog = new ebg.popindialog();
-            this.helpDialog.create( 'nicodemusHelpDialog' );
-            this.helpDialog.setTitle( _("Cards help") );
-            
-            var html = `<div id="help-popin">
-                <h1>${_("Machines effects")}</h1>
-                <div id="help-machines" class="help-section">
-                    <table>`;
-                MACHINES_IDS.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
-                html += `</table>
-                </div>
-                <h1>${_("Projects")}</h1>
-                <div id="help-projects" class="help-section">
-                    <table><tr><td class="grid">`;
-                PROJECTS_IDS.slice(1, 5).forEach((number, index) => html += `<div id="project${index + 1}" class="project"></div>`);
-                html += `</td></tr><tr><td>${getProjectTooltip(11)}</td></tr>
-                <tr><td><div id="project0" class="project"></div></td></tr><tr><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
-                PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
-                html += `</td></tr><tr><td>${getProjectTooltip(21)}</td></tr>
-                <tr><td><div id="project5" class="project"></div></td></tr><tr><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
-                PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);
-                html += `</td></tr><tr><td>${getProjectTooltip(31)}</td></tr></table>
-                </div>
-            </div>`;
-            
-            // Show the dialog
-            this.helpDialog.setContent(html);
-        }
+        const helpDialog = new ebg.popindialog();
+        helpDialog.create('nicodemusHelpDialog');
+        helpDialog.setTitle(_("Cards help"));
+        
+        var html = `<div id="help-popin">
+            <h1>${_("Machines effects")}</h1>
+            <div id="help-machines" class="help-section">
+                <table>`;
+            MACHINES_IDS.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
+            html += `</table>
+            </div>
+            <h1>${_("Projects")}</h1>
+            <div id="help-projects" class="help-section">
+                <table><tr><td class="grid">`;
+            PROJECTS_IDS.slice(1, 5).forEach((number, index) => html += `<div id="project${index + 1}" class="project"></div>`);
+            html += `</td></tr><tr><td>${getProjectTooltip(11)}</td></tr>
+            <tr><td><div id="project0" class="project"></div></td></tr><tr><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
+            PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
+            html += `</td></tr><tr><td>${getProjectTooltip(21)}</td></tr>
+            <tr><td><div id="project5" class="project"></div></td></tr><tr><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
+            PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);
+            html += `</td></tr><tr><td>${getProjectTooltip(31)}</td></tr></table>
+            </div>
+        </div>`;
+        
+        // Show the dialog
+        helpDialog.setContent(html);
 
-        this.helpDialog.show();
+        helpDialog.show();
+    }
+
+    private showDiscarded(playerId: number) {
+        const discardedDialog = new ebg.popindialog();
+        discardedDialog.create('nicodemusDiscardedDialog');
+        discardedDialog.setTitle('');
+        
+        var html = `<div id="discarded-popin">
+            <h1>${_("Complete projects")}</h1>
+            <div class="discarded-cards">`;
+
+        if (this.gamedatas.players[playerId].discardedProjects.length) {
+            this.gamedatas.players[playerId].discardedProjects.forEach(project => html += `<div class="project project${PROJECTS_IDS.indexOf(getUniqueId(project))}"></div>`);
+        } else {
+            html += `<div class="message">${_('No complete projects')}</div>`;
+        }
+            
+        html += `</div>
+            <h1>${_("Discarded machines")}</h1>
+            <div class="discarded-cards">`;
+
+        if (this.gamedatas.players[playerId].discardedMachines.length) {
+            this.gamedatas.players[playerId].discardedMachines.forEach(machine => html += `<div class="machine machine${MACHINES_IDS.indexOf(getUniqueId(machine))}"></div>`);
+        } else {
+            html += `<div class="message">${_('No discarded machines')}</div>`;
+        }
+            
+        html += `</div>
+        </div>`;
+        
+        // Show the dialog
+        discardedDialog.setContent(html);
+
+        discardedDialog.show();
     }
 
     private setRemainingMachines(remainingMachines: number) {
@@ -862,7 +898,11 @@ class Nicodemus implements NicodemusGame {
     }
 
     notif_removeProject(notif: Notif<NotifRemoveProjectArgs>) {
-            this.getProjectStocks().forEach(stock => stock.removeFromStockById(''+notif.args.project.id));
+        this.getProjectStocks().forEach(stock => stock.removeFromStockById(''+notif.args.project.id));
+
+        const player = this.gamedatas.players[this.getPlayerId()];
+        player.discardedProjects.push(notif.args.project);
+        player.discardedMachines.push(...notif.args.discardedMachines);
     }
 
     notif_lastTurn() {

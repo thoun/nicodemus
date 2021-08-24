@@ -50,11 +50,11 @@ trait StateTrait {
         $completeProjectsData = $this->getGlobalVariable(COMPLETED_PROJECTS);
 
         $discardedMachines = [];
-        $dicardedProjects = [];
+        $discardedProjects = [];
 
         foreach ($completeProjectsData as $completeProjectData) {
             $project = $completeProjectData->project;
-            $dicardedProjects[] = $project;
+            $discardedProjects[] = $project;
             $this->incPlayerScore($playerId, $project->points);
 
             self::incStat($project->points, 'pointsWithCompletedProjects');
@@ -68,10 +68,11 @@ trait StateTrait {
                 'player_name' => self::getActivePlayerName(),
                 'project' => $project,
                 'projectImage' => $this->getUniqueId($project),
+                'discardedMachines' => $machinesToCompleteProject,
             ]);
         }
-        $this->machines->moveCards(array_map(function($machine) { return $machine->id; }, $discardedMachines), 'discard');
-        $this->projects->moveCards(array_map(function($project) { return $project->id; }, $dicardedProjects), 'discard');
+        $this->machines->moveCards(array_map(function($machine) { return $machine->id; }, $discardedMachines), 'discard', $playerId);
+        $this->projects->moveCards(array_map(function($project) { return $project->id; }, $discardedProjects), 'discard', $playerId);
 
         $projectsNumber = count($completeProjectsData);
         self::incStat($projectsNumber, 'completedProjects');
