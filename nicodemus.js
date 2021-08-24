@@ -155,8 +155,30 @@ function getProjectTooltip(type) {
     }
     return null;
 }
+function getMachineColor(color) {
+    switch (color) {
+        case 1: return '#006fa1';
+        case 2: return '#702c91';
+        case 3: return '#a72c32';
+        case 4: return '#c48b10';
+    }
+    return null;
+}
+function getColorName(color) {
+    switch (color) {
+        case 1: return _('Production');
+        case 2: return _('Transformation');
+        case 3: return _('Attack');
+        case 4: return _('Special');
+    }
+}
 function setupProjectCard(game, cardDiv, type) {
-    game.addTooltipHtml(cardDiv.id, getProjectTooltip(type));
+    var tooltip = getProjectTooltip(type);
+    if (type >= 11 && type <= 14) {
+        var color = type - 10;
+        tooltip += "<br><strong style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</strong>";
+    }
+    game.addTooltipHtml(cardDiv.id, tooltip);
 }
 function moveToAnotherStock(sourceStock, destinationStock, uniqueId, cardId) {
     if (sourceStock === destinationStock) {
@@ -995,7 +1017,7 @@ var Nicodemus = /** @class */ (function () {
                 dojo.place("<div id=\"player-icon-first-player\" class=\"player-icon first-player\"></div>", "player_board_" + player.id);
                 _this.addTooltipHtml('player-icon-first-player', _("First player"));
             }
-            dojo.place("<button class=\"bgabutton bgabutton_gray discarded-button\" id=\"discarded-button-" + player.id + "\">" + _('Complete projects') + "</button>", "player_board_" + player.id);
+            dojo.place("<button class=\"bgabutton bgabutton_gray discarded-button\" id=\"discarded-button-" + player.id + "\">" + _('Completed projects') + "</button>", "player_board_" + player.id);
             document.getElementById("discarded-button-" + player.id).addEventListener('click', function () { return _this.showDiscarded(playerId); });
         });
         this.addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
@@ -1191,12 +1213,12 @@ var Nicodemus = /** @class */ (function () {
         var discardedDialog = new ebg.popindialog();
         discardedDialog.create('nicodemusDiscardedDialog');
         discardedDialog.setTitle('');
-        var html = "<div id=\"discarded-popin\">\n            <h1>" + _("Complete projects") + "</h1>\n            <div class=\"discarded-cards\">";
+        var html = "<div id=\"discarded-popin\">\n            <h1>" + _("Completed projects") + "</h1>\n            <div class=\"discarded-cards\">";
         if (this.gamedatas.players[playerId].discardedProjects.length) {
             this.gamedatas.players[playerId].discardedProjects.forEach(function (project) { return html += "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\"></div>"; });
         }
         else {
-            html += "<div class=\"message\">" + _('No complete projects') + "</div>";
+            html += "<div class=\"message\">" + _('No completed projects') + "</div>";
         }
         html += "</div>\n            <h1>" + _("Discarded machines") + "</h1>\n            <div class=\"discarded-cards\">";
         if (this.gamedatas.players[playerId].discardedMachines.length) {
@@ -1329,15 +1351,6 @@ var Nicodemus = /** @class */ (function () {
         }
         dojo.place("<div id=\"last-round\">\n            " + _("This is the last round of the game!") + "\n        </div>", 'page-title');
     };
-    Nicodemus.prototype.getMachineColor = function (color) {
-        switch (color) {
-            case 1: return '#006fa1';
-            case 2: return '#702c91';
-            case 3: return '#a72c32';
-            case 4: return '#c48b10';
-        }
-        return null;
-    };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     Nicodemus.prototype.format_string_recursive = function (log, args) {
@@ -1346,7 +1359,7 @@ var Nicodemus = /** @class */ (function () {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
                 if (typeof args.machine_type == 'string' && args.machine_type[0] != '<' && typeof args.machine == 'object') {
-                    args.machine_type = "<strong style=\"color: " + this.getMachineColor(args.machine.type) + "\">" + _(args.machine_type) + "</strong>";
+                    args.machine_type = "<strong style=\"color: " + getMachineColor(args.machine.type) + "\">" + _(args.machine_type) + "</strong>";
                 }
                 ['resource', 'resourceFrom', 'resourceTo'].forEach(function (argNameStart) {
                     if (typeof args[argNameStart + "Name"] == 'string' && typeof args[argNameStart + "Type"] == 'number' && args[argNameStart + "Name"][0] != '<') {

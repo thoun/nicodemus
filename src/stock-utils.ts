@@ -148,8 +148,32 @@ function getProjectTooltip(type: number) {
     return null;
 }
 
+function getMachineColor(color: number) {
+    switch (color) {
+        case 1: return '#006fa1';
+        case 2: return '#702c91';
+        case 3: return '#a72c32';
+        case 4: return '#c48b10';
+    }
+    return null;
+}
+
+function getColorName(color: number) {
+    switch (color) {
+        case 1: return _('Production');
+        case 2: return _('Transformation');
+        case 3: return _('Attack');
+        case 4: return _('Special');
+    }
+}
+
 function setupProjectCard(game: Game, cardDiv: HTMLDivElement, type: number) {
-    (game as any).addTooltipHtml(cardDiv.id, getProjectTooltip(type));
+    let tooltip = getProjectTooltip(type);
+    if (type >= 11 && type <= 14) {
+        const color = type - 10;
+        tooltip += `<br><strong style="color: ${getMachineColor(color)}">${getColorName(color)}</strong>`;
+    }
+    (game as any).addTooltipHtml(cardDiv.id, tooltip);
 }
 
 function moveToAnotherStock(sourceStock: Stock, destinationStock: Stock, uniqueId: number, cardId: string) {

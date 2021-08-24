@@ -495,7 +495,7 @@ class Nicodemus implements NicodemusGame {
                 (this as any).addTooltipHtml('player-icon-first-player', _("First player"));
             }
 
-            dojo.place(`<button class="bgabutton bgabutton_gray discarded-button" id="discarded-button-${player.id}">${_('Complete projects')}</button>`, `player_board_${player.id}`);
+            dojo.place(`<button class="bgabutton bgabutton_gray discarded-button" id="discarded-button-${player.id}">${_('Completed projects')}</button>`, `player_board_${player.id}`);
             document.getElementById(`discarded-button-${player.id}`).addEventListener('click', () => this.showDiscarded(playerId));
         });
 
@@ -739,13 +739,13 @@ class Nicodemus implements NicodemusGame {
         discardedDialog.setTitle('');
         
         var html = `<div id="discarded-popin">
-            <h1>${_("Complete projects")}</h1>
+            <h1>${_("Completed projects")}</h1>
             <div class="discarded-cards">`;
 
         if (this.gamedatas.players[playerId].discardedProjects.length) {
             this.gamedatas.players[playerId].discardedProjects.forEach(project => html += `<div class="project project${PROJECTS_IDS.indexOf(getUniqueId(project))}"></div>`);
         } else {
-            html += `<div class="message">${_('No complete projects')}</div>`;
+            html += `<div class="message">${_('No completed projects')}</div>`;
         }
             
         html += `</div>
@@ -914,16 +914,6 @@ class Nicodemus implements NicodemusGame {
             ${_("This is the last round of the game!")}
         </div>`, 'page-title');
     }
-    
-    private getMachineColor(color: number) {
-        switch (color) {
-            case 1: return '#006fa1';
-            case 2: return '#702c91';
-            case 3: return '#a72c32';
-            case 4: return '#c48b10';
-        }
-        return null;
-    }
 
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
@@ -932,7 +922,7 @@ class Nicodemus implements NicodemusGame {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
                 if (typeof args.machine_type == 'string' && args.machine_type[0] != '<' && typeof args.machine == 'object') {
-                    args.machine_type = `<strong style="color: ${this.getMachineColor(args.machine.type)}">${_(args.machine_type)}</strong>`;
+                    args.machine_type = `<strong style="color: ${getMachineColor(args.machine.type)}">${_(args.machine_type)}</strong>`;
                 }
 
                 ['resource', 'resourceFrom', 'resourceTo'].forEach(argNameStart => {
