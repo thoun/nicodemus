@@ -86,8 +86,10 @@ trait ArgsTrait {
                 }
             }
         } else if ($machine->type == 4 && $machine->subType == 2) {
-            $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table'));
+            $tableMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('table', null, 'location_arg'));
             $selectableMachines = array_slice($tableMachines, 0, count($tableMachines) - 1);
+            // we can't select another copy machine
+            $selectableMachines = array_filter($selectableMachines, function ($machine) { return !($machine->type == 4 && $machine->subType == 2); });
         }
 
         if ($selectableMachines == null) {
