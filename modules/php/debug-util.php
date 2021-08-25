@@ -12,7 +12,7 @@ trait DebugUtilTrait {
         //$this->debugSetPoints(19);
         //$this->debugAddResources(2343492, 5);
         //$this->debugAddResources(2343493, 2);
-        $this->debugSetMachineInHand(2343492, 3, 2);
+        $this->debugSetMachineInHand(2343492, 3, 1);
         //$this->debugSetMachineInHand(2343492, 4, 1, 1);
         //$this->machines->moveAllCardsInLocation('deck', 'discard');
         //$this->debugSetMachineInTable(3, 4);
@@ -23,7 +23,7 @@ trait DebugUtilTrait {
         //$this->debugSetMachineInWorkshop(2343492, 2, 5, 1);
         //$this->debugSetProjectInWorkshop(2343492, 2, 1);
         //$this->debugSetProjectInWorkshop(2343492, 3, 4);
-        //$this->removeResource(2343493, 1, 1);
+        //$this->removeResource(2343493, 2, 0);
 
         // Activate first player must be commented in setup if this is used
         $this->gamestate->changeActivePlayer(2343492);

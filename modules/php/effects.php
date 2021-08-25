@@ -243,20 +243,30 @@ trait EffectTrait {
 
         switch ($machine->subType) {
             case 1: 
-                // steal charcoalium
-                $this->addResource($playerId, 1, 0, true);
+                $opponentResourceCount = count($this->getResources(0, $opponentId));
+
+                if ($opponentResourceCount > 0) {
+                    // steal charcoalium
+                    $this->addResource($playerId, 1, 0, true);
+                }
 
                 // steal a card
                 $this->stealCard($playerId, $opponentId);
-                break;
 
-                self::notifyAllPlayers('applyAttackEffectNotif', clienttranslate('${player_name} uses ${machine_type} effect to steal 1 ${resourceName} and 1 machine with ${machineImage}'), [
+                $message = $opponentResourceCount > 0 ?
+                    clienttranslate('${player_name} uses ${machine_type} effect to steal 1 ${resourceName} and 1 machine with ${machineImage}') :
+                    clienttranslate('${player_name} uses ${machine_type} effect to steal 1 machine with ${machineImage} (opponent has no ${resourceName} to steal)');
+
+                    self::notifyAllPlayers('applyAttackEffectNotif', $message, [
                     'playerId' => $playerId,
                     'player_name' => self::getActivePlayerName(),
                     'machine' => $machine,
                     'machine_type' => $this->getColorName($machine->type),
                     'machineImage' => $this->getUniqueId($machine),
+                    'resourceName' => $this->getResourceName(0),
                 ]);
+
+                break;
 
             case 2: 
                 $opponentResourceCount = $this->countPlayerResources($opponentId);
