@@ -12,7 +12,7 @@ trait DebugUtilTrait {
         //$this->debugSetPoints(19);
         //$this->debugAddResources(2343492, 5);
         //$this->debugAddResources(2343493, 2);
-        $this->debugSetMachineInHand(2343492, 4, 2);
+        $this->debugSetMachineInHand(2343492, 2, 3);
         //$this->debugSetMachineInHand(2343492, 4, 1, 1);
         //$this->machines->moveAllCardsInLocation('deck', 'discard');
         $this->debugClearTable();

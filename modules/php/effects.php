@@ -211,8 +211,11 @@ trait EffectTrait {
                 return $this->discardPreviousMachineForResources($playerId, $context, $playerId);
             case 2: 
                 return $this->discardPreviousMachineForResources($playerId, $context, 0);
-            case 3: 
-                $this->addResource($playerId, 1, 0);
+            case 3:     
+                // only remove charcoalium if other resource is selected            
+                if ($context->selectedCardId != null && count($context->selectedResources) > 0) {
+                    $this->addResource($playerId, 1, 0);
+                }
                 return $this->discardPreviousMachineForResources($playerId, $context, 0);                
             case 4: 
                 if ($context->exchanges < 3) {
