@@ -15,20 +15,26 @@
     }
   }
 
-  .first-player {
-    width: 48px;
-    height: 48px;
-  }
+  .fp-button-grid {
+    display: grid;
+    align-items: center;
+    grid-template-columns: 54px auto;
 
-  .bgabutton_gray {
-    background: none;
+    .first-player {
+      width: 48px;
+      height: 48px;
+    }
+
+    .bgabutton_gray {
+      background: none;
+    }
   }
 }
 
 #player_boards {
   &.hide-buttons {
     .discarded-button {
-      display: none;;
+      display: none;
     }
   }
 }

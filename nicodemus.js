@@ -996,7 +996,7 @@ var Nicodemus = /** @class */ (function () {
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
             // charcoalium & resources counters
-            dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-" + player.id + "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            <div class=\"counters\">\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
+            dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-" + player.id + "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
             var charcoaliumCounter = new ebg.counter();
             charcoaliumCounter.create("charcoalium-counter-" + playerId);
             charcoaliumCounter.setValue(player.resources[0].length);
@@ -1013,13 +1013,18 @@ var Nicodemus = /** @class */ (function () {
             crystalCounter.create("crystal-counter-" + playerId);
             crystalCounter.setValue(player.resources[3].length);
             _this.crystalCounters[playerId] = crystalCounter;
+            var html = "<div class=\"fp-button-grid\">";
             if (player.playerNo == 1) {
-                dojo.place("<div id=\"player-icon-first-player\" class=\"player-icon first-player\"></div>", "player_board_" + player.id);
-                _this.addTooltipHtml('player-icon-first-player', _("First player"));
+                html += "<div id=\"player-icon-first-player\" class=\"player-icon first-player\"></div>";
             }
-            dojo.place("<button class=\"bgabutton bgabutton_gray discarded-button\" id=\"discarded-button-" + player.id + "\">" + _('Completed projects') + "</button>", "player_board_" + player.id);
+            else {
+                html += "<div></div>";
+            }
+            html += "<button class=\"bgabutton bgabutton_gray discarded-button\" id=\"discarded-button-" + player.id + "\">" + _('Completed projects') + "</button>\n            </div>";
+            dojo.place(html, "player_board_" + player.id);
             document.getElementById("discarded-button-" + player.id).addEventListener('click', function () { return _this.showDiscarded(playerId); });
         });
+        this.addTooltipHtml('player-icon-first-player', _("First player"));
         this.addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
         this.addTooltipHtmlToClass('wood-counter', _("Wood"));
         this.addTooltipHtmlToClass('copper-counter', _("Copper"));

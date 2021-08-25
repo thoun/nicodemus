@@ -396,11 +396,16 @@
 .player-board .counters .icon {
   margin-right: 5px;
 }
-.player-board .first-player {
+.player-board .fp-button-grid {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 54px auto;
+}
+.player-board .fp-button-grid .first-player {
   width: 48px;
   height: 48px;
 }
-.player-board .bgabutton_gray {
+.player-board .fp-button-grid .bgabutton_gray {
   background: none;
 }
 

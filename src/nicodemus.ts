@@ -454,8 +454,6 @@ class Nicodemus implements NicodemusGame {
                     <div class="icon charcoalium"></div> 
                     <span id="charcoalium-counter-${player.id}"></span>
                 </div>
-            </div>
-            <div class="counters">
                 <div id="wood-counter-wrapper-${player.id}" class="wood-counter">
                     <div class="icon wood"></div> 
                     <span id="wood-counter-${player.id}"></span>
@@ -490,15 +488,22 @@ class Nicodemus implements NicodemusGame {
             crystalCounter.setValue(player.resources[3].length);
             this.crystalCounters[playerId] = crystalCounter;
 
+            let html = `<div class="fp-button-grid">`;
+
             if (player.playerNo == 1) {
-                dojo.place(`<div id="player-icon-first-player" class="player-icon first-player"></div>`, `player_board_${player.id}`);
-                (this as any).addTooltipHtml('player-icon-first-player', _("First player"));
+                html += `<div id="player-icon-first-player" class="player-icon first-player"></div>`;
+            } else {
+                html += `<div></div>`
             }
 
-            dojo.place(`<button class="bgabutton bgabutton_gray discarded-button" id="discarded-button-${player.id}">${_('Completed projects')}</button>`, `player_board_${player.id}`);
+            html += `<button class="bgabutton bgabutton_gray discarded-button" id="discarded-button-${player.id}">${_('Completed projects')}</button>
+            </div>`;
+
+            dojo.place(html, `player_board_${player.id}`);
             document.getElementById(`discarded-button-${player.id}`).addEventListener('click', () => this.showDiscarded(playerId));
         });
 
+        (this as any).addTooltipHtml('player-icon-first-player', _("First player"));
         (this as any).addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
         (this as any).addTooltipHtmlToClass('wood-counter', _("Wood"));
         (this as any).addTooltipHtmlToClass('copper-counter', _("Copper"));
