@@ -212,8 +212,7 @@
   font-size: 28pt;
 }
 
-/* we show help button if user has no mouse ( = no tooltips) */
-@media (hover: hover) {
+@media only screen and (min-width: 1124px) {
   #nicodemus-help-button {
     bottom: 5px;
   }
