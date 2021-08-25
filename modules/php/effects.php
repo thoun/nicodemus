@@ -226,7 +226,7 @@ trait EffectTrait {
                     if (count($context->selectedResources) > 0) {
                         return $this->discardPreviousMachineForResources($playerId, $context, 0);
                     } else {
-                        $context->selectedCardId = $machines[0]->id;
+                        $context->selectedCardId = $machines[count($machines) - 2]->id;
                         $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
                         return "selectResource";
                     }
