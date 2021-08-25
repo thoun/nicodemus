@@ -259,20 +259,29 @@ trait EffectTrait {
                 ]);
 
             case 2: 
-                if (count($context->selectedResources) == 1) {
-                    $resourceType = $context->selectedResources[0];
-                    $this->addResource($playerId, 1, $resourceType, true);
+                $opponentResourceCount = $this->countPlayerResources($opponentId);
+                if (count($context->selectedResources) == 1 || $opponentResourceCount == 0) {
+
+                    $resourceType = null;
+                    if ($opponentResourceCount > 0) {
+                        $resourceType = $context->selectedResources[0];
+                        $this->addResource($playerId, 1, $resourceType, true);
+                    }
 
                     // steal a card
                     $this->stealCard($playerId, $opponentId);
 
-                    self::notifyAllPlayers('applyAttackEffectNotif', clienttranslate('${player_name} uses ${machine_type} effect to steal 1 ${resourceName} and 1 machine with ${machineImage}'), [
+                    $message = $opponentResourceCount > 0 ?
+                        clienttranslate('${player_name} uses ${machine_type} effect to steal 1 ${resourceName} and 1 machine with ${machineImage}') :
+                        clienttranslate('${player_name} uses ${machine_type} effect to steal 1 machine with ${machineImage} (opponent has no resource to steal)');
+
+                    self::notifyAllPlayers('applyAttackEffectNotif', $message, [
                         'playerId' => $playerId,
                         'player_name' => self::getActivePlayerName(),
                         'machine' => $machine,
                         'machine_type' => $this->getColorName($machine->type),
                         'machineImage' => $this->getUniqueId($machine),
-                        'resourceName' => $this->getResourceName($resourceType),
+                        'resourceName' => $resourceType != null ? $this->getResourceName($resourceType) : null,
                         'resourceType' => $resourceType,
                     ]);
                 } else {

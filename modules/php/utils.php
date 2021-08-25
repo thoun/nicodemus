@@ -270,6 +270,10 @@ trait UtilTrait {
         ]);
     }
 
+    function countPlayerResources(int $playerId) {
+        return intval(self::getUniqueValueFromDB("SELECT count(*) FROM `resource` where `card_location` = 'player' and `card_location_arg` = $playerId and `card_type` > 0"));
+    }
+
     function getPlayerScore(int $playerId) {
         return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
     }
