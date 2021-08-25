@@ -16,6 +16,10 @@ trait DebugUtilTrait {
         //$this->debugSetMachineInHand(2343492, 4, 1, 1);
         //$this->machines->moveAllCardsInLocation('deck', 'discard');
         $this->debugClearTable();
+        $this->debugSetMachineInTable(1, 5);
+        $this->debugSetMachineInTable(1, 5, 1);
+        $this->debugSetMachineInTable(3, 2);
+        $this->debugSetMachineInTable(4, 2, 1);
         $this->debugSetMachineInTable(3, 1);
         //$this->debugSetMachineInTable(3, 3);
         //$this->debugSetMachineInWorkshop(2343492, 2, 1);
@@ -54,8 +58,8 @@ trait DebugUtilTrait {
         return $this->getMachinesFromDb($this->machines->getCardsOfType($type, $subType))[$index];
     }
 
-    private function debugSetMachineInTable($type, $subType) {
-        $card = $this->debugGetMachineByTypes($type, $subType);
+    private function debugSetMachineInTable($type, $subType, $index = 0) {
+        $card = $this->debugGetMachineByTypes($type, $subType, $index);
         $this->machines->moveCard($card->id, 'table', $this->countMachinesOnTable() + 1);
     }
 
