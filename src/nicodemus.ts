@@ -263,7 +263,8 @@ class Nicodemus implements NicodemusGame {
                     if (!choosePlayActionArgs.canApplyEffect) {
                         dojo.addClass('applyEffect-button', 'disabled');
                     }
-                    (this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
+                    // remove because it makes problems with ipad
+                    //(this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
                     break;
 
                 case 'selectResource':

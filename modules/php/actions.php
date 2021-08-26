@@ -133,7 +133,7 @@ trait ActionTrait {
 
         $this->addResource($playerId, $machine->points, 0);
 
-        self::notifyAllPlayers('machinePlayedGetCharcoalium', clienttranslate('${player_name} wins ${charcoalium} charcoalium(s) with played machine'), [
+        self::notifyAllPlayers('machinePlayedGetCharcoalium', clienttranslate('${player_name} gains ${charcoalium} charcoalium(s) with played machine'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'charcoalium' => $machine->points,
@@ -158,7 +158,7 @@ trait ActionTrait {
 
         $this->addResource($playerId, 1, $resource);
 
-        self::notifyAllPlayers('machinePlayedGetResource', clienttranslate('${player_name} wins 1 ${resourceName} with played machine'), [
+        self::notifyAllPlayers('machinePlayedGetResource', clienttranslate('${player_name} gains 1 ${resourceName} with played machine'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'resourceName' => $this->getResourceName($resource),

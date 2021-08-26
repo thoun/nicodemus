@@ -45,7 +45,7 @@ trait EffectTrait {
             $resource = $combination[0];
             $this->addResource($playerId, 2, $resource);
 
-            self::notifyAllPlayers('addResourcesFromCombinationNotif', clienttranslate('${player_name} wins ${number} ${resourceName} with applied effect'), [
+            self::notifyAllPlayers('addResourcesFromCombinationNotif', clienttranslate('${player_name} gains ${number} ${resourceName} with applied effect'), [
                 'playerId' => $playerId,
                 'player_name' => self::getActivePlayerName(),
                 'resourceName' => $this->getResourceName($resource),
@@ -56,7 +56,7 @@ trait EffectTrait {
             foreach($combination as $selectedResource) {
                 $this->addResource($playerId, 1, $selectedResource);
 
-                self::notifyAllPlayers('addResourcesFromCombinationNotif', clienttranslate('${player_name} wins ${number} ${resourceName} with applied effect'), [
+                self::notifyAllPlayers('addResourcesFromCombinationNotif', clienttranslate('${player_name} gains ${number} ${resourceName} with applied effect'), [
                     'playerId' => $playerId,
                     'player_name' => self::getActivePlayerName(),
                     'resourceName' => $this->getResourceName($selectedResource),
@@ -124,7 +124,7 @@ trait EffectTrait {
     }
 
     function logProductionEffect(int $playerId, int $number, int $resource) {
-        self::notifyAllPlayers('applyProductionEffectNotif', clienttranslate('${player_name} wins ${number} ${resourceName} with applied effect'), [
+        self::notifyAllPlayers('applyProductionEffectNotif', clienttranslate('${player_name} gains ${number} ${resourceName} with applied effect'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'resourceName' => $this->getResourceName($resource),
@@ -189,6 +189,8 @@ trait EffectTrait {
             if (count($context->selectedResources) > 0) {
                 $discardedMachine = $machines[count($machines) - 2];
                 $this->addResourcesFromCombination($playerId, $context->selectedResources);
+                //$machineResources = $this->getResourcesFromDb($this->resources->getCardsInLocation('machine', $id));
+                //$this->moveResources(0, 0, $machineResources);
                 $this->machines->moveCard($discardedMachine->id, 'discard');
                 self::notifyAllPlayers($from == 0 ? 'discardTableMachines' : 'discardHandMachines', '', [
                     'machines' => [$discardedMachine],

@@ -842,7 +842,8 @@ var Nicodemus = /** @class */ (function () {
                     if (!choosePlayActionArgs_1.canApplyEffect) {
                         dojo.addClass('applyEffect-button', 'disabled');
                     }
-                    this.addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs_1.machine)));
+                    // remove because it makes problems with ipad
+                    //(this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
                     break;
                 case 'selectResource':
                     var selectResourceArgs = args;

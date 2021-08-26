@@ -21,6 +21,7 @@ trait DebugUtilTrait {
         $this->debugSetMachineInTable(3, 2);
         $this->debugSetMachineInTable(4, 2, 1);
         $this->debugSetMachineInTable(3, 1);
+        $this->debugSetCharcoaliumInTable(5, 2);
         //$this->debugSetMachineInTable(3, 3);
         //$this->debugSetMachineInWorkshop(2343492, 2, 1);
         //$this->debugSetMachineInWorkshop(2343492, 2, 5, 1);
@@ -85,5 +86,13 @@ trait DebugUtilTrait {
     private function debugSetProjectInWorkshop($playerId, $type, $subType) {
         $card = $this->debugGetProjectByTypes($type, $subType);
         $this->projects->moveCard($card->id, 'player', $playerId);
+    }
+
+    private function debugSetCharcoaliumInTable(int $spot, int $number) {
+        $machine = $this->getMachinesWithResourcesFromDb($this->machines->getCardsInLocation('table', null, 'location_arg'))[$spot - 1];
+
+        $resources = $this->getResources(0, 0);
+        $movedIds = array_map(function ($r) { return $r->id; }, array_slice($resources, 0, $number));
+        $this->resources->moveCards($movedIds, 'machine', $machine->id);
     }
 }
