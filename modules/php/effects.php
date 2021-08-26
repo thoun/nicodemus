@@ -187,13 +187,22 @@ trait EffectTrait {
 
         if ($context->selectedCardId != null) {
             if (count($context->selectedResources) > 0) {
-                $discardedMachine = $machines[count($machines) - 2];
+                $machineId = $context->selectedCardId;
+
+                $discardedMachine = $this->array_find($machines, function ($machine) use ($machineId) { return $machine->id == $machineId; });
                 $this->addResourcesFromCombination($playerId, $context->selectedResources);
-                //$machineResources = $this->getResourcesFromDb($this->resources->getCardsInLocation('machine', $id));
-                //$this->moveResources(0, 0, $machineResources);
+
+                // remove charcoalium on discarded machine
+                $removedCharcoaliums = $this->getResourcesFromDb($this->resources->getCardsInLocation('machine', $machineId));
+                $this->resources->moveAllCardsInLocation('machine', 'table', $context->selectedCardId);
+                foreach($removedCharcoaliums as &$charcoalium) {
+                    $charcoalium->location = 'table';
+                }
+
                 $this->machines->moveCard($discardedMachine->id, 'discard');
                 self::notifyAllPlayers($from == 0 ? 'discardTableMachines' : 'discardHandMachines', '', [
                     'machines' => [$discardedMachine],
+                    'removedCharcoaliums' => $removedCharcoaliums,
                 ]);
 
                 $this->removeEmptySpaceFromTable();

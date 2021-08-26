@@ -160,8 +160,14 @@ interface NotifAddMachinesToHandArgs {
     remainingMachines?: number;
 }
 
+interface NotifRemovedCharcoaliumFromMachineArgs {
+    removedCharcoaliums: Resource[];
+}
+
+
 interface NotifDiscardMachinesArgs {
     machines: Machine[];
+    removedCharcoaliums: Resource[];
 }
 
 interface NotifAddWorkshopProjectsArgs {

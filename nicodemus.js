@@ -418,7 +418,8 @@ var Table = /** @class */ (function () {
                 var tableMachinesDiv = document.getElementById('table-machines');
                 if ((tableMachinesDiv.contains(originDiv) && tableMachinesDiv.contains(div)) || originDiv.classList.contains('to_be_destroyed')) {
                     div.appendChild(resourceDiv);
-                    console.log('outer', div.outerHTML);
+                    resourceDiv.style.left = newPlace.x + "px";
+                    resourceDiv.style.top = newPlace.y + "px";
                 }
                 else {
                     slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
@@ -517,6 +518,8 @@ var PlayerTable = /** @class */ (function () {
                 originDiv.dataset.placed = JSON.stringify(originPlaced.filter(function (place) { return place.resourceId != resource.id; }));
                 if (originDiv.classList.contains('to_be_destroyed')) {
                     div.appendChild(resourceDiv);
+                    resourceDiv.style.left = newPlace.x + "px";
+                    resourceDiv.style.top = newPlace.y + "px";
                 }
                 else {
                     slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
@@ -1343,6 +1346,7 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.notif_discardTableMachines = function (notif) {
         var _this = this;
         notif.args.machines.forEach(function (machine) { return _this.table.machineStocks[machine.location_arg].removeFromStockById('' + machine.id); });
+        this.table.addResources(0, notif.args.removedCharcoaliums);
     };
     Nicodemus.prototype.notif_removeProject = function (notif) {
         var _a;

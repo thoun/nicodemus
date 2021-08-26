@@ -231,7 +231,8 @@ class Table {
 
                 if ((tableMachinesDiv.contains(originDiv) && tableMachinesDiv.contains(div)) || originDiv.classList.contains('to_be_destroyed')) {
                     div.appendChild(resourceDiv);
-                    console.log('outer', div.outerHTML);
+                    resourceDiv.style.left = `${newPlace.x}px`;
+                    resourceDiv.style.top = `${newPlace.y}px`;
                 } else {
                     slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
                 }

@@ -901,6 +901,7 @@ class Nicodemus implements NicodemusGame {
 
     notif_discardTableMachines(notif: Notif<NotifDiscardMachinesArgs>) {
         notif.args.machines.forEach(machine => this.table.machineStocks[machine.location_arg].removeFromStockById(''+machine.id));
+        this.table.addResources(0, notif.args.removedCharcoaliums);
     }
 
     notif_removeProject(notif: Notif<NotifRemoveProjectArgs>) {

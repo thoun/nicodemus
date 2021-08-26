@@ -127,6 +127,8 @@ class PlayerTable {
 
                 if (originDiv.classList.contains('to_be_destroyed')) {
                     div.appendChild(resourceDiv);
+                    resourceDiv.style.left = `${newPlace.x}px`;
+                    resourceDiv.style.top = `${newPlace.y}px`;
                 } else {
                     slideToObjectAndAttach(resourceDiv, divId, newPlace.x , newPlace.y);
                 }

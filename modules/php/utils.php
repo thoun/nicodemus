@@ -359,6 +359,7 @@ trait UtilTrait {
 
         self::notifyAllPlayers('discardTableMachines', '', [
             'machines' => $row1machines,
+            'removedCharcoaliums' => $removedCharcoaliums,
         ]);
 
         self::notifyAllPlayers('tableMove', '', [
