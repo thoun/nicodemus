@@ -12,7 +12,7 @@ class DiscardedMachineSelector {
             html += `
             <div class="complete-project">
                 <div class="project-infos">
-                    <div class="project project${PROJECTS_IDS.indexOf(getUniqueId(completeProject.project))}"></div>
+                    <div class="project project${PROJECTS_IDS.indexOf(getUniqueId(completeProject.project))}">${this.game.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(completeProject.project)) : ''}</div>
                     <div><span id="discarded-machines-selector-${completeProject.project.id}-counter" class="machine-counter">1</span> / ${completeProject.machinesNumber}</div>
                 </div>
                 <div id="discarded-machines-selector-${completeProject.project.id}-machines" class="machines"></div>

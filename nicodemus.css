@@ -243,6 +243,7 @@
   border-collapse: separate;
 }
 #help-popin #help-machines .machine {
+  position: relative;
   width: 190px;
   height: 190px;
   background-image: url("img/cards.jpg");
@@ -300,6 +301,7 @@
   grid-template-columns: 1fr 1fr;
 }
 #help-popin #help-projects .project {
+  position: relative;
   width: 134px;
   height: 93px;
   background-image: url("img/projects.jpg");
@@ -495,6 +497,9 @@ html {
   height: 16px;
   margin-bottom: -2px;
 }
+.log .machine, .log .project {
+  margin-bottom: 0;
+}
 
 .gamelogreview .icon {
   width: 20px;
@@ -681,6 +686,7 @@ html {
 }
 
 .machine {
+  position: relative;
   width: 190px;
   height: 190px;
   background-image: url("img/cards.jpg");
@@ -740,6 +746,7 @@ html {
 }
 
 .project {
+  position: relative;
   width: 134px;
   height: 93px;
   background-image: url("img/projects.jpg");
@@ -807,4 +814,14 @@ html {
   text-align: center;
   background: #a1311f;
   color: white;
+}
+
+.indication {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  text-shadow: 0 0 2px white, 0 0 4px white, 0 0 6px white, 0 0 8px white;
+  pointer-events: none;
 }

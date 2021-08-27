@@ -59,6 +59,7 @@ $project-height: 93px;
 
     #help-machines {
         .machine {
+            position: relative;
             width: $machine-width; 
             height: $machine-height;
             background-image: url('img/cards.jpg');
@@ -77,6 +78,7 @@ $project-height: 93px;
         }
 
         .project {
+            position: relative;
             width: $project-width; 
             height: $project-height;
             background-image: url('img/projects.jpg');

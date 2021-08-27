@@ -46,6 +46,16 @@ $game_preferences = [
         ],
         'default' => 1
     ],
+
+    203 => [
+        'name' => totranslate('Show color-blind indications'),
+        'needReload' => true,
+        'values' => [
+            1 => [ 'name' => totranslate('Enabled')],
+            2 => [ 'name' => totranslate('Disabled')],
+        ],
+        'default' => 2
+    ],
 ];
 
 

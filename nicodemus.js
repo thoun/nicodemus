@@ -129,6 +129,9 @@ function getMachineTooltip(type) {
 }
 function setupMachineCard(game, cardDiv, type) {
     game.addTooltipHtml(cardDiv.id, getMachineTooltip(type));
+    if (game.showColorblindIndications) {
+        dojo.place(getColorBlindIndicationHtmlByType(type), cardDiv.id);
+    }
 }
 function getProjectTooltip(type) {
     switch (type) {
@@ -157,6 +160,7 @@ function getProjectTooltip(type) {
 }
 function getMachineColor(color) {
     switch (color) {
+        case 0: return 'black';
         case 1: return '#006fa1';
         case 2: return '#702c91';
         case 3: return '#a72c32';
@@ -166,10 +170,26 @@ function getMachineColor(color) {
 }
 function getColorName(color) {
     switch (color) {
+        case 0: return _('Each color');
         case 1: return _('Production');
         case 2: return _('Transformation');
         case 3: return _('Attack');
         case 4: return _('Special');
+    }
+}
+function getColorBlindIndicationHtml(color) {
+    return "<div class=\"indication\" style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</div>";
+}
+function getColorBlindIndicationHtmlByType(type) {
+    var color = Math.floor(type / 10);
+    return "<div class=\"indication\" style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</div>";
+}
+function getColorBlindProjectHtml(type) {
+    if (type >= 10 && type <= 14) {
+        return getColorBlindIndicationHtml(type - 10);
+    }
+    else {
+        return '';
     }
 }
 function setupProjectCard(game, cardDiv, type) {
@@ -179,6 +199,12 @@ function setupProjectCard(game, cardDiv, type) {
         tooltip += "<br><strong style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</strong>";
     }
     game.addTooltipHtml(cardDiv.id, tooltip);
+    if (game.showColorblindIndications) {
+        var html = getColorBlindProjectHtml(type);
+        if (html != '') {
+            dojo.place(html, cardDiv.id);
+        }
+    }
 }
 function moveToAnotherStock(sourceStock, destinationStock, uniqueId, cardId) {
     if (sourceStock === destinationStock) {
@@ -557,7 +583,7 @@ var DiscardedMachineSelector = /** @class */ (function () {
         this.machineStocks = [];
         var html = "<div id=\"discarded-machines-selector\" class=\"whiteblock\">";
         completeProjects.forEach(function (completeProject) {
-            html += "\n            <div class=\"complete-project\">\n                <div class=\"project-infos\">\n                    <div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(completeProject.project)) + "\"></div>\n                    <div><span id=\"discarded-machines-selector-" + completeProject.project.id + "-counter\" class=\"machine-counter\">1</span> / " + completeProject.machinesNumber + "</div>\n                </div>\n                <div id=\"discarded-machines-selector-" + completeProject.project.id + "-machines\" class=\"machines\"></div>\n            </div>";
+            html += "\n            <div class=\"complete-project\">\n                <div class=\"project-infos\">\n                    <div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(completeProject.project)) + "\">" + (_this.game.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(completeProject.project)) : '') + "</div>\n                    <div><span id=\"discarded-machines-selector-" + completeProject.project.id + "-counter\" class=\"machine-counter\">1</span> / " + completeProject.machinesNumber + "</div>\n                </div>\n                <div id=\"discarded-machines-selector-" + completeProject.project.id + "-machines\" class=\"machines\"></div>\n            </div>";
         });
         html += "</div>";
         dojo.place(html, 'myhand-wrap', 'before');
@@ -663,6 +689,7 @@ var Nicodemus = /** @class */ (function () {
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
+        this.showColorblindIndications = this.prefs[203].value == 1;
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
         this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
@@ -857,7 +884,7 @@ var Nicodemus = /** @class */ (function () {
                 case 'selectProject':
                     var selectProjectArgs = args;
                     selectProjectArgs.projects.forEach(function (project) {
-                        return _this.addActionButton("selectProject" + project.id + "-button", "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\"></div>", function () { return _this.selectProject(project.id); });
+                        return _this.addActionButton("selectProject" + project.id + "-button", "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\">" + (_this.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(project)) : '') + "</div>", function () { return _this.selectProject(project.id); });
                     });
                     break;
                 case 'selectExchange':
@@ -1202,14 +1229,21 @@ var Nicodemus = /** @class */ (function () {
         dojo.connect($('nicodemus-help-button'), 'onclick', this, function () { return _this.showHelp(); });
     };
     Nicodemus.prototype.showHelp = function () {
+        var _this = this;
         var helpDialog = new ebg.popindialog();
         helpDialog.create('nicodemusHelpDialog');
         helpDialog.setTitle(_("Cards help"));
-        var html = "<div id=\"help-popin\">\n            <h1>" + _("Machines effects") + "</h1>\n            <div id=\"help-machines\" class=\"help-section\">\n                <table>";
-        MACHINES_IDS.forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + index + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
-        html += "</table>\n            </div>\n            <h1>" + _("Projects") + "</h1>\n            <div id=\"help-projects\" class=\"help-section\">\n                <table><tr><td class=\"grid\">";
-        PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project" + (index + 1) + "\" class=\"project\"></div>"; });
-        html += "</td></tr><tr><td>" + getProjectTooltip(11) + "</td></tr>\n            <tr><td><div id=\"project0\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
+        var html = "<div id=\"help-popin\">\n            <h1>" + _("Machines effects") + "</h1>\n            <div id=\"help-machines\" class=\"help-section\">\n                <h2 style=\"color: " + getMachineColor(1) + "\">" + getColorName(1) + "</h2>\n                <table>";
+        MACHINES_IDS.slice(0, 5).forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + index + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
+        html += "\n                </table>\n                <h2 style=\"color: " + getMachineColor(2) + "\">" + getColorName(2) + "</h2>\n                <table>";
+        MACHINES_IDS.slice(5, 10).forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + (index + 5) + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
+        html += "\n                </table>\n                <h2 style=\"color: " + getMachineColor(3) + "\">" + getColorName(3) + "</h2>\n                <table>";
+        MACHINES_IDS.slice(10, 14).forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + (index + 10) + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
+        html += "\n                </table>\n                <h2 style=\"color: " + getMachineColor(4) + "\">" + getColorName(4) + "</h2>\n                <table>";
+        MACHINES_IDS.slice(14, 16).forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + (index + 14) + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
+        html += "\n                </table>\n            </div>\n            <h1>" + _("Projects") + "</h1>\n            <div id=\"help-projects\" class=\"help-section\">\n                <table><tr><td class=\"grid\">";
+        PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project" + (index + 1) + "\" class=\"project\">" + (_this.showColorblindIndications ? getColorBlindIndicationHtml(index + 1) : '') + "</div>"; });
+        html += "</td></tr><tr><td>" + getProjectTooltip(11) + "</td></tr>\n            <tr><td><div id=\"project0\" class=\"project\">" + (this.showColorblindIndications ? getColorBlindIndicationHtml(0) : '') + "</div></td></tr><tr><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
         PROJECTS_IDS.slice(6, 9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 6) + "\" class=\"project\"></div>"; });
         html += "</td></tr><tr><td>" + getProjectTooltip(21) + "</td></tr>\n            <tr><td><div id=\"project5\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
         PROJECTS_IDS.slice(9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 9) + "\" class=\"project\"></div>"; });
@@ -1219,19 +1253,20 @@ var Nicodemus = /** @class */ (function () {
         helpDialog.show();
     };
     Nicodemus.prototype.showDiscarded = function (playerId) {
+        var _this = this;
         var discardedDialog = new ebg.popindialog();
         discardedDialog.create('nicodemusDiscardedDialog');
         discardedDialog.setTitle('');
         var html = "<div id=\"discarded-popin\">\n            <h1>" + _("Completed projects") + "</h1>\n            <div class=\"discarded-cards\">";
         if (this.gamedatas.players[playerId].discardedProjects.length) {
-            this.gamedatas.players[playerId].discardedProjects.forEach(function (project) { return html += "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\"></div>"; });
+            this.gamedatas.players[playerId].discardedProjects.forEach(function (project) { return html += "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\">" + (_this.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(project)) : '') + "</div>"; });
         }
         else {
             html += "<div class=\"message\">" + _('No completed projects') + "</div>";
         }
         html += "</div>\n            <h1>" + _("Discarded machines") + "</h1>\n            <div class=\"discarded-cards\">";
         if (this.gamedatas.players[playerId].discardedMachines.length) {
-            this.gamedatas.players[playerId].discardedMachines.forEach(function (machine) { return html += "<div class=\"machine machine" + MACHINES_IDS.indexOf(getUniqueId(machine)) + "\"></div>"; });
+            this.gamedatas.players[playerId].discardedMachines.forEach(function (machine) { return html += "<div class=\"machine machine" + MACHINES_IDS.indexOf(getUniqueId(machine)) + "\">" + (_this.showColorblindIndications ? getColorBlindIndicationHtml(machine.type) : '') + "</div>"; });
         }
         else {
             html += "<div class=\"message\">" + _('No discarded machines') + "</div>";
@@ -1377,10 +1412,10 @@ var Nicodemus = /** @class */ (function () {
                     }
                 });
                 if (typeof args.machineImage == 'number') {
-                    args.machineImage = "<div class=\"machine machine" + MACHINES_IDS.indexOf(args.machineImage) + "\"></div>";
+                    args.machineImage = "<div class=\"machine machine" + MACHINES_IDS.indexOf(args.machineImage) + "\">" + (this.showColorblindIndications ? getColorBlindIndicationHtmlByType(args.machineImage) : '') + "</div>";
                 }
                 if (typeof args.projectImage == 'number') {
-                    args.projectImage = "<div class=\"project project" + PROJECTS_IDS.indexOf(args.projectImage) + "\"></div>";
+                    args.projectImage = "<div class=\"project project" + PROJECTS_IDS.indexOf(args.projectImage) + "\">" + (this.showColorblindIndications ? getColorBlindProjectHtml(args.projectImage) : '') + "</div>";
                 }
                 if (typeof args.machineEffect == 'object') {
                     var uniqueId_1 = getUniqueId(args.machineEffect);

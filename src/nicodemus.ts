@@ -34,6 +34,7 @@ class Nicodemus implements NicodemusGame {
     private selectedTableProjectsIds: number[] = [];
 
     public zoom: number = 1;
+    public showColorblindIndications: boolean;
 
     public clickAction: 'play' | 'select' = 'play';
 
@@ -63,6 +64,8 @@ class Nicodemus implements NicodemusGame {
         this.gamedatas = gamedatas;
 
         log('gamedatas', gamedatas);
+
+        this.showColorblindIndications = (this as any).prefs[203].value == 1;
 
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
@@ -277,7 +280,7 @@ class Nicodemus implements NicodemusGame {
                 case 'selectProject':
                     const selectProjectArgs = args as SelectProjectArgs;
                     selectProjectArgs.projects.forEach(project => 
-                        (this as any).addActionButton(`selectProject${project.id}-button`, `<div class="project project${PROJECTS_IDS.indexOf(getUniqueId(project))}"></div>`, () => this.selectProject(project.id))
+                        (this as any).addActionButton(`selectProject${project.id}-button`, `<div class="project project${PROJECTS_IDS.indexOf(getUniqueId(project))}">${this.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(project)) : ''}</div>`, () => this.selectProject(project.id))
                     );
                     break;
 
@@ -715,16 +718,33 @@ class Nicodemus implements NicodemusGame {
         var html = `<div id="help-popin">
             <h1>${_("Machines effects")}</h1>
             <div id="help-machines" class="help-section">
+                <h2 style="color: ${getMachineColor(1)}">${getColorName(1)}</h2>
                 <table>`;
-            MACHINES_IDS.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
-            html += `</table>
+            MACHINES_IDS.slice(0, 5).forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
+            html += `
+                </table>
+                <h2 style="color: ${getMachineColor(2)}">${getColorName(2)}</h2>
+                <table>`;
+            MACHINES_IDS.slice(5, 10).forEach((number, index) => html += `<tr><td><div id="machine${index + 5}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
+            html += `
+                </table>
+                <h2 style="color: ${getMachineColor(3)}">${getColorName(3)}</h2>
+                <table>`;
+            MACHINES_IDS.slice(10, 14).forEach((number, index) => html += `<tr><td><div id="machine${index + 10}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
+            html += `
+                </table>
+                <h2 style="color: ${getMachineColor(4)}">${getColorName(4)}</h2>
+                <table>`;
+            MACHINES_IDS.slice(14, 16).forEach((number, index) => html += `<tr><td><div id="machine${index + 14}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
+            html += `
+                </table>
             </div>
             <h1>${_("Projects")}</h1>
             <div id="help-projects" class="help-section">
                 <table><tr><td class="grid">`;
-            PROJECTS_IDS.slice(1, 5).forEach((number, index) => html += `<div id="project${index + 1}" class="project"></div>`);
+            PROJECTS_IDS.slice(1, 5).forEach((number, index) => html += `<div id="project${index + 1}" class="project">${this.showColorblindIndications ? getColorBlindIndicationHtml(index + 1) : ''}</div>`);
             html += `</td></tr><tr><td>${getProjectTooltip(11)}</td></tr>
-            <tr><td><div id="project0" class="project"></div></td></tr><tr><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
+            <tr><td><div id="project0" class="project">${this.showColorblindIndications ? getColorBlindIndicationHtml(0) : ''}</div></td></tr><tr><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
             PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
             html += `</td></tr><tr><td>${getProjectTooltip(21)}</td></tr>
             <tr><td><div id="project5" class="project"></div></td></tr><tr><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
@@ -749,7 +769,7 @@ class Nicodemus implements NicodemusGame {
             <div class="discarded-cards">`;
 
         if (this.gamedatas.players[playerId].discardedProjects.length) {
-            this.gamedatas.players[playerId].discardedProjects.forEach(project => html += `<div class="project project${PROJECTS_IDS.indexOf(getUniqueId(project))}"></div>`);
+            this.gamedatas.players[playerId].discardedProjects.forEach(project => html += `<div class="project project${PROJECTS_IDS.indexOf(getUniqueId(project))}">${this.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(project)) : ''}</div>`);
         } else {
             html += `<div class="message">${_('No completed projects')}</div>`;
         }
@@ -759,7 +779,7 @@ class Nicodemus implements NicodemusGame {
             <div class="discarded-cards">`;
 
         if (this.gamedatas.players[playerId].discardedMachines.length) {
-            this.gamedatas.players[playerId].discardedMachines.forEach(machine => html += `<div class="machine machine${MACHINES_IDS.indexOf(getUniqueId(machine))}"></div>`);
+            this.gamedatas.players[playerId].discardedMachines.forEach(machine => html += `<div class="machine machine${MACHINES_IDS.indexOf(getUniqueId(machine))}">${this.showColorblindIndications ? getColorBlindIndicationHtml(machine.type) : ''}</div>`);
         } else {
             html += `<div class="message">${_('No discarded machines')}</div>`;
         }
@@ -938,11 +958,11 @@ class Nicodemus implements NicodemusGame {
                     }
                 });
                 if (typeof args.machineImage == 'number') {
-                    args.machineImage = `<div class="machine machine${MACHINES_IDS.indexOf(args.machineImage)}"></div>`;
+                    args.machineImage = `<div class="machine machine${MACHINES_IDS.indexOf(args.machineImage)}">${this.showColorblindIndications ? getColorBlindIndicationHtmlByType(args.machineImage) : ''}</div>`;
                 }
 
                 if (typeof args.projectImage == 'number') {
-                    args.projectImage = `<div class="project project${PROJECTS_IDS.indexOf(args.projectImage)}"></div>`;
+                    args.projectImage = `<div class="project project${PROJECTS_IDS.indexOf(args.projectImage)}">${this.showColorblindIndications ? getColorBlindProjectHtml(args.projectImage) : ''}</div>`;
                 }
 
                 if (typeof args.machineEffect == 'object') {

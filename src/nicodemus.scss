@@ -112,6 +112,10 @@ html {
     height: 16px;
     margin-bottom: -2px;
   }
+
+  .machine, .project {
+    margin-bottom: 0;
+  }
 }
 
 .gamelogreview {
@@ -242,6 +246,7 @@ html {
 }
 
 .machine {
+  position: relative;
   width: $machine-width; 
   height: $machine-height;
   background-image: url('img/cards.jpg');
@@ -257,6 +262,7 @@ html {
 }
 
 .project {
+  position: relative;
   width: $project-width; 
   height: $project-height;
   background-image: url('img/projects.jpg');
@@ -280,4 +286,14 @@ html {
     text-align: center;
     background: #a1311f;
     color: white;
+}
+
+.indication {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  text-shadow: 0 0 2px white, 0 0 4px white, 0 0 6px white, 0 0 8px white;
+  pointer-events: none;
 }

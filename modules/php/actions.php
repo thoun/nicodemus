@@ -163,6 +163,7 @@ trait ActionTrait {
             'player_name' => self::getActivePlayerName(),
             'resourceName' => $this->getResourceName($resource),
             'resourceType' => $resource,
+            'i18n' => ['resourceName'],
         ]);
 
         self::incStat(1, 'playedMachinesForResource');

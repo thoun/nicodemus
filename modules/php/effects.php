@@ -51,6 +51,7 @@ trait EffectTrait {
                 'resourceName' => $this->getResourceName($resource),
                 'resourceType' => $resource,
                 'number' => 2,
+                'i18n' => ['resourceName'],
             ]);
         } else {
             foreach($combination as $selectedResource) {
@@ -62,6 +63,7 @@ trait EffectTrait {
                     'resourceName' => $this->getResourceName($selectedResource),
                     'resourceType' => $selectedResource,
                     'number' => 1,
+                    'i18n' => ['resourceName'],
                 ]);
             }
         }
@@ -130,6 +132,7 @@ trait EffectTrait {
             'resourceName' => $this->getResourceName($resource),
             'resourceType' => $resource,
             'number' => $number,
+            'i18n' => ['resourceName'],
         ]);
     }
 
@@ -278,6 +281,7 @@ trait EffectTrait {
                     'machine_type' => $this->getColorName($machine->type),
                     'machineImage' => $this->getUniqueId($machine),
                     'resourceName' => $this->getResourceName(0),
+                    'i18n' => ['resourceName'],
                 ]);
 
                 break;
@@ -307,6 +311,7 @@ trait EffectTrait {
                         'machineImage' => $this->getUniqueId($machine),
                         'resourceName' => $resourceType != null ? $this->getResourceName($resourceType) : null,
                         'resourceType' => $resourceType,
+                        'i18n' => ['resourceName'],
                     ]);
                 } else {
                     return "selectResource";
@@ -340,6 +345,7 @@ trait EffectTrait {
                     'machineImage' => $this->getUniqueId($machine),
                     'resourceName' => $this->getResourceName(0),
                     'resourceType' => 0,
+                    'i18n' => ['resourceName'],
                 ]);
 
                 break;

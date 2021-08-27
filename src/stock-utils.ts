@@ -130,6 +130,10 @@ function getMachineTooltip(type: number) {
 
 function setupMachineCard(game: Game, cardDiv: HTMLDivElement, type: number) {
     (game as any).addTooltipHtml(cardDiv.id, getMachineTooltip(type));
+
+    if (game.showColorblindIndications) {
+        dojo.place(getColorBlindIndicationHtmlByType(type), cardDiv.id);
+    }
 }
 
 function getProjectTooltip(type: number) {
@@ -150,6 +154,7 @@ function getProjectTooltip(type: number) {
 
 function getMachineColor(color: number) {
     switch (color) {
+        case 0: return 'black';
         case 1: return '#006fa1';
         case 2: return '#702c91';
         case 3: return '#a72c32';
@@ -160,10 +165,28 @@ function getMachineColor(color: number) {
 
 function getColorName(color: number) {
     switch (color) {
+        case 0: return _('Each color');
         case 1: return _('Production');
         case 2: return _('Transformation');
         case 3: return _('Attack');
         case 4: return _('Special');
+    }
+}
+
+function getColorBlindIndicationHtml(color: number): string {
+    return `<div class="indication" style="color: ${getMachineColor(color)}">${getColorName(color)}</div>`;
+}
+
+function getColorBlindIndicationHtmlByType(type: number): string {
+    const color = Math.floor(type / 10);
+    return `<div class="indication" style="color: ${getMachineColor(color)}">${getColorName(color)}</div>`;
+}
+
+function getColorBlindProjectHtml(type: number): string {
+    if (type >= 10 && type <= 14) {
+        return getColorBlindIndicationHtml(type - 10);
+    } else {
+        return '';
     }
 }
 
@@ -174,6 +197,12 @@ function setupProjectCard(game: Game, cardDiv: HTMLDivElement, type: number) {
         tooltip += `<br><strong style="color: ${getMachineColor(color)}">${getColorName(color)}</strong>`;
     }
     (game as any).addTooltipHtml(cardDiv.id, tooltip);
+    if (game.showColorblindIndications) {
+        const html = getColorBlindProjectHtml(type);
+        if (html != '') {
+            dojo.place(html, cardDiv.id);
+        }
+    }
 }
 
 function moveToAnotherStock(sourceStock: Stock, destinationStock: Stock, uniqueId: number, cardId: string) {
