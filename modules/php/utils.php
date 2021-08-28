@@ -306,6 +306,17 @@ trait UtilTrait {
         return $colorName;
     }
 
+    function getEnglishResourceName(int $type) {
+        $resourceName = null;
+        switch ($type) {
+            case 0: $resourceName = 'charcoalium'; break;
+            case 1: $resourceName = 'wood'; break;
+            case 2: $resourceName = 'copper'; break;
+            case 3: $resourceName = 'crystal'; break;
+        }
+        return $resourceName;
+    }
+
     function getResourceName(int $type) {
         $resourceName = null;
         switch ($type) {

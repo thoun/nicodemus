@@ -48,7 +48,7 @@ trait EffectTrait {
             self::notifyAllPlayers('addResourcesFromCombinationNotif', clienttranslate('${player_name} gains ${number} ${resourceName} with applied effect'), [
                 'playerId' => $playerId,
                 'player_name' => self::getActivePlayerName(),
-                'resourceName' => $this->getResourceName($resource),
+                'resourceName' => $this->getEnglishResourceName($resource),
                 'resourceType' => $resource,
                 'number' => 2,
                 'i18n' => ['resourceName'],
@@ -60,7 +60,7 @@ trait EffectTrait {
                 self::notifyAllPlayers('addResourcesFromCombinationNotif', clienttranslate('${player_name} gains ${number} ${resourceName} with applied effect'), [
                     'playerId' => $playerId,
                     'player_name' => self::getActivePlayerName(),
-                    'resourceName' => $this->getResourceName($selectedResource),
+                    'resourceName' => $this->getEnglishResourceName($selectedResource),
                     'resourceType' => $selectedResource,
                     'number' => 1,
                     'i18n' => ['resourceName'],
@@ -129,7 +129,7 @@ trait EffectTrait {
         self::notifyAllPlayers('applyProductionEffectNotif', clienttranslate('${player_name} gains ${number} ${resourceName} with applied effect'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
-            'resourceName' => $this->getResourceName($resource),
+            'resourceName' => $this->getEnglishResourceName($resource),
             'resourceType' => $resource,
             'number' => $number,
             'i18n' => ['resourceName'],
@@ -280,7 +280,7 @@ trait EffectTrait {
                     'machine' => $machine,
                     'machine_type' => $this->getColorName($machine->type),
                     'machineImage' => $this->getUniqueId($machine),
-                    'resourceName' => $this->getResourceName(0),
+                    'resourceName' => $this->getEnglishResourceName(0),
                     'i18n' => ['resourceName'],
                 ]);
 
@@ -309,7 +309,7 @@ trait EffectTrait {
                         'machine' => $machine,
                         'machine_type' => $this->getColorName($machine->type),
                         'machineImage' => $this->getUniqueId($machine),
-                        'resourceName' => $resourceType != null ? $this->getResourceName($resourceType) : null,
+                        'resourceName' => $resourceType != null ? $this->getEnglishResourceName($resourceType) : null,
                         'resourceType' => $resourceType,
                         'i18n' => ['resourceName'],
                     ]);
@@ -343,7 +343,7 @@ trait EffectTrait {
                     'machine' => $machine,
                     'machine_type' => $this->getColorName($machine->type),
                     'machineImage' => $this->getUniqueId($machine),
-                    'resourceName' => $this->getResourceName(0),
+                    'resourceName' => $this->getEnglishResourceName(0),
                     'resourceType' => 0,
                     'i18n' => ['resourceName'],
                 ]);

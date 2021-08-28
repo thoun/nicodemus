@@ -33,11 +33,10 @@ trait ActionTrait {
 
         $machine = $this->getMachineFromDb($this->machines->getCard($id));
 
-        self::notifyAllPlayers('machinePlayed', clienttranslate('${player_name} plays ${machine_type} machine ${machineImage}'), [
+        self::notifyAllPlayers('machinePlayed', clienttranslate('${player_name} plays machine ${machineImage}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'machine' => $machine,
-            'machine_type' => $this->getColorName($machine->type),
             'machineImage' => $this->getUniqueId($machine),
         ]);
 
@@ -104,11 +103,10 @@ trait ActionTrait {
         $machineResources = $this->getResourcesFromDb($this->resources->getCardsInLocation('machine', $id));
         $this->moveResources($playerId, 0, $machineResources);
 
-        self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs ${machine_type} machine ${machineImage}'), [
+        self::notifyAllPlayers('machineRepaired', clienttranslate('${player_name} repairs machine ${machineImage}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'machine' => $machine,
-            'machine_type' => $this->getColorName($machine->type),
             'machineSpot' => $machineSpot,
             'machineImage' => $this->getUniqueId($machine),
         ]);
@@ -161,7 +159,7 @@ trait ActionTrait {
         self::notifyAllPlayers('machinePlayedGetResource', clienttranslate('${player_name} gains 1 ${resourceName} with played machine'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
-            'resourceName' => $this->getResourceName($resource),
+            'resourceName' => $this->getEnglishResourceName($resource),
             'resourceType' => $resource,
             'i18n' => ['resourceName'],
         ]);
