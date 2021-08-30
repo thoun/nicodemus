@@ -130,9 +130,8 @@ $gameinfos = [
 // Short game presentation text that will appear on the game description page, structured as an array of paragraphs.
 // Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
 // A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
-'presentation' => [
-    totranslate("Nicodemus Gideon is retiring! To take his place, two assistants of the Dream Factory — that is, you and one other — will face off in a duel in which you repair machines and complete projects as quickly as possible in order to score 20 or more points first."),
-    totranslate("In Nicodemus , you can return to the universe of Imaginarium in a game in which the two players must block one another repeatedly, with advantages swinging one way, then the other, with the slightest mistake possibly being fatal to your chances."),
+'presentation' => [ // from Bombyx website
+    totranslate("For the last 352 years, he has repaired the fascinating machines from the Bric-a-brac, essential for producing resources and charcoalium. Assistants interested in his position must face each other in a handyman duel under strict rules."),
 ],
 
 // Games categories
