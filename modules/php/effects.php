@@ -351,8 +351,9 @@ trait EffectTrait {
                 break;
 
             case 4:    
-                // oppponent discard 2 chosen resources             
-                if (count($context->selectedResources) > 0) {
+                // oppponent discard 2 chosen resources
+                $opponentResourceCount = $this->countPlayerResources($opponentId);
+                if (count($context->selectedResources) > 0 || $opponentResourceCount == 0) {
                     if (count($context->selectedResources) == 2 && $context->selectedResources[0] == $context->selectedResources[1]) {
                         $this->removeResource($opponentId, 2, $context->selectedResources[0]);
                     } else {
@@ -363,7 +364,9 @@ trait EffectTrait {
 
                     $message = count($context->selectedResources) >= 2 ?
                         clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard ${resource1Name} and ${resource2Name} with ${machineImage}') :
-                        clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard ${resource1Name} with ${machineImage}');
+                        (count($context->selectedResources) >= 1 ?
+                            clienttranslate('${player_name} uses ${machine_type} effect to force opponent to discard ${resource1Name} with ${machineImage}') :
+                            clienttranslate('${player_name} uses ${machine_type} effect with no effect (opponent has no resource to steal)'));
 
                     self::notifyAllPlayers('applyAttackEffectNotif', $message, [
                         'playerId' => $playerId,
@@ -371,8 +374,8 @@ trait EffectTrait {
                         'machine' => $machine,
                         'machine_type' => $this->getColorName($machine->type),
                         'machineImage' => $this->getUniqueId($machine),                        
-                        'resource1Name' => $this->getResourceName($context->selectedResources[0]),
-                        'resource1Type' => $context->selectedResources[0],                        
+                        'resource1Name' => count($context->selectedResources) >= 1 ? $this->getResourceName($context->selectedResources[0]) : null,
+                        'resource1Type' => count($context->selectedResources) >= 1 ? $context->selectedResources[0] : null,                        
                         'resource2Name' => count($context->selectedResources) >= 2 ? $this->getResourceName($context->selectedResources[1]) : null,
                         'resource2Type' => count($context->selectedResources) >= 2 ? $context->selectedResources[1] : null,
                     ]);
