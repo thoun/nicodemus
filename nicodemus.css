@@ -169,6 +169,9 @@
 #playerstables .player-table .machines-and-projects .empty {
   display: none;
 }
+#playerstables.hide-resources .player-resources .cube {
+  display: none;
+}
 
 #discarded-machines-selector .complete-project {
   display: flex;
@@ -824,4 +827,5 @@ html {
   text-align: center;
   text-shadow: 0 0 2px white, 0 0 4px white, 0 0 6px white, 0 0 8px white;
   pointer-events: none;
+  user-select: none;
 }

@@ -968,6 +968,9 @@ var Nicodemus = /** @class */ (function () {
             case 202:
                 dojo.toggleClass('player_boards', 'hide-buttons', prefValue == 2);
                 break;
+            case 204:
+                dojo.toggleClass('playerstables', 'hide-resources', prefValue == 2);
+                break;
         }
     };
     Nicodemus.prototype.onProjectSelectionChanged = function () {

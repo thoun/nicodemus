@@ -74,4 +74,12 @@ $red: #a1311f;
             }
         }
     }
+
+    &.hide-resources {
+        .player-resources {
+            .cube {
+                display: none;
+            }
+        }
+    }
 }

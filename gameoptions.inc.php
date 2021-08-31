@@ -56,6 +56,16 @@ $game_preferences = [
         ],
         'default' => 2
     ],
+
+    204 => [
+        'name' => totranslate('Show resources on player board'),
+        'needReload' => false,
+        'values' => [
+            1 => [ 'name' => totranslate('Enabled')],
+            2 => [ 'name' => totranslate('Disabled')],
+        ],
+        'default' => 1
+    ],
 ];
 
 
