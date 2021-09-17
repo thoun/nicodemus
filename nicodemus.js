@@ -620,10 +620,18 @@ var DiscardedMachineSelector = /** @class */ (function () {
         }
         var selected = dojo.hasClass("discarded-machines-selector-" + projectId + "-machines_item_" + itemId, 'selected');
         if (selected) {
-            this.machineStocks.forEach(function (stock) { return stock.selectItem(itemId); });
+            this.machineStocks.forEach(function (stock) {
+                if (stock.items.some(function (item) { return item.id === itemId; })) {
+                    stock.selectItem(itemId);
+                }
+            });
         }
         else {
-            this.machineStocks.forEach(function (stock) { return stock.unselectItem(itemId); });
+            this.machineStocks.forEach(function (stock) {
+                if (stock.items.some(function (item) { return item.id === itemId; })) {
+                    stock.unselectItem(itemId);
+                }
+            });
         }
         this.updateCounters();
     };

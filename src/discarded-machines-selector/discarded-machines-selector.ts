@@ -62,9 +62,17 @@ class DiscardedMachineSelector {
 
         const selected = dojo.hasClass(`discarded-machines-selector-${projectId}-machines_item_${itemId}`, 'selected');
         if (selected) {
-            this.machineStocks.forEach(stock => stock.selectItem(itemId));
+            this.machineStocks.forEach(stock => {
+                if (stock.items.some(item => item.id === itemId)) {
+                    stock.selectItem(itemId);
+                }
+            });
         } else {
-            this.machineStocks.forEach(stock => stock.unselectItem(itemId));
+            this.machineStocks.forEach(stock => {
+                if (stock.items.some(item => item.id === itemId)) {
+                    stock.unselectItem(itemId);
+                }
+            });
         }
 
         this.updateCounters();
