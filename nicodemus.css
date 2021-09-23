@@ -147,10 +147,15 @@
 #playerstables .player-table .player-resources {
   position: absolute;
   top: 20px;
-  left: 0;
   display: grid;
   grid-template-columns: repeat(3, 50px);
   grid-template-rows: 115px 60px;
+}
+#playerstables .player-table .player-resources.left {
+  left: 0;
+}
+#playerstables .player-table .player-resources.right {
+  right: 0;
 }
 #playerstables .player-table .player-resources:not(.under) .top {
   grid-column: 1/4;

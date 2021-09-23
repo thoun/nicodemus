@@ -15,6 +15,7 @@ trait DebugUtilTrait {
         //self::DbQuery("UPDATE card SET `card_location_arg` = card_location_arg + 200 where `card_type` = 117");
         //$this->debugSetPlayerPoints(2343492, 19);
         $this->debugAddResources(2343492, 5);
+        $this->debugAddResources(2343493, 5);
         //$this->debugAddResources(2343493, 2);
         //$this->debugSetMachineInHand(2343492, 3, 4);
         //$this->debugSetMachineInHand(2343492, 4, 1, 1);
