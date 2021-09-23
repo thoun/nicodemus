@@ -369,6 +369,14 @@ trait ActionTrait {
                 throw new BgaUserException("Last played machine should be on selection");
             }
 
+            $selectedMachines = $this->getMachinesFromDb($this->machines->getCards($selectedMachinesIds));
+            $mandatoryMachine = $this->getMachineFromDb($this->machines->getCard($project->mandatoryMachine->id));
+            if ($this->machinesToCompleteProject($project->project, $selectedMachines, $mandatoryMachine) == null) {
+                throw new BgaUserException("Selected machines don't match project requirement");
+            }
+
+
+
             // we update machines linked to project with selectedMachinesIds
             $project->machines = array_values(array_filter($project->machines, function($machine) use ($selectedMachinesIds) {
                 return $this->array_some($selectedMachinesIds, function($id) use ($machine) {  return $machine->id == $id; });

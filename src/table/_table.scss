@@ -116,6 +116,11 @@
 #remaining-machine-counter {
   top: 408px;
   left: 1193px;
+
+  &.almost-empty {
+    color: red;
+    font-weight: bold;
+  }
 }
 
 .deck {

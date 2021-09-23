@@ -282,10 +282,10 @@ trait UtilTrait {
         self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
 
         if ($this->getMaxPlayerScore() >= 20) {
-            self::setGameStateValue(LAST_TURN, 1);
-            self::notifyAllPlayers('lastTurn', clienttranslate("There is not enough machines left on the deck, it's last turn !"), [
+            self::setGameStateValue(LAST_TURN, 1);            
+            self::notifyAllPlayers('lastTurn', clienttranslate('${player_name} reaches 20 points, it\'s last turn !'), [
                 'playerId' => $playerId,
-                'points' => $this->getPlayerScore($playerId),
+                'player_name' => self::getActivePlayerName(),
             ]);
         }
 

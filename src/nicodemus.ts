@@ -801,6 +801,7 @@ class Nicodemus implements NicodemusGame {
         const visibility = remainingMachines > 0 ? 'visible' : 'hidden';
         document.getElementById('machine-deck').style.visibility = visibility;
         document.getElementById('remaining-machine-counter').style.visibility = visibility;
+        dojo.toggleClass('remaining-machine-counter', 'almost-empty', remainingMachines <= 5);
     }
 
     private setRemainingProjects(remainingProjects: number) {
@@ -832,6 +833,7 @@ class Nicodemus implements NicodemusGame {
             ['addMachinesToHand', ANIMATION_MS],
             ['points', 1],
             ['lastTurn', 1],
+            ['setRemainingMachines', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
             ['discardHandMachines', ANIMATION_MS],
@@ -891,6 +893,10 @@ class Nicodemus implements NicodemusGame {
         if (notif.args.remainingMachines !== undefined) {
             this.setRemainingMachines(notif.args.remainingMachines);
         }
+    }
+
+    notif_setRemainingMachines(notif: Notif<NotifAddMachinesToHandArgs>) {
+        this.setRemainingMachines(notif.args.remainingMachines);
     }
 
     notif_addWorkshopProjects(notif: Notif<NotifAddWorkshopProjectsArgs>) {

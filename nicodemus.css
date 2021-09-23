@@ -104,6 +104,10 @@
   top: 408px;
   left: 1193px;
 }
+#remaining-machine-counter.almost-empty {
+  color: red;
+  font-weight: bold;
+}
 
 .deck {
   z-index: 1;

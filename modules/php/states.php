@@ -23,7 +23,7 @@ trait StateTrait {
         if ($remainingCardsInDeck < $cardNumberToRefill) {
             // no more cards in deck, end turn
             self::setGameStateValue(LAST_TURN, 1);
-            self::notifyAllPlayers('lastTurn', clienttranslate('${player_name} reaches 20 points, it\'s last turn !'), [
+            self::notifyAllPlayers('lastTurn', clienttranslate("There is not enough machines left on the deck, it's last turn !"), [
                 'playerId' => $playerId,
                 'player_name' => self::getActivePlayerName(),
             ]);
@@ -36,6 +36,11 @@ trait StateTrait {
             self::notifyPlayer($playerId, 'addMachinesToHand', '', [
                 'machines' => $machines,
                 'from' => 0,
+                'remainingMachines' => $this->getRemainingMachines(),
+            ]);
+
+            $opponentId = $this->getOpponentId($playerId);  
+            self::notifyPlayer($opponentId, 'setRemainingMachines', '', [
                 'remainingMachines' => $this->getRemainingMachines(),
             ]);
         }
