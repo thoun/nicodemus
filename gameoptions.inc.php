@@ -58,11 +58,12 @@ $game_preferences = [
     ],
 
     204 => [
-        'name' => totranslate('Show resources on player board'),
+        'name' => totranslate('Show player resources tokens'),
         'needReload' => false,
         'values' => [
-            1 => [ 'name' => totranslate('Enabled')],
-            2 => [ 'name' => totranslate('Disabled')],
+            1 => [ 'name' => totranslate('Under player picture (better visibility)')],
+            2 => [ 'name' => totranslate('Over player picture (more compact player board)')],
+            3 => [ 'name' => totranslate('Hidden (visible in player panel)')],
         ],
         'default' => 1
     ],

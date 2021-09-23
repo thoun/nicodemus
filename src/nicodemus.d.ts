@@ -39,7 +39,7 @@ interface CompleteProject {
 }
 
 interface PlacedTokens {
-    resourceId: number;
+    resourceId?: number;
     x: number;
     y: number;
 }

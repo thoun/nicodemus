@@ -466,7 +466,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var color = player.color.startsWith('00') ? 'blue' : 'red';
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n\n                <div class=\"player-resources " + side + "\">\n                    <div id=\"player" + this.playerId + "-resources1\"></div>\n                    <div id=\"player" + this.playerId + "-resources2\"></div>\n                    <div id=\"player" + this.playerId + "-resources3\"></div>\n                    <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                </div>\n            </div>\n            <div class=\"machines-and-projects\">\n                <div id=\"player-table-" + this.playerId + "-projects\"></div>\n                <div id=\"player-table-" + this.playerId + "-machines\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n\n                <div id=\"player-resources-" + this.playerId + "\" class=\"player-resources " + side + "\">\n                    <div id=\"player" + this.playerId + "-resources1\"></div>\n                    <div id=\"player" + this.playerId + "-resources2\"></div>\n                    <div id=\"player" + this.playerId + "-resources3\"></div>\n                    <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                </div>\n            </div>\n            <div id=\"machines-and-projects-" + this.playerId + "\" class=\"machines-and-projects\">\n                <div id=\"player-table-" + this.playerId + "-projects\"></div>\n                <div id=\"player-table-" + this.playerId + "-machines\"></div>\n            </div>\n        </div>";
         dojo.place(html, 'playerstables');
         // projects        
         this.projectStock = new ebg.stock();
@@ -508,21 +508,44 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
     };
-    PlayerTable.prototype.getPlaceOnPlayerBoard = function (placed, type) {
+    PlayerTable.prototype.getMinDistance = function (placedTiles, newPlace) {
         var _this = this;
-        var xMaxShift = type ? 28 : 148;
-        var yMaxShift = type ? 84 : 32;
-        var newPlace = {
+        if (!placedTiles.length) {
+            return 999;
+        }
+        var distances = placedTiles.map(function (place) { return _this.getDistance(newPlace, place); });
+        if (distances.length == 1) {
+            return distances[0];
+        }
+        return distances.reduce(function (a, b) { return a < b ? a : b; });
+    };
+    PlayerTable.prototype.getPlaceOnPlayerBoard = function (placed, type, under) {
+        var xMaxShift = under ?
+            (type ? 110 : 190) :
+            (type ? 28 : 148);
+        var yMaxShift = type && !under ? 84 : 32;
+        var place = {
             x: Math.random() * xMaxShift,
             y: Math.random() * yMaxShift,
         };
+        var minDistance = this.getMinDistance(placed, place);
         var protection = 0;
-        while (protection < 1000 && placed.some(function (place) { return _this.getDistance(newPlace, place) < 32; })) {
-            newPlace.x = Math.random() * xMaxShift;
-            newPlace.y = Math.random() * yMaxShift;
+        while (protection < 1000 && minDistance < 32) {
+            var newPlace = {
+                x: Math.random() * xMaxShift,
+                y: Math.random() * yMaxShift,
+            };
+            var newMinDistance = this.getMinDistance(placed, newPlace);
+            if (newMinDistance > minDistance) {
+                place = newPlace;
+                minDistance = newMinDistance;
+            }
             protection++;
         }
-        return newPlace;
+        return place;
+    };
+    PlayerTable.prototype.ressourcesUnder = function () {
+        return this.game.prefs[204] == 1;
     };
     PlayerTable.prototype.addResources = function (type, resources) {
         var _this = this;
@@ -532,9 +555,10 @@ var PlayerTable = /** @class */ (function () {
             return;
         }
         var placed = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
+        var under = this.ressourcesUnder();
         // add tokens
         resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
-            var newPlace = _this.getPlaceOnPlayerBoard(placed, type);
+            var newPlace = _this.getPlaceOnPlayerBoard(placed, type, under);
             placed.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
             var resourceDivId = "resource" + type + "-" + resource.id;
             var resourceDiv = document.getElementById("resource" + type + "-" + resource.id);
@@ -570,6 +594,38 @@ var PlayerTable = /** @class */ (function () {
         this.projectStock.setSelectionMode(selectable ? 2 : 0);
         if (!selectable) {
             this.projectStock.unselectAll();
+        }
+    };
+    PlayerTable.prototype.setResourcesPosition = function (under) {
+        dojo.toggleClass("machines-and-projects-" + this.playerId, 'resources-under', under);
+        dojo.toggleClass("player-resources-" + this.playerId, 'under', under);
+        this.repositionResourceTokens(under);
+    };
+    PlayerTable.prototype.repositionResourceTokens = function (under) {
+        var _this = this;
+        var _loop_5 = function (type) {
+            var divId = "player" + this_3.playerId + "-resources" + type;
+            var div = document.getElementById(divId);
+            if (!div) {
+                return { value: void 0 };
+            }
+            var oldPlaced = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
+            var placed = [];
+            oldPlaced.forEach(function (place) {
+                var resourceDiv = document.getElementById("resource" + type + "-" + place.resourceId);
+                var newPlace = _this.getPlaceOnPlayerBoard(placed, type, under);
+                newPlace.resourceId = place.resourceId;
+                placed.push(newPlace);
+                resourceDiv.style.left = newPlace.x + "px";
+                resourceDiv.style.top = newPlace.y + "px";
+            });
+            div.dataset.placed = JSON.stringify(placed);
+        };
+        var this_3 = this;
+        for (var type = 0; type <= 3; type++) {
+            var state_1 = _loop_5(type);
+            if (typeof state_1 === "object")
+                return state_1.value;
         }
     };
     return PlayerTable;
@@ -860,12 +916,12 @@ var Nicodemus = /** @class */ (function () {
                     var choosePlayActionArgs_1 = args;
                     this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.machine.points + " [resource0])"), function () { return _this.getCharcoalium(); });
                     if (choosePlayActionArgs_1.machine.produce == 9) {
-                        var _loop_5 = function (i) {
-                            this_3.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
+                        var _loop_6 = function (i) {
+                            this_4.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
                         };
-                        var this_3 = this;
+                        var this_4 = this;
                         for (var i = 1; i <= 3; i++) {
-                            _loop_5(i);
+                            _loop_6(i);
                         }
                     }
                     else {
@@ -977,7 +1033,8 @@ var Nicodemus = /** @class */ (function () {
                 dojo.toggleClass('player_boards', 'hide-buttons', prefValue == 2);
                 break;
             case 204:
-                dojo.toggleClass('playerstables', 'hide-resources', prefValue == 2);
+                this.playersTables.forEach(function (playerTable) { return playerTable.setResourcesPosition(prefValue == 1); });
+                dojo.toggleClass('playerstables', 'hide-resources', prefValue == 3);
                 break;
         }
     };

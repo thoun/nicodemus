@@ -382,7 +382,8 @@ class Nicodemus implements NicodemusGame {
                 dojo.toggleClass('player_boards', 'hide-buttons', prefValue == 2);
                 break;
             case 204:
-                dojo.toggleClass('playerstables', 'hide-resources', prefValue == 2);
+                this.playersTables.forEach(playerTable => playerTable.setResourcesPosition(prefValue == 1));
+                dojo.toggleClass('playerstables', 'hide-resources', prefValue == 3);
                 break;
         }
     }

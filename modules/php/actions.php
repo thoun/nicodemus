@@ -372,10 +372,8 @@ trait ActionTrait {
             $selectedMachines = $this->getMachinesFromDb($this->machines->getCards($selectedMachinesIds));
             $mandatoryMachine = $this->getMachineFromDb($this->machines->getCard($project->mandatoryMachine->id));
             if ($this->machinesToCompleteProject($project->project, $selectedMachines, $mandatoryMachine) == null) {
-                throw new BgaUserException("Selected machines don't match project requirement");
+                throw new BgaUserException(self::_("Selected machines don't match project requirement"));
             }
-
-
 
             // we update machines linked to project with selectedMachinesIds
             $project->machines = array_values(array_filter($project->machines, function($machine) use ($selectedMachinesIds) {

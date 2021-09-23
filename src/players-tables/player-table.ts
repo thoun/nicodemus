@@ -20,14 +20,14 @@ class PlayerTable {
                 <div class="player-name">${player.name}</div>
                 <div id="player-icon-${this.playerId}" class="player-icon ${color}"></div>
 
-                <div class="player-resources ${side}">
+                <div id="player-resources-${this.playerId}" class="player-resources ${side}">
                     <div id="player${this.playerId}-resources1"></div>
                     <div id="player${this.playerId}-resources2"></div>
                     <div id="player${this.playerId}-resources3"></div>
                     <div id="player${this.playerId}-resources0" class="top"></div>
                 </div>
             </div>
-            <div class="machines-and-projects">
+            <div id="machines-and-projects-${this.playerId}" class="machines-and-projects">
                 <div id="player-table-${this.playerId}-projects"></div>
                 <div id="player-table-${this.playerId}-machines"></div>
             </div>
@@ -85,21 +85,48 @@ class PlayerTable {
         return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
     }
 
-    private getPlaceOnPlayerBoard(placed: PlacedTokens[], type: number): Partial<PlacedTokens> {
-        const xMaxShift = type ? 28 : 148;
-        const yMaxShift = type ? 84 : 32;
-        const newPlace = {
+    private getMinDistance(placedTiles: PlacedTokens[], newPlace: PlacedTokens): number {
+        if (!placedTiles.length) {
+            return 999;
+        }
+        const distances = placedTiles.map(place => this.getDistance(newPlace, place));
+        if (distances.length == 1) {
+            return distances[0];
+        }
+        return distances.reduce((a, b) => a < b ? a : b);
+    }
+
+    private getPlaceOnPlayerBoard(placed: PlacedTokens[], type: number, under: boolean): Partial<PlacedTokens> {
+        const xMaxShift = under ? 
+            (type ? 110: 190) :
+            (type ? 28 : 148);
+        const yMaxShift = type && !under ? 84 : 32;
+
+        let place = {
             x: Math.random() * xMaxShift,
             y: Math.random() * yMaxShift,
         };
+        let minDistance = this.getMinDistance(placed, place);
         let protection = 0;
-        while (protection < 1000 && placed.some(place => this.getDistance(newPlace, place) < 32)) {
-            newPlace.x = Math.random() * xMaxShift;
-            newPlace.y = Math.random() * yMaxShift;
+        while (protection < 1000 && minDistance < 32) {
+            const newPlace = {
+                x: Math.random() * xMaxShift,
+                y: Math.random() * yMaxShift,
+            };
+            const newMinDistance = this.getMinDistance(placed, newPlace);
+            if (newMinDistance > minDistance) {
+                place = newPlace;
+                minDistance = newMinDistance;
+            }
+
             protection++;
         }
 
-        return newPlace;
+        return place;
+    }
+
+    private ressourcesUnder(): boolean {
+        return (this.game as any).prefs[204] == 1;
     }
 
     public addResources(type: number, resources: Resource[]) {
@@ -110,9 +137,10 @@ class PlayerTable {
         }
         const placed: PlacedTokens[] = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
 
+        const under = this.ressourcesUnder();
         // add tokens
         resources.filter(resource => !placed.some(place => place.resourceId == resource.id)).forEach(resource => {
-            const newPlace = this.getPlaceOnPlayerBoard(placed, type);
+            const newPlace = this.getPlaceOnPlayerBoard(placed, type, under);
             placed.push({
                 ...newPlace, 
                 resourceId: resource.id,
@@ -152,10 +180,40 @@ class PlayerTable {
     private setProjectStockVisibility() {
         dojo.toggleClass(`player-table-${this.playerId}-projects`, 'empty', !this.projectStock.items.length);
     }
+
     public setProjectSelectable(selectable: boolean) {
         this.projectStock.setSelectionMode(selectable ? 2 : 0);
         if (!selectable) {
             this.projectStock.unselectAll();
+        }
+    }
+
+    public setResourcesPosition(under: boolean) {
+        dojo.toggleClass(`machines-and-projects-${this.playerId}`, 'resources-under', under);
+        dojo.toggleClass(`player-resources-${this.playerId}`, 'under', under);
+        this.repositionResourceTokens(under);
+    }
+
+    private repositionResourceTokens(under: boolean) {
+        for (let type = 0; type <= 3; type++) {
+            const divId = `player${this.playerId}-resources${type}`;
+            const div = document.getElementById(divId);
+            if (!div) {
+                return;
+            }
+            const oldPlaced: PlacedTokens[] = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
+            const placed = [];
+
+            oldPlaced.forEach(place => {
+                const resourceDiv = document.getElementById(`resource${type}-${place.resourceId}`);
+                const newPlace = this.getPlaceOnPlayerBoard(placed, type, under);
+                newPlace.resourceId = place.resourceId;
+                placed.push(newPlace);
+                resourceDiv.style.left = `${newPlace.x}px`;
+                resourceDiv.style.top = `${newPlace.y}px`;
+            });
+
+            div.dataset.placed = JSON.stringify(placed);
         }
     }
 }
