@@ -545,7 +545,7 @@ var PlayerTable = /** @class */ (function () {
         return place;
     };
     PlayerTable.prototype.ressourcesUnder = function () {
-        return this.game.prefs[204] == 1;
+        return this.game.prefs[204].value == 1;
     };
     PlayerTable.prototype.addResources = function (type, resources) {
         var _this = this;
@@ -556,6 +556,7 @@ var PlayerTable = /** @class */ (function () {
         }
         var placed = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
         var under = this.ressourcesUnder();
+        console.log('under', under);
         // add tokens
         resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
             var newPlace = _this.getPlaceOnPlayerBoard(placed, type, under);

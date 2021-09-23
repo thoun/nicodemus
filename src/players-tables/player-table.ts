@@ -126,7 +126,7 @@ class PlayerTable {
     }
 
     private ressourcesUnder(): boolean {
-        return (this.game as any).prefs[204] == 1;
+        return (this.game as any).prefs[204].value == 1;
     }
 
     public addResources(type: number, resources: Resource[]) {
@@ -138,6 +138,7 @@ class PlayerTable {
         const placed: PlacedTokens[] = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
 
         const under = this.ressourcesUnder();
+        console.log('under', under);
         // add tokens
         resources.filter(resource => !placed.some(place => place.resourceId == resource.id)).forEach(resource => {
             const newPlace = this.getPlaceOnPlayerBoard(placed, type, under);
