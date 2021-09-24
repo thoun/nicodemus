@@ -697,12 +697,14 @@ var DiscardedMachineSelector = /** @class */ (function () {
         this.completeProjects.forEach(function (completeProject) {
             var projectId = completeProject.project.id;
             completeProject.selectedMachinesIds = _this.machineStocks[projectId].getSelectedItems().map(function (item) { return Number(item.id); });
-            var validProject = completeProject.machinesNumber == completeProject.selectedMachinesIds.length;
             document.getElementById("discarded-machines-selector-" + projectId + "-counter").innerHTML = '' + completeProject.selectedMachinesIds.length;
+            var validProject = completeProject.machinesNumber == completeProject.selectedMachinesIds.length;
+            var validWarningProject = completeProject.machinesNumber < completeProject.selectedMachinesIds.length;
             dojo.toggleClass("discarded-machines-selector-" + projectId + "-counter", 'valid', validProject);
+            dojo.toggleClass("discarded-machines-selector-" + projectId + "-counter", 'validWarning', validWarningProject);
         });
         //this.onDiscardedMachinesSelectionChanged?.(this.completeProjects);
-        var allValidSelection = this.completeProjects.every(function (cp) { return cp.machinesNumber == cp.selectedMachinesIds.length; });
+        var allValidSelection = this.completeProjects.every(function (cp) { return cp.machinesNumber <= cp.selectedMachinesIds.length; });
         dojo.toggleClass('selectProjectDiscardedMachine-button', 'disabled', !allValidSelection);
     };
     DiscardedMachineSelector.prototype.getCompleteProjects = function () {

@@ -19,6 +19,10 @@
             &.valid {
                 color: green;
             }
+
+            &.validWarning {
+                color: #9e8e01;
+            }
         }
     }
 

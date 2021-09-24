@@ -212,6 +212,9 @@
 #discarded-machines-selector .project-infos .machine-counter.valid {
   color: green;
 }
+#discarded-machines-selector .project-infos .machine-counter.validWarning {
+  color: #9e8e01;
+}
 #discarded-machines-selector .machines {
   flex: 1;
 }

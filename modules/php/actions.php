@@ -362,7 +362,7 @@ trait ActionTrait {
             }
             
             $selectedMachinesIds = $completeProjectParameter->selectedMachinesIds;
-            if (count($selectedMachinesIds) != $project->machinesNumber) {
+            if (count($selectedMachinesIds) < $project->machinesNumber) {
                 throw new BgaUserException("Should select $project->machinesNumber, but only selected ".count($selectedMachinesIds));
             }
             if (!$this->array_some($selectedMachinesIds, function ($id) use ($project) { return $project->mandatoryMachine->id == $id; })) {

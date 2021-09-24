@@ -82,13 +82,15 @@ class DiscardedMachineSelector {
         this.completeProjects.forEach(completeProject => {
             const projectId = completeProject.project.id;
             completeProject.selectedMachinesIds = this.machineStocks[projectId].getSelectedItems().map(item => Number(item.id));
-            const validProject = completeProject.machinesNumber == completeProject.selectedMachinesIds.length;
             document.getElementById(`discarded-machines-selector-${projectId}-counter`).innerHTML = ''+completeProject.selectedMachinesIds.length;
+            const validProject = completeProject.machinesNumber == completeProject.selectedMachinesIds.length;
+            const validWarningProject = completeProject.machinesNumber < completeProject.selectedMachinesIds.length;
             dojo.toggleClass(`discarded-machines-selector-${projectId}-counter`, 'valid', validProject);
+            dojo.toggleClass(`discarded-machines-selector-${projectId}-counter`, 'validWarning', validWarningProject);
         });
 
         //this.onDiscardedMachinesSelectionChanged?.(this.completeProjects);
-        const allValidSelection = this.completeProjects.every(cp => cp.machinesNumber == cp.selectedMachinesIds.length);
+        const allValidSelection = this.completeProjects.every(cp => cp.machinesNumber <= cp.selectedMachinesIds.length);
         dojo.toggleClass('selectProjectDiscardedMachine-button', 'disabled', !allValidSelection);
     }
 
