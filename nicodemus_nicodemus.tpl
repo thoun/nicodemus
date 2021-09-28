@@ -18,10 +18,10 @@
                 </div>
             </div>
             <div id="table-resources">
-                <div id="table-resources0"></div>
-                <div id="table-resources1"></div>
-                <div id="table-resources2"></div>
-                <div id="table-resources3"></div>
+                <div id="table-resources0" class="charcoalium-counter"></div>
+                <div id="table-resources1" class="wood-counter"></div>
+                <div id="table-resources3" class="crystal-counter"></div>
+                <div id="table-resources2" class="copper-counter"></div>
             </div>
         </div>
     </div>

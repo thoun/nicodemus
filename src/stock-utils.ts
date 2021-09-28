@@ -144,7 +144,8 @@ function getProjectTooltip(type: number) {
 
         // points
         case 20: return _("You must have at least 2 identical machines in your workshop.");
-        case 21: case 22: case 23: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
+        case 21: case 22: case 23: return dojo.string.substitute(_("You must have at least 2 machines worth ${victoryPoints} victory points in your workshop."), {victoryPoints : type-20});
+        case 29: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
 
         // resources
         case 31: case 32: case 33: case 34: case 35: case 36: case 37: case 38: return formatTextIcons(_("You must have machines in your workshop that have the indicated resources and/or charcoalium in their production zones. [resource9] resources do not count towards these objectives."));
@@ -173,6 +174,15 @@ function getColorName(color: number) {
     }
 }
 
+function getResourceName(type: number) {
+    switch (type) {
+        case 0: return _('Charcoalium');
+        case 1: return _('Wood');
+        case 2: return _('Copper');
+        case 3: return _('Crystal');
+    }
+}
+
 function getColorBlindIndicationHtml(color: number): string {
     return `<div class="indication" style="color: ${getMachineColor(color)}">${getColorName(color)}</div>`;
 }
@@ -190,11 +200,29 @@ function getColorBlindProjectHtml(type: number): string {
     }
 }
 
+
+const RESOURCE_PROJECTS_RESOURCES = [
+  {0: 1, 1: 1},
+  {0: 1, 2: 1},
+  {0: 1, 3: 1},
+  {0: 2},
+  {1: 2},
+  {2: 2},
+  {3: 2},
+  {1: 1, 2: 1, 3: 1},
+];
+
 function setupProjectCard(game: Game, cardDiv: HTMLDivElement, type: number) {
     let tooltip = getProjectTooltip(type);
     if (type >= 11 && type <= 14) {
         const color = type - 10;
         tooltip += `<br><strong style="color: ${getMachineColor(color)}">${getColorName(color)}</strong>`;
+    } else if (type >= 31) {
+        const resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
+        Object.keys(resources).forEach(key => {
+        const resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
+        tooltip += `<br>${formatTextIcons(`[resource${key}]`)} ${resources[key]} ${getResourceName(Number(key))}`;
+        });
     }
     (game as any).addTooltipHtml(cardDiv.id, tooltip);
     if (game.showColorblindIndications) {

@@ -21,10 +21,10 @@ class PlayerTable {
                 <div id="player-icon-${this.playerId}" class="player-icon ${color}"></div>
 
                 <div id="player-resources-${this.playerId}" class="player-resources ${side}">
-                    <div id="player${this.playerId}-resources1"></div>
-                    <div id="player${this.playerId}-resources2"></div>
-                    <div id="player${this.playerId}-resources3"></div>
-                    <div id="player${this.playerId}-resources0" class="top"></div>
+                    <div id="player${this.playerId}-resources1" class="wood-counter"></div>
+                    <div id="player${this.playerId}-resources3" class="crystal-counter"></div>
+                    <div id="player${this.playerId}-resources2" class="copper-counter"></div>
+                    <div id="player${this.playerId}-resources0" class="top charcoalium-counter"></div>
                 </div>
             </div>
             <div id="machines-and-projects-${this.playerId}" class="machines-and-projects">

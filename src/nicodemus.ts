@@ -76,6 +76,13 @@ class Nicodemus implements NicodemusGame {
         };
         this.createPlayerTables(gamedatas);
 
+        // after player boards & player tables
+        (this as any).addTooltipHtml('player-icon-first-player', _("First player"));
+        (this as any).addTooltipHtmlToClass('charcoalium-counter', getResourceName(0));
+        (this as any).addTooltipHtmlToClass('wood-counter', getResourceName(1));
+        (this as any).addTooltipHtmlToClass('copper-counter', getResourceName(2));
+        (this as any).addTooltipHtmlToClass('crystal-counter', getResourceName(3));
+
         this.machineCounter = new ebg.counter();
         this.machineCounter.create('remaining-machine-counter');
         this.setRemainingMachines(gamedatas.remainingMachines);
@@ -466,13 +473,13 @@ class Nicodemus implements NicodemusGame {
                     <div class="icon wood"></div> 
                     <span id="wood-counter-${player.id}"></span>
                 </div>
-                <div id="copper-counter-wrapper-${player.id}" class="copper-counter">
-                    <div class="icon copper"></div> 
-                    <span id="copper-counter-${player.id}"></span>
-                </div>
                 <div id="crystal-counter-wrapper-${player.id}" class="crystal-counter">
                     <div class="icon crystal"></div> 
                     <span id="crystal-counter-${player.id}"></span>
+                </div>
+                <div id="copper-counter-wrapper-${player.id}" class="copper-counter">
+                    <div class="icon copper"></div> 
+                    <span id="copper-counter-${player.id}"></span>
                 </div>
             </div>`, `player_board_${player.id}`);
 
@@ -510,12 +517,6 @@ class Nicodemus implements NicodemusGame {
             dojo.place(html, `player_board_${player.id}`);
             document.getElementById(`discarded-button-${player.id}`).addEventListener('click', () => this.showDiscarded(playerId));
         });
-
-        (this as any).addTooltipHtml('player-icon-first-player', _("First player"));
-        (this as any).addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
-        (this as any).addTooltipHtmlToClass('wood-counter', _("Wood"));
-        (this as any).addTooltipHtmlToClass('copper-counter', _("Copper"));
-        (this as any).addTooltipHtmlToClass('crystal-counter', _("Crystal"));
     }
 
     private createPlayerTables(gamedatas: NicodemusGamedatas) {
@@ -750,7 +751,7 @@ class Nicodemus implements NicodemusGame {
             html += `</td></tr><tr><td>${getProjectTooltip(11)}</td></tr>
             <tr><td><div id="project0" class="project">${this.showColorblindIndications ? getColorBlindIndicationHtml(0) : ''}</div></td></tr><tr><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
             PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
-            html += `</td></tr><tr><td>${getProjectTooltip(21)}</td></tr>
+            html += `</td></tr><tr><td>${getProjectTooltip(29)}</td></tr>
             <tr><td><div id="project5" class="project"></div></td></tr><tr><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
             PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);
             html += `</td></tr><tr><td>${getProjectTooltip(31)}</td></tr></table>

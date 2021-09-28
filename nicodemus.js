@@ -145,7 +145,8 @@ function getProjectTooltip(type) {
         case 20: return _("You must have at least 2 identical machines in your workshop.");
         case 21:
         case 22:
-        case 23: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
+        case 23: return dojo.string.substitute(_("You must have at least 2 machines worth ${victoryPoints} victory points in your workshop."), { victoryPoints: type - 20 });
+        case 29: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
         // resources
         case 31:
         case 32:
@@ -177,6 +178,14 @@ function getColorName(color) {
         case 4: return _('Special');
     }
 }
+function getResourceName(type) {
+    switch (type) {
+        case 0: return _('Charcoalium');
+        case 1: return _('Wood');
+        case 2: return _('Copper');
+        case 3: return _('Crystal');
+    }
+}
 function getColorBlindIndicationHtml(color) {
     return "<div class=\"indication\" style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</div>";
 }
@@ -192,11 +201,28 @@ function getColorBlindProjectHtml(type) {
         return '';
     }
 }
+var RESOURCE_PROJECTS_RESOURCES = [
+    { 0: 1, 1: 1 },
+    { 0: 1, 2: 1 },
+    { 0: 1, 3: 1 },
+    { 0: 2 },
+    { 1: 2 },
+    { 2: 2 },
+    { 3: 2 },
+    { 1: 1, 2: 1, 3: 1 },
+];
 function setupProjectCard(game, cardDiv, type) {
     var tooltip = getProjectTooltip(type);
     if (type >= 11 && type <= 14) {
         var color = type - 10;
         tooltip += "<br><strong style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</strong>";
+    }
+    else if (type >= 31) {
+        var resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
+        Object.keys(resources).forEach(function (key) {
+            var resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
+            tooltip += "<br>" + formatTextIcons("[resource" + key + "]") + " " + resources[key] + " " + getResourceName(Number(key));
+        });
     }
     game.addTooltipHtml(cardDiv.id, tooltip);
     if (game.showColorblindIndications) {
@@ -466,7 +492,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var color = player.color.startsWith('00') ? 'blue' : 'red';
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n\n                <div id=\"player-resources-" + this.playerId + "\" class=\"player-resources " + side + "\">\n                    <div id=\"player" + this.playerId + "-resources1\"></div>\n                    <div id=\"player" + this.playerId + "-resources2\"></div>\n                    <div id=\"player" + this.playerId + "-resources3\"></div>\n                    <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                </div>\n            </div>\n            <div id=\"machines-and-projects-" + this.playerId + "\" class=\"machines-and-projects\">\n                <div id=\"player-table-" + this.playerId + "-projects\"></div>\n                <div id=\"player-table-" + this.playerId + "-machines\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n\n                <div id=\"player-resources-" + this.playerId + "\" class=\"player-resources " + side + "\">\n                    <div id=\"player" + this.playerId + "-resources1\" class=\"wood-counter\"></div>\n                    <div id=\"player" + this.playerId + "-resources3\" class=\"crystal-counter\"></div>\n                    <div id=\"player" + this.playerId + "-resources2\" class=\"copper-counter\"></div>\n                    <div id=\"player" + this.playerId + "-resources0\" class=\"top charcoalium-counter\"></div>\n                </div>\n            </div>\n            <div id=\"machines-and-projects-" + this.playerId + "\" class=\"machines-and-projects\">\n                <div id=\"player-table-" + this.playerId + "-projects\"></div>\n                <div id=\"player-table-" + this.playerId + "-machines\"></div>\n            </div>\n        </div>";
         dojo.place(html, 'playerstables');
         // projects        
         this.projectStock = new ebg.stock();
@@ -765,6 +791,12 @@ var Nicodemus = /** @class */ (function () {
             _this.onProjectSelectionChanged();
         };
         this.createPlayerTables(gamedatas);
+        // after player boards & player tables
+        this.addTooltipHtml('player-icon-first-player', _("First player"));
+        this.addTooltipHtmlToClass('charcoalium-counter', getResourceName(0));
+        this.addTooltipHtmlToClass('wood-counter', getResourceName(1));
+        this.addTooltipHtmlToClass('copper-counter', getResourceName(2));
+        this.addTooltipHtmlToClass('crystal-counter', getResourceName(3));
         this.machineCounter = new ebg.counter();
         this.machineCounter.create('remaining-machine-counter');
         this.setRemainingMachines(gamedatas.remainingMachines);
@@ -1098,7 +1130,7 @@ var Nicodemus = /** @class */ (function () {
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
             // charcoalium & resources counters
-            dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-" + player.id + "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
+            dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-" + player.id + "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
             var charcoaliumCounter = new ebg.counter();
             charcoaliumCounter.create("charcoalium-counter-" + playerId);
             charcoaliumCounter.setValue(player.resources[0].length);
@@ -1126,11 +1158,6 @@ var Nicodemus = /** @class */ (function () {
             dojo.place(html, "player_board_" + player.id);
             document.getElementById("discarded-button-" + player.id).addEventListener('click', function () { return _this.showDiscarded(playerId); });
         });
-        this.addTooltipHtml('player-icon-first-player', _("First player"));
-        this.addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
-        this.addTooltipHtmlToClass('wood-counter', _("Wood"));
-        this.addTooltipHtmlToClass('copper-counter', _("Copper"));
-        this.addTooltipHtmlToClass('crystal-counter', _("Crystal"));
     };
     Nicodemus.prototype.createPlayerTables = function (gamedatas) {
         var _this = this;
@@ -1316,7 +1343,7 @@ var Nicodemus = /** @class */ (function () {
         PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project" + (index + 1) + "\" class=\"project\">" + (_this.showColorblindIndications ? getColorBlindIndicationHtml(index + 1) : '') + "</div>"; });
         html += "</td></tr><tr><td>" + getProjectTooltip(11) + "</td></tr>\n            <tr><td><div id=\"project0\" class=\"project\">" + (this.showColorblindIndications ? getColorBlindIndicationHtml(0) : '') + "</div></td></tr><tr><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
         PROJECTS_IDS.slice(6, 9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 6) + "\" class=\"project\"></div>"; });
-        html += "</td></tr><tr><td>" + getProjectTooltip(21) + "</td></tr>\n            <tr><td><div id=\"project5\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
+        html += "</td></tr><tr><td>" + getProjectTooltip(29) + "</td></tr>\n            <tr><td><div id=\"project5\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
         PROJECTS_IDS.slice(9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 9) + "\" class=\"project\"></div>"; });
         html += "</td></tr><tr><td>" + getProjectTooltip(31) + "</td></tr></table>\n            </div>\n        </div>";
         // Show the dialog

@@ -30,9 +30,11 @@ trait DebugUtilTrait {
         $this->debugSetMachineInWorkshop(2343492, 4, 2, 1);
         $this->debugSetMachineInWorkshop(2343492, 3, 1);
 
-        $this->debugSetProjectInWorkshop(2343492, 1, 4);
+        $this->debugSetProjectInWorkshop(2343492, 1, 1);
+        $this->debugSetProjectInWorkshop(2343492, 2, 1);
+        $this->debugSetProjectInWorkshop(2343492, 2, 2);
+        $this->debugSetProjectInWorkshop(2343492, 2, 3);
         $this->debugSetProjectInWorkshop(2343492, 3, 3);
-        $this->debugSetProjectInWorkshop(2343492, 3, 4);
         //$this->removeResource(2343493, 2, 0);
         //$this->removeResource(2343493, 2, 1);
 
