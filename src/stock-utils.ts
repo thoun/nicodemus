@@ -129,7 +129,9 @@ function getMachineTooltip(type: number) {
 }
 
 function setupMachineCard(game: Game, cardDiv: HTMLDivElement, type: number) {
-    (game as any).addTooltipHtml(cardDiv.id, getMachineTooltip(type));
+    let tooltip = getMachineTooltip(type);
+    tooltip += `<br><div class="tooltip-image"><div class="tooltip-machine machine${MACHINES_IDS.indexOf(type)}"></div></div>`;
+    (game as any).addTooltipHtml(cardDiv.id, tooltip);
 
     if (game.showColorblindIndications) {
         dojo.place(getColorBlindIndicationHtmlByType(type), cardDiv.id);
@@ -218,13 +220,18 @@ function setupProjectCard(game: Game, cardDiv: HTMLDivElement, type: number) {
         const color = type - 10;
         tooltip += `<br><strong style="color: ${getMachineColor(color)}">${getColorName(color)}</strong>`;
     } else if (type >= 31) {
+        tooltip += `<br>`;
         const resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
-        Object.keys(resources).forEach(key => {
-        const resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
-        tooltip += `<br>${formatTextIcons(`[resource${key}]`)} ${resources[key]} ${getResourceName(Number(key))}`;
-        });
+        tooltip += Object.keys(resources).map(key => {
+                const resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
+                return `${formatTextIcons(`[resource${key}]`)} ${resources[key]} ${getResourceName(Number(key))}`;
+            }).join(', ');
     }
+
+    tooltip += `<br><div class="tooltip-image"><div class="tooltip-project project${PROJECTS_IDS.indexOf(type)}"></div></div>`;
+
     (game as any).addTooltipHtml(cardDiv.id, tooltip);
+
     if (game.showColorblindIndications) {
         const html = getColorBlindProjectHtml(type);
         if (html != '') {

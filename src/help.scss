@@ -91,3 +91,34 @@ $project-height: 93px;
         }
     }
 }
+
+.tooltip-image {
+    margin: 15px;
+    text-align: center;
+}
+
+.tooltip-machine {
+    display: inline-block;
+    width: $machine-width * 2; 
+    height: $machine-height * 2;
+    background-image: url('img/machines-big.jpg');
+
+    @for $i from 0 through 16 {
+        &.machine#{$i} {
+            background-position: ($i * 100% / 15) 0%;
+        }
+    }
+}
+
+.tooltip-project {
+    display: inline-block;
+    width: $project-width * 2; 
+    height: $project-height * 2;
+    background-image: url('img/projects-big.jpg');
+
+    @for $i from 0 through 16 {
+        &.project#{$i} {
+            background-position: ($i * 100% / 16) 0%;
+        }
+    }
+}

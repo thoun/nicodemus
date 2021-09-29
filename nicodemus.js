@@ -128,7 +128,9 @@ function getMachineTooltip(type) {
     return null;
 }
 function setupMachineCard(game, cardDiv, type) {
-    game.addTooltipHtml(cardDiv.id, getMachineTooltip(type));
+    var tooltip = getMachineTooltip(type);
+    tooltip += "<br><div class=\"tooltip-image\"><div class=\"tooltip-machine machine" + MACHINES_IDS.indexOf(type) + "\"></div></div>";
+    game.addTooltipHtml(cardDiv.id, tooltip);
     if (game.showColorblindIndications) {
         dojo.place(getColorBlindIndicationHtmlByType(type), cardDiv.id);
     }
@@ -218,12 +220,14 @@ function setupProjectCard(game, cardDiv, type) {
         tooltip += "<br><strong style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</strong>";
     }
     else if (type >= 31) {
+        tooltip += "<br>";
         var resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
-        Object.keys(resources).forEach(function (key) {
+        tooltip += Object.keys(resources).map(function (key) {
             var resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
-            tooltip += "<br>" + formatTextIcons("[resource" + key + "]") + " " + resources[key] + " " + getResourceName(Number(key));
-        });
+            return formatTextIcons("[resource" + key + "]") + " " + resources[key] + " " + getResourceName(Number(key));
+        }).join(', ');
     }
+    tooltip += "<br><div class=\"tooltip-image\"><div class=\"tooltip-project project" + PROJECTS_IDS.indexOf(type) + "\"></div></div>";
     game.addTooltipHtml(cardDiv.id, tooltip);
     if (game.showColorblindIndications) {
         var html = getColorBlindProjectHtml(type);
