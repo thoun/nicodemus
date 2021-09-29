@@ -957,8 +957,11 @@ var Nicodemus = /** @class */ (function () {
                     if (choosePlayActionArgs_1.machine.produce == 9) {
                         var _loop_6 = function (i) {
                             this_4.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
+                            dojo.removeClass("getResource" + i + "-button", 'bgabutton_blue');
+                            dojo.addClass("getResource" + i + "-button", 'bgabutton_gray');
                         };
                         var this_4 = this;
+                        // for those machines, getting 1 resource is not the best option, so we "unlight" them
                         for (var i = 1; i <= 3; i++) {
                             _loop_6(i);
                         }

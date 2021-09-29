@@ -258,8 +258,11 @@ class Nicodemus implements NicodemusGame {
                     const choosePlayActionArgs = args as ChoosePlayActionArgs;
                     (this as any).addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(` (${choosePlayActionArgs.machine.points} [resource0])`), () => this.getCharcoalium());
                     if (choosePlayActionArgs.machine.produce == 9) {
+                        // for those machines, getting 1 resource is not the best option, so we "unlight" them
                         for (let i=1; i<=3; i++) {
                             (this as any).addActionButton(`getResource${i}-button`, _('Get resource') + formatTextIcons(` ([resource${i}])`), () => this.getResource(i));
+                            dojo.removeClass(`getResource${i}-button`, 'bgabutton_blue');
+                            dojo.addClass(`getResource${i}-button`, 'bgabutton_gray');
                         }
                     } else {
                         (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.machine.produce}])`), () => this.getResource(choosePlayActionArgs.machine.produce));
