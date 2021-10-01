@@ -941,7 +941,7 @@ class Nicodemus implements NicodemusGame {
     notif_removeProject(notif: Notif<NotifRemoveProjectArgs>) {
         this.getProjectStocks().forEach(stock => stock.removeFromStockById(''+notif.args.project.id));
 
-        const player = this.gamedatas.players[this.getPlayerId()];
+        const player = this.gamedatas.players[notif.args.playerId];
         player.discardedProjects.push(notif.args.project);
         player.discardedMachines.push(...notif.args.discardedMachines);
     }

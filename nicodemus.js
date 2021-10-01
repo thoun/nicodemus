@@ -1496,7 +1496,7 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.notif_removeProject = function (notif) {
         var _a;
         this.getProjectStocks().forEach(function (stock) { return stock.removeFromStockById('' + notif.args.project.id); });
-        var player = this.gamedatas.players[this.getPlayerId()];
+        var player = this.gamedatas.players[notif.args.playerId];
         player.discardedProjects.push(notif.args.project);
         (_a = player.discardedMachines).push.apply(_a, notif.args.discardedMachines);
     };

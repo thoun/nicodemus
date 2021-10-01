@@ -14,8 +14,8 @@ trait DebugUtilTrait {
 
         //self::DbQuery("UPDATE card SET `card_location_arg` = card_location_arg + 200 where `card_type` = 117");
         //$this->debugSetPlayerPoints(2343492, 19);
-        //$this->debugAddResources(2343492, 5);
-        //$this->debugAddResources(2343493, 2);
+        $this->debugAddResources(2343492, 4);
+        $this->debugAddResources(2343493, 4);
         //$this->debugSetMachineInHand(2343492, 1, 5);
         //$this->debugSetMachineInHand(2343492, 4, 1, 1);
         //$this->machines->moveAllCardsInLocation('deck', 'discard');
@@ -40,10 +40,10 @@ trait DebugUtilTrait {
 
         //$this->machines->pickCardsForLocation(39, 'deck', 'discard');
 
-        $this->debugReplaceHand(2343492, [
+        /*$this->debugReplaceHand(2343492, [
             [2, 1, 0],
             [2, 5, 0]
-        ]);
+        ]);*/
 
         // Activate first player must be commented in setup if this is used
         $this->gamestate->changeActivePlayer(2343492);
