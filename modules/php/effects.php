@@ -179,12 +179,12 @@ trait EffectTrait {
             'location_arg'
         ));
 
-        if (count($machines) < 2) {
+        if ($from == 0 && count($machines) < 2) {
             throw new BgaSystemException("No previous machine");
         }
 
         if ($context->selectedCardId == null && count($machines) == ($from == 0 ? 2 : 1)) {
-            $context->selectedCardId = $machine[0]->id;
+            $context->selectedCardId = $machines[0]->id;
             $this->setGlobalVariable(APPLY_EFFECT_CONTEXT, $context);
         } 
 
