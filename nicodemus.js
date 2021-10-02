@@ -1494,11 +1494,12 @@ var Nicodemus = /** @class */ (function () {
         this.table.addResources(0, notif.args.removedCharcoaliums);
     };
     Nicodemus.prototype.notif_removeProject = function (notif) {
-        var _a;
         this.getProjectStocks().forEach(function (stock) { return stock.removeFromStockById('' + notif.args.project.id); });
         var player = this.gamedatas.players[notif.args.playerId];
         player.discardedProjects.push(notif.args.project);
-        (_a = player.discardedMachines).push.apply(_a, notif.args.discardedMachines);
+        notif.args.discardedMachines.filter(function (machine) {
+            return !player.discardedMachines.some(function (dm) { return dm.id == machine.id; });
+        }).forEach(function (machine) { return player.discardedMachines.push(machine); });
     };
     Nicodemus.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

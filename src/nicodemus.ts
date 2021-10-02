@@ -943,7 +943,9 @@ class Nicodemus implements NicodemusGame {
 
         const player = this.gamedatas.players[notif.args.playerId];
         player.discardedProjects.push(notif.args.project);
-        player.discardedMachines.push(...notif.args.discardedMachines);
+        notif.args.discardedMachines.filter(machine => 
+            !player.discardedMachines.some(dm => dm.id == machine.id)
+        ).forEach(machine =>  player.discardedMachines.push(machine));
     }
 
     notif_lastTurn() {
