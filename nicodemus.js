@@ -130,7 +130,7 @@ function getMachineTooltip(type) {
 function setupMachineCard(game, cardDiv, type) {
     var tooltip = getMachineTooltip(type);
     tooltip += "<br><div class=\"tooltip-image\"><div class=\"tooltip-machine machine" + MACHINES_IDS.indexOf(type) + "\"></div></div>";
-    game.addTooltipHtml(cardDiv.id, tooltip);
+    game.setTooltip(cardDiv.id, tooltip);
     if (game.showColorblindIndications) {
         dojo.place(getColorBlindIndicationHtmlByType(type), cardDiv.id);
     }
@@ -228,7 +228,7 @@ function setupProjectCard(game, cardDiv, type) {
         }).join(', ');
     }
     tooltip += "<br><div class=\"tooltip-image\"><div class=\"tooltip-project project" + PROJECTS_IDS.indexOf(type) + "\"></div></div>";
-    game.addTooltipHtml(cardDiv.id, tooltip);
+    game.setTooltip(cardDiv.id, tooltip);
     if (game.showColorblindIndications) {
         var html = getColorBlindProjectHtml(type);
         if (html != '') {
@@ -764,6 +764,7 @@ var Nicodemus = /** @class */ (function () {
         this.selectedTableProjectsIds = [];
         this.zoom = 1;
         this.clickAction = 'play';
+        this.TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -796,11 +797,11 @@ var Nicodemus = /** @class */ (function () {
         };
         this.createPlayerTables(gamedatas);
         // after player boards & player tables
-        this.addTooltipHtml('player-icon-first-player', _("First player"));
-        this.addTooltipHtmlToClass('charcoalium-counter', getResourceName(0));
-        this.addTooltipHtmlToClass('wood-counter', getResourceName(1));
-        this.addTooltipHtmlToClass('copper-counter', getResourceName(2));
-        this.addTooltipHtmlToClass('crystal-counter', getResourceName(3));
+        this.setTooltip('player-icon-first-player', _("First player"));
+        this.setTooltipToClass('charcoalium-counter', getResourceName(0));
+        this.setTooltipToClass('wood-counter', getResourceName(1));
+        this.setTooltipToClass('copper-counter', getResourceName(2));
+        this.setTooltipToClass('crystal-counter', getResourceName(3));
         this.machineCounter = new ebg.counter();
         this.machineCounter.create('remaining-machine-counter');
         this.setRemainingMachines(gamedatas.remainingMachines);
@@ -979,7 +980,7 @@ var Nicodemus = /** @class */ (function () {
                         dojo.addClass('applyEffect-button', 'disabled');
                     }
                     // remove because it makes problems with ipad
-                    //(this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
+                    //this.setTooltip('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
                     break;
                 case 'selectResource':
                     var selectResourceArgs = args;
@@ -1015,6 +1016,12 @@ var Nicodemus = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Nicodemus.prototype.setTooltip = function (id, html) {
+        this.addTooltipHtml(id, html, this.TOOLTIP_DELAY);
+    };
+    Nicodemus.prototype.setTooltipToClass = function (className, html) {
+        this.addTooltipHtmlToClass(className, html, this.TOOLTIP_DELAY);
+    };
     Nicodemus.prototype.setZoom = function (zoom) {
         if (zoom === void 0) { zoom = 1; }
         this.zoom = zoom;
@@ -1535,7 +1542,7 @@ var Nicodemus = /** @class */ (function () {
                     setTimeout(function () {
                         var effectImage = document.getElementById(id_1);
                         if (effectImage) {
-                            _this.addTooltipHtml(id_1, getMachineTooltip(uniqueId_1));
+                            _this.setTooltip(id_1, getMachineTooltip(uniqueId_1));
                         }
                     }, 200);
                 }

@@ -38,6 +38,8 @@ class Nicodemus implements NicodemusGame {
 
     public clickAction: 'play' | 'select' = 'play';
 
+    private TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
+
     constructor() {    
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
@@ -77,11 +79,11 @@ class Nicodemus implements NicodemusGame {
         this.createPlayerTables(gamedatas);
 
         // after player boards & player tables
-        (this as any).addTooltipHtml('player-icon-first-player', _("First player"));
-        (this as any).addTooltipHtmlToClass('charcoalium-counter', getResourceName(0));
-        (this as any).addTooltipHtmlToClass('wood-counter', getResourceName(1));
-        (this as any).addTooltipHtmlToClass('copper-counter', getResourceName(2));
-        (this as any).addTooltipHtmlToClass('crystal-counter', getResourceName(3));
+        this.setTooltip('player-icon-first-player', _("First player"));
+        this.setTooltipToClass('charcoalium-counter', getResourceName(0));
+        this.setTooltipToClass('wood-counter', getResourceName(1));
+        this.setTooltipToClass('copper-counter', getResourceName(2));
+        this.setTooltipToClass('crystal-counter', getResourceName(3));
 
         this.machineCounter = new ebg.counter();
         this.machineCounter.create('remaining-machine-counter');
@@ -277,7 +279,7 @@ class Nicodemus implements NicodemusGame {
                         dojo.addClass('applyEffect-button', 'disabled');
                     }
                     // remove because it makes problems with ipad
-                    //(this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
+                    //this.setTooltip('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
                     break;
 
                 case 'selectResource':
@@ -321,7 +323,13 @@ class Nicodemus implements NicodemusGame {
 
 
     ///////////////////////////////////////////////////
-    
+
+    public setTooltip(id: string, html: string) {
+        (this as any).addTooltipHtml(id, html, this.TOOLTIP_DELAY);
+    }
+    public setTooltipToClass(className: string, html: string) {
+        (this as any).addTooltipHtmlToClass(className, html, this.TOOLTIP_DELAY);
+    }
 
     private setZoom(zoom: number = 1) {
         this.zoom = zoom;
@@ -989,7 +997,7 @@ class Nicodemus implements NicodemusGame {
                     setTimeout(() => {
                         const effectImage = document.getElementById(id);
                         if (effectImage) {
-                            (this as any).addTooltipHtml(id, getMachineTooltip(uniqueId));
+                            this.setTooltip(id, getMachineTooltip(uniqueId));
                         }
                     }, 200);
                 }

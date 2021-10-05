@@ -87,6 +87,7 @@ interface NicodemusGame extends Game {
     getOpponentId(playerId: number): number;
     getPlayerScore(playerId: number): number;
     machineClick(id: number, from: 'hand' | 'table', payments?: Payment[]): void;
+    setTooltip(id: string, html: string): void;
 }
 
 interface ChooseActionArgs {

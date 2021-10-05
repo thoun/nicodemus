@@ -128,10 +128,10 @@ function getMachineTooltip(type: number) {
     return null;
 }
 
-function setupMachineCard(game: Game, cardDiv: HTMLDivElement, type: number) {
+function setupMachineCard(game: NicodemusGame, cardDiv: HTMLDivElement, type: number) {
     let tooltip = getMachineTooltip(type);
     tooltip += `<br><div class="tooltip-image"><div class="tooltip-machine machine${MACHINES_IDS.indexOf(type)}"></div></div>`;
-    (game as any).addTooltipHtml(cardDiv.id, tooltip);
+    game.setTooltip(cardDiv.id, tooltip);
 
     if (game.showColorblindIndications) {
         dojo.place(getColorBlindIndicationHtmlByType(type), cardDiv.id);
@@ -214,7 +214,7 @@ const RESOURCE_PROJECTS_RESOURCES = [
   {1: 1, 2: 1, 3: 1},
 ];
 
-function setupProjectCard(game: Game, cardDiv: HTMLDivElement, type: number) {
+function setupProjectCard(game: NicodemusGame, cardDiv: HTMLDivElement, type: number) {
     let tooltip = getProjectTooltip(type);
     if (type >= 11 && type <= 14) {
         const color = type - 10;
@@ -230,7 +230,7 @@ function setupProjectCard(game: Game, cardDiv: HTMLDivElement, type: number) {
 
     tooltip += `<br><div class="tooltip-image"><div class="tooltip-project project${PROJECTS_IDS.indexOf(type)}"></div></div>`;
 
-    (game as any).addTooltipHtml(cardDiv.id, tooltip);
+    game.setTooltip(cardDiv.id, tooltip);
 
     if (game.showColorblindIndications) {
         const html = getColorBlindProjectHtml(type);
