@@ -571,6 +571,16 @@ html {
   background-repeat: repeat;
 }
 
+@media (hover: none) {
+  #page-title .action-button.bgabutton, #page-title .bgabutton {
+    margin-bottom: 8px;
+    margin-top: 8px;
+  }
+}
+#page-title .action-button.bgabutton, #page-title .bgabutton {
+  min-height: 16px;
+}
+
 #zoom-wrapper {
   position: relative;
 }
