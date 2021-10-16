@@ -273,6 +273,11 @@ trait UtilTrait {
     function countPlayerResources(int $playerId) {
         return intval(self::getUniqueValueFromDB("SELECT count(*) FROM `resource` where `card_location` = 'player' and `card_location_arg` = $playerId and `card_type` > 0"));
     }
+    
+
+    function getPlayerName(int $playerId) {
+        return self::getUniqueValueFromDb("SELECT player_name FROM player WHERE player_id = $playerId");
+    }
 
     function getPlayerScore(int $playerId) {
         return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
@@ -285,7 +290,7 @@ trait UtilTrait {
             self::setGameStateValue(LAST_TURN, 1);            
             self::notifyAllPlayers('lastTurn', clienttranslate('${player_name} reaches 20 points, it\'s last turn !'), [
                 'playerId' => $playerId,
-                'player_name' => self::getActivePlayerName(),
+                'player_name' => $this->getPlayerName($playerId),
             ]);
         }
 
