@@ -17,7 +17,7 @@ trait DebugUtilTrait {
         //$this->debugSetPlayerPoints(2343492, 19);
         $this->debugAddResources(2343492, 4);
         $this->debugAddResources(2343493, 4);
-        $this->debugSetMachineInHand(2343492, 1, 5);
+        //$this->debugSetMachineInHand(2343492, 1, 5);
         //$this->debugSetMachineInHand(2343492, 4, 1, 1);
         //$this->machines->moveAllCardsInLocation('deck', 'discard');
         //$this->debugClearTable();

@@ -20,7 +20,7 @@ trait StateTrait {
 
 
         
-        if ($remainingCardsInDeck < $cardNumberToRefill) {
+        if ($remainingCardsInDeck < $cardNumberToRefill && intval(self::getGameStateValue(LAST_TURN)) == 0) {
             // no more cards in deck, end turn
             self::setGameStateValue(LAST_TURN, 1);
             self::notifyAllPlayers('lastTurn', clienttranslate("There is not enough machines left on the deck, it's last turn !"), [
