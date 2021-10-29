@@ -1316,7 +1316,8 @@ var Nicodemus = /** @class */ (function () {
         if (!this.checkAction('discardSelectedMachines')) {
             return;
         }
-        var base64 = btoa(JSON.stringify(this.discardedMachineSelector.getCompleteProjects()));
+        var strippedObject = this.discardedMachineSelector.getCompleteProjects().slice().map(function (completeProject) { return (__assign(__assign({}, completeProject), { project: { id: completeProject.project.id }, machines: null })); });
+        var base64 = btoa(JSON.stringify(strippedObject));
         this.takeAction('discardSelectedMachines', {
             completeProjects: base64
         });

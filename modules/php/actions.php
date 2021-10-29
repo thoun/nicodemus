@@ -350,7 +350,7 @@ trait ActionTrait {
     }
 
     public function discardSelectedMachines(array $completeProjectsParameter) {
-        self::checkAction('discardSelectedMachines'); 
+        self::checkAction('discardSelectedMachines');
 
         $completeProjects = $this->getGlobalVariable(COMPLETED_PROJECTS);
 

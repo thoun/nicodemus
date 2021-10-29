@@ -698,7 +698,12 @@ class Nicodemus implements NicodemusGame {
             return;
         }
 
-        const base64 = btoa(JSON.stringify(this.discardedMachineSelector.getCompleteProjects()));
+        const strippedObject = this.discardedMachineSelector.getCompleteProjects().slice().map(completeProject => ({
+            ...completeProject,
+            project: { id: completeProject.project.id },
+            machines: null,
+        }));
+        const base64 = btoa(JSON.stringify(strippedObject));
 
         this.takeAction('discardSelectedMachines', {
             completeProjects: base64
