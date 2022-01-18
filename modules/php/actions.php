@@ -159,7 +159,7 @@ trait ActionTrait {
         self::notifyAllPlayers('machinePlayedGetResource', clienttranslate('${player_name} gains 1 ${resourceName} with played machine'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
-            'resourceName' => $this->getEnglishResourceName($resource),
+            'resourceName' => $this->getResourceName($resource),
             'resourceType' => $resource,
             'i18n' => ['resourceName'],
         ]);
@@ -338,6 +338,7 @@ trait ActionTrait {
             'resourceFromType' => $from,
             'resourceToName' => $this->getResourceName($to),
             'resourceToType' => $to,
+            'i18n' => ['resourceFromName', 'resourceToName'],
         ]);
 
         $this->gamestate->nextState($transition != null ? $transition : 'refillHand');

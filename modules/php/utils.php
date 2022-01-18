@@ -303,32 +303,21 @@ trait UtilTrait {
     function getColorName(int $type) {
         $colorName = null;
         switch ($type) {
-            case 1: $colorName = _('Production'); break;
-            case 2: $colorName = _('Transformation'); break;
-            case 3: $colorName = _('Attack'); break;
-            case 4: $colorName = _('Special'); break;
+            case 1: $colorName = clienttranslate('Production'); break;
+            case 2: $colorName = clienttranslate('Transformation'); break;
+            case 3: $colorName = clienttranslate('Attack'); break;
+            case 4: $colorName = clienttranslate('Special'); break;
         }
         return $colorName;
-    }
-
-    function getEnglishResourceName(int $type) {
-        $resourceName = null;
-        switch ($type) {
-            case 0: $resourceName = 'charcoalium'; break;
-            case 1: $resourceName = 'wood'; break;
-            case 2: $resourceName = 'copper'; break;
-            case 3: $resourceName = 'crystal'; break;
-        }
-        return $resourceName;
     }
 
     function getResourceName(int $type) {
         $resourceName = null;
         switch ($type) {
-            case 0: $resourceName = _('charcoalium'); break;
-            case 1: $resourceName = _('wood'); break;
-            case 2: $resourceName = _('copper'); break;
-            case 3: $resourceName = _('crystal'); break;
+            case 0: $resourceName = clienttranslate('charcoalium'); break;
+            case 1: $resourceName = clienttranslate('wood'); break;
+            case 2: $resourceName = clienttranslate('copper'); break;
+            case 3: $resourceName = clienttranslate('crystal'); break;
         }
         return $resourceName;
     }
