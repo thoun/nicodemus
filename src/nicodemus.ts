@@ -22,6 +22,7 @@ class Nicodemus implements NicodemusGame {
     private woodCounters: Counter[] = [];
     private copperCounters: Counter[] = [];
     private crystalCounters: Counter[] = [];
+    private handCounters: Counter[] = [];
     private machineCounter: Counter;
     private projectCounter: Counter;
 
@@ -430,7 +431,6 @@ class Nicodemus implements NicodemusGame {
         if (player) {
             const color = player.color.startsWith('00') ? 'blue' : 'red';
             dojo.addClass('my-hand-label', color);
-            // document.getElementById('myhand-wrap').style.backgroundColor = `#${player.color}40`;
         }
     }
     
@@ -513,6 +513,19 @@ class Nicodemus implements NicodemusGame {
             crystalCounter.create(`crystal-counter-${playerId}`);
             crystalCounter.setValue(player.resources[3].length);
             this.crystalCounters[playerId] = crystalCounter;
+
+            // hand cards counter
+            dojo.place(`<div class="counters">
+                <div id="playerhand-counter-wrapper-${player.id}" class="playerhand-counter">
+                    <div class="player-hand-card"></div> 
+                    <span id="playerhand-counter-${player.id}"></span>
+                </div>
+            </div>`, `player_board_${player.id}`);
+
+            const handCounter = new ebg.counter();
+            handCounter.create(`playerhand-counter-${playerId}`);
+            handCounter.setValue(player.handMachinesCount);
+            this.handCounters[playerId] = handCounter;
 
             let html = `<div class="fp-button-grid">`;
 
@@ -851,7 +864,6 @@ class Nicodemus implements NicodemusGame {
             ['addMachinesToHand', ANIMATION_MS],
             ['points', 1],
             ['lastTurn', 1],
-            ['setRemainingMachines', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
             ['discardHandMachines', ANIMATION_MS],
@@ -870,6 +882,7 @@ class Nicodemus implements NicodemusGame {
     notif_machinePlayed(notif: Notif<NotifMachinePlayedArgs>) {        
         this.playerMachineHand.removeFromStockById(''+notif.args.machine.id);
         this.table.machinePlayed(notif.args.playerId, notif.args.machine);
+        this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
     }
 
     notif_machineRepaired(notif: Notif<NotifMachineRepairedArgs>) {
@@ -906,14 +919,9 @@ class Nicodemus implements NicodemusGame {
         } else if (notif.args.from > 0) {
             from = `player-icon-${notif.args.from}`;
         }
-        notif.args.machines.forEach(machine => addToStockWithId(this.playerMachineHand, getUniqueId(machine), ''+machine.id, from));
+        notif.args.machines?.forEach(machine => addToStockWithId(this.playerMachineHand, getUniqueId(machine), ''+machine.id, from));
+        this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
 
-        if (notif.args.remainingMachines !== undefined) {
-            this.setRemainingMachines(notif.args.remainingMachines);
-        }
-    }
-
-    notif_setRemainingMachines(notif: Notif<NotifAddMachinesToHandArgs>) {
         this.setRemainingMachines(notif.args.remainingMachines);
     }
 
@@ -938,15 +946,16 @@ class Nicodemus implements NicodemusGame {
         this.table.addResources(notif.args.resourceType, notif.args.resources);
     }
 
-    notif_discardHandMachines(notif: Notif<NotifDiscardMachinesArgs>) {
-        notif.args.machines.forEach(machine => this.playerMachineHand.removeFromStockById(''+machine.id));
+    notif_discardHandMachines(notif: Notif<NotifDiscardHandMachinesArgs>) {
+        notif.args.machines?.forEach(machine => this.playerMachineHand.removeFromStockById(''+machine.id));
+        this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
     }
 
-    notif_discardPlayerMachines(notif: Notif<NotifDiscardMachinesArgs>) {
+    notif_discardPlayerMachines(notif: Notif<NotifDiscardTableMachinesArgs>) {
         notif.args.machines.forEach(machine => this.getPlayerTable(machine.location_arg).machineStock.removeFromStockById(''+machine.id));
     }
 
-    notif_discardTableMachines(notif: Notif<NotifDiscardMachinesArgs>) {
+    notif_discardTableMachines(notif: Notif<NotifDiscardTableMachinesArgs>) {
         notif.args.machines.forEach(machine => this.table.machineStocks[machine.location_arg].removeFromStockById(''+machine.id));
         this.table.addResources(0, notif.args.removedCharcoaliums);
     }

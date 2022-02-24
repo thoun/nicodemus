@@ -73,13 +73,9 @@ trait EffectTrait {
         $opponentMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $opponentId));
         $stolenMachine = $opponentMachines[bga_rand(1, count($opponentMachines)) - 1];
         $this->machines->moveCard($stolenMachine->id, 'hand', $playerId);
-        self::notifyPlayer($opponentId, 'discardHandMachines', '', [
-            'machines' => [$stolenMachine],
-        ]);
-        self::notifyPlayer($playerId, 'addMachinesToHand', '', [
-            'machines' => [$stolenMachine],
-            'from' => $opponentId,
-        ]);
+
+        $this->notifDiscardHandMachines($opponentId, [$stolenMachine]);
+        $this->notifAddHandMachines($playerId, [$stolenMachine], $opponentId);
     }
 
     function getMachineForEffect() {
@@ -195,18 +191,25 @@ trait EffectTrait {
                 $discardedMachine = $this->array_find($machines, function ($machine) use ($machineId) { return $machine->id == $machineId; });
                 $this->addResourcesFromCombination($playerId, $context->selectedResources);
 
-                // remove charcoalium on discarded machine
-                $removedCharcoaliums = $this->getResourcesFromDb($this->resources->getCardsInLocation('machine', $machineId));
-                $this->resources->moveAllCardsInLocation('machine', 'table', $context->selectedCardId);
-                foreach($removedCharcoaliums as &$charcoalium) {
-                    $charcoalium->location = 'table';
+                $removedCharcoaliums = null;
+                if ($from == 0) {
+                    // remove charcoalium on discarded machine
+                    $removedCharcoaliums = $this->getResourcesFromDb($this->resources->getCardsInLocation('machine', $machineId));
+                    $this->resources->moveAllCardsInLocation('machine', 'table', $context->selectedCardId);
+                    foreach($removedCharcoaliums as &$charcoalium) {
+                        $charcoalium->location = 'table';
+                    }
                 }
 
                 $this->machines->moveCard($discardedMachine->id, 'discard');
-                self::notifyAllPlayers($from == 0 ? 'discardTableMachines' : 'discardHandMachines', '', [
-                    'machines' => [$discardedMachine],
-                    'removedCharcoaliums' => $removedCharcoaliums,
-                ]);
+                if ($from == 0) {
+                    self::notifyAllPlayers('discardTableMachines', '', [
+                        'machines' => [$discardedMachine],
+                        'removedCharcoaliums' => $removedCharcoaliums,
+                    ]);
+                } else {
+                    $this->notifDiscardHandMachines($playerId, [$discardedMachine]);
+                }
 
                 $this->removeEmptySpaceFromTable();
 
@@ -329,9 +332,7 @@ trait EffectTrait {
                     $opponentMachines = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $opponentId));
                 }
                 if (count($discardedMachines) > 0) {
-                    self::notifyPlayer($opponentId, 'discardHandMachines', '', [
-                        'machines' => $discardedMachines,
-                    ]);
+                    $this->notifDiscardHandMachines($opponentId, $discardedMachines);
                 }
 
                 // opponent discard 2 charcoaliums

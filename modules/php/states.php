@@ -33,16 +33,7 @@ trait StateTrait {
 
             $machines = $this->getMachinesFromDb($this->machines->pickCards(min($remainingCardsInDeck, $cardNumberToRefill), 'deck', $playerId));
 
-            self::notifyPlayer($playerId, 'addMachinesToHand', '', [
-                'machines' => $machines,
-                'from' => 0,
-                'remainingMachines' => $this->getRemainingMachines(),
-            ]);
-
-            $opponentId = $this->getOpponentId($playerId);  
-            self::notifyPlayer($opponentId, 'setRemainingMachines', '', [
-                'remainingMachines' => $this->getRemainingMachines(),
-            ]);
+            $this->notifAddHandMachines($playerId, $machines, 0);
         }
 
         $this->gamestate->nextState('nextPlayer');
@@ -113,7 +104,6 @@ trait StateTrait {
     }
 
     function stGameEnd() {
-        $sqlCharcoaliumPerPlayer = "SELECT player_id, COALESCE(`resources`.charcoalium_count, 0) as charcoalium FROM `player` left outer join (SELECT card_location_arg, count(*) as `charcoalium_count` FROM `resource` where `card_type` = 0 and `card_location` = 'player' group by card_location_arg) as  `resources` on `player`.player_id = `resources`.card_location_arg";
         $charcoaliumPerPlayer = array_values(self::getCollectionFromDb("SELECT player_id, COALESCE(`resources`.charcoalium_count, 0) as charcoalium FROM `player` left outer join (SELECT card_location_arg, count(*) as `charcoalium_count` FROM `resource` where `card_type` = 0 and `card_location` = 'player' group by card_location_arg) as  `resources` on `player`.player_id = `resources`.card_location_arg"));
         $charcoaliumEquality = intval($charcoaliumPerPlayer[0]['charcoalium']) == intval($charcoaliumPerPlayer[1]['charcoalium']);
         $signForUpdate = $charcoaliumEquality ? '>' : '=';

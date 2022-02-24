@@ -556,6 +556,15 @@
 .player-board .fp-button-grid .bgabutton_gray {
   background: none;
 }
+.player-board .player-hand-card {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  background-image: url("img/cards.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: bottom;
+}
 
 #player_boards.hide-buttons .discarded-button {
   display: none;

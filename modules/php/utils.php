@@ -513,4 +513,42 @@ trait UtilTrait {
 
         return true;
     }
+
+    function getHandCount(int $playerId) {
+        return intval($this->machines->countCardInLocation('hand', $playerId));
+    }
+
+    function notifDiscardHandMachines(int $playerId, array $machines) {
+        $args = [
+            'playerId' => $playerId,
+            'handMachinesCount' => $this->getHandCount($playerId),
+        ];
+
+        $playersIds = array_keys($this->loadPlayersBasicInfos());
+
+        foreach($playersIds as $pId) {
+            $this->notifyPlayer($pId, 'discardHandMachines', '', $pId == $playerId ? 
+                ($args + ['machines' => $machines]) :
+                $args,
+            );
+        }
+    }
+
+    function notifAddHandMachines(int $playerId, array $machines, int $from) {
+        $args = [
+            'playerId' => $playerId,
+            'from' => $from,
+            'remainingMachines' => $this->getRemainingMachines(),
+            'handMachinesCount' => $this->getHandCount($playerId),
+        ];
+
+        $playersIds = array_keys($this->loadPlayersBasicInfos());
+
+        foreach($playersIds as $pId) {
+            $this->notifyPlayer($pId, 'addMachinesToHand', '', $pId == $playerId ? 
+                ($args + ['machines' => $machines]) :
+                $args,
+            );
+        }
+    }
 }

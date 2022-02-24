@@ -759,6 +759,7 @@ var Nicodemus = /** @class */ (function () {
         this.woodCounters = [];
         this.copperCounters = [];
         this.crystalCounters = [];
+        this.handCounters = [];
         this.playersTables = [];
         this.selectedPlayerProjectsIds = [];
         this.selectedTableProjectsIds = [];
@@ -1108,7 +1109,6 @@ var Nicodemus = /** @class */ (function () {
         if (player) {
             var color = player.color.startsWith('00') ? 'blue' : 'red';
             dojo.addClass('my-hand-label', color);
-            // document.getElementById('myhand-wrap').style.backgroundColor = `#${player.color}40`;
         }
     };
     Nicodemus.prototype.getProjectStocks = function () {
@@ -1161,6 +1161,12 @@ var Nicodemus = /** @class */ (function () {
             crystalCounter.create("crystal-counter-" + playerId);
             crystalCounter.setValue(player.resources[3].length);
             _this.crystalCounters[playerId] = crystalCounter;
+            // hand cards counter
+            dojo.place("<div class=\"counters\">\n                <div id=\"playerhand-counter-wrapper-" + player.id + "\" class=\"playerhand-counter\">\n                    <div class=\"player-hand-card\"></div> \n                    <span id=\"playerhand-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
+            var handCounter = new ebg.counter();
+            handCounter.create("playerhand-counter-" + playerId);
+            handCounter.setValue(player.handMachinesCount);
+            _this.handCounters[playerId] = handCounter;
             var html = "<div class=\"fp-button-grid\">";
             if (player.playerNo == 1) {
                 html += "<div id=\"player-icon-first-player\" class=\"player-icon first-player\"></div>";
@@ -1423,7 +1429,6 @@ var Nicodemus = /** @class */ (function () {
             ['addMachinesToHand', ANIMATION_MS],
             ['points', 1],
             ['lastTurn', 1],
-            ['setRemainingMachines', 1],
             ['addResources', ANIMATION_MS],
             ['removeResources', ANIMATION_MS],
             ['discardHandMachines', ANIMATION_MS],
@@ -1440,6 +1445,7 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.notif_machinePlayed = function (notif) {
         this.playerMachineHand.removeFromStockById('' + notif.args.machine.id);
         this.table.machinePlayed(notif.args.playerId, notif.args.machine);
+        this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
     };
     Nicodemus.prototype.notif_machineRepaired = function (notif) {
         moveToAnotherStock(this.table.machineStocks[notif.args.machineSpot], this.getPlayerTable(notif.args.playerId).machineStock, getUniqueId(notif.args.machine), '' + notif.args.machine.id);
@@ -1458,6 +1464,7 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.notif_addMachinesToHand = function (notif) {
         var _this = this;
+        var _a;
         var from = undefined;
         if (notif.args.from === 0) {
             from = 'machine-deck';
@@ -1465,12 +1472,8 @@ var Nicodemus = /** @class */ (function () {
         else if (notif.args.from > 0) {
             from = "player-icon-" + notif.args.from;
         }
-        notif.args.machines.forEach(function (machine) { return addToStockWithId(_this.playerMachineHand, getUniqueId(machine), '' + machine.id, from); });
-        if (notif.args.remainingMachines !== undefined) {
-            this.setRemainingMachines(notif.args.remainingMachines);
-        }
-    };
-    Nicodemus.prototype.notif_setRemainingMachines = function (notif) {
+        (_a = notif.args.machines) === null || _a === void 0 ? void 0 : _a.forEach(function (machine) { return addToStockWithId(_this.playerMachineHand, getUniqueId(machine), '' + machine.id, from); });
+        this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
         this.setRemainingMachines(notif.args.remainingMachines);
     };
     Nicodemus.prototype.notif_addWorkshopProjects = function (notif) {
@@ -1490,7 +1493,9 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.notif_discardHandMachines = function (notif) {
         var _this = this;
-        notif.args.machines.forEach(function (machine) { return _this.playerMachineHand.removeFromStockById('' + machine.id); });
+        var _a;
+        (_a = notif.args.machines) === null || _a === void 0 ? void 0 : _a.forEach(function (machine) { return _this.playerMachineHand.removeFromStockById('' + machine.id); });
+        this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
     };
     Nicodemus.prototype.notif_discardPlayerMachines = function (notif) {
         var _this = this;

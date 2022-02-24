@@ -53,6 +53,8 @@ interface NicodemusPlayer extends Player {
     discardedMachines: Machine[];
 
     resources: Resource[][];
+
+    handMachinesCount: number;
 }
 
 /**
@@ -129,6 +131,7 @@ interface ChooseProjectDiscardedMachineArgs {
 interface NotifMachinePlayedArgs {
     playerId: number;
     machine: Machine;
+    handMachinesCount: number;
 }
 
 interface NotifMachineRepairedArgs {
@@ -156,17 +159,24 @@ interface NotifResourcesArgs {
 }
 
 interface NotifAddMachinesToHandArgs {
-    machines: Machine[];
+    playerId: number;
+    machines?: Machine[];
     from: number;
-    remainingMachines?: number;
+    remainingMachines: number;
+    handMachinesCount: number;
 }
 
 interface NotifRemovedCharcoaliumFromMachineArgs {
     removedCharcoaliums: Resource[];
 }
 
+interface NotifDiscardHandMachinesArgs {
+    playerId: number;
+    machines?: Machine[];
+    handMachinesCount: number;
+}
 
-interface NotifDiscardMachinesArgs {
+interface NotifDiscardTableMachinesArgs {
     machines: Machine[];
     removedCharcoaliums: Resource[];
 }

@@ -38,6 +38,7 @@ trait ActionTrait {
             'player_name' => self::getActivePlayerName(),
             'machine' => $machine,
             'machineImage' => $this->getUniqueId($machine),
+            'handMachinesCount' => $this->getHandCount($playerId),
         ]);
 
         self::incStat(1, 'playedMachines');

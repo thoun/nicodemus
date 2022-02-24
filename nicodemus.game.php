@@ -149,6 +149,7 @@ class Nicodemus extends Table {
             for ($i=0;$i<=3;$i++) {
                 $player['resources'][$i] = $this->getResources($i, $playerId);
             }
+            $player['handMachinesCount'] = $this->getHandCount($playerId);
         }
 
         $result['handMachines'] = $this->getMachinesFromDb($this->machines->getCardsInLocation('hand', $current_player_id));
