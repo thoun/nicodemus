@@ -11,6 +11,14 @@ trait StateTrait {
         The action method of state X is called everytime the current game state is set to X.
     */
 
+    function stSelectProject() {
+        $remainingProjectsInDeck = intval($this->projects->countCardInLocation('deck'));
+
+        if ($remainingProjectsInDeck == 0) {
+            $this->gamestate->nextState('refillHand');
+        }
+    }
+
     function stRefillHand() {
         $playerId = self::getActivePlayerId();
 

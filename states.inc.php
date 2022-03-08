@@ -149,7 +149,8 @@ $playerActionsGameStates = [
         "name" => "selectProject",
         "description" => clienttranslate('${actplayer} must choose a project for effect ${machineEffect}'),
         "descriptionmyturn" => clienttranslate('${you} must choose a project for effect ${machineEffect}'),
-        "type" => "activeplayer",        
+        "type" => "activeplayer",
+        "action" => "stSelectProject",     
         "args" => "argSelectProject",
         "possibleactions" => [ 
             "selectProject",

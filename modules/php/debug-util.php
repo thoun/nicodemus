@@ -20,23 +20,23 @@ trait DebugUtilTrait {
         //$this->debugSetMachineInHand(2343492, 4, 1, 1);
         //$this->machines->moveAllCardsInLocation('deck', 'discard');
         //$this->debugClearTable();
-        $this->debugSetMachineInTable(3, 3);
+        //$this->debugSetMachineInTable(3, 3);
         //$this->debugSetMachineInTable(1, 5, 1);
         //$this->debugSetMachineInTable(3, 2);
         //$this->debugSetMachineInTable(4, 2, 1);
         //$this->debugSetMachineInTable(3, 1);
         //$this->debugSetCharcoaliumInTable(5, 2);
         //$this->debugSetMachineInTable(3, 3);
-        $this->debugSetMachineInWorkshop(2343492, 2, 4);
-        $this->debugSetMachineInWorkshop(2343492, 3, 1);
-        $this->debugSetMachineInWorkshop(2343492, 4, 2);
+        //$this->debugSetMachineInWorkshop(2343492, 2, 4);
+        //$this->debugSetMachineInWorkshop(2343492, 3, 1);
+        //$this->debugSetMachineInWorkshop(2343492, 4, 2);
 
-        $this->debugSetProjectInWorkshop(2343492, 1, 0);
-        $this->debugSetProjectInWorkshop(2343492, 1, 3);
-        $this->debugSetProjectInWorkshop(2343492, 2, 3);
-        $this->debugSetProjectInWorkshop(2343492, 3, 1);
-        $this->debugSetProjectInWorkshop(2343492, 3, 3);
-        $this->debugSetProjectInWorkshop(2343492, 3, 4);
+        //$this->debugSetProjectInWorkshop(2343492, 1, 0);
+        //$this->debugSetProjectInWorkshop(2343492, 1, 3);
+        //$this->debugSetProjectInWorkshop(2343492, 2, 3);
+        //$this->debugSetProjectInWorkshop(2343492, 3, 1);
+        //$this->debugSetProjectInWorkshop(2343492, 3, 3);
+        //$this->debugSetProjectInWorkshop(2343492, 3, 4);
         //$this->removeResource(2343493, 2, 0);
         //$this->removeResource(2343493, 2, 1);
 
@@ -46,6 +46,8 @@ trait DebugUtilTrait {
             [2, 1, 0],
             [2, 5, 0]
         ]);*/
+
+        //$this->projects->moveAllCardsInLocation('deck', 'discard');
 
         // Activate first player must be commented in setup if this is used
         $this->gamestate->changeActivePlayer(2343492);
