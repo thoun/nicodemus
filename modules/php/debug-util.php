@@ -21,13 +21,13 @@ trait DebugUtilTrait {
         //$this->machines->moveAllCardsInLocation('deck', 'discard');
         //$this->debugClearTable();
         //$this->debugSetMachineInTable(3, 3);
-        //$this->debugSetMachineInTable(1, 5, 1);
+        //$this->debugSetMachineInTable(2, 1, 1);
         //$this->debugSetMachineInTable(3, 2);
         //$this->debugSetMachineInTable(4, 2, 1);
         //$this->debugSetMachineInTable(3, 1);
         //$this->debugSetCharcoaliumInTable(5, 2);
         //$this->debugSetMachineInTable(3, 3);
-        //$this->debugSetMachineInWorkshop(2343492, 2, 4);
+        $this->debugSetMachineInWorkshop(2343492, 2, 1);
         //$this->debugSetMachineInWorkshop(2343492, 3, 1);
         //$this->debugSetMachineInWorkshop(2343492, 4, 2);
 

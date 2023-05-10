@@ -488,6 +488,9 @@ var Table = /** @class */ (function () {
         });
         div.dataset.placed = JSON.stringify(placed);
     };
+    Table.prototype.unselectAllMachines = function () {
+        this.machineStocks.forEach(function (stock) { return stock.unselectAll(); });
+    };
     return Table;
 }());
 var PlayerTable = /** @class */ (function () {
@@ -1223,6 +1226,12 @@ var Nicodemus = /** @class */ (function () {
                         });
                         _this.addActionButton("selectPaymentButton" + index + "-button", formatTextIcons(label), function () { return _this.repairMachine(id, payment); });
                     });
+                    this.addActionButton("cancelSelectPayment-button", _('Cancel'), function () {
+                        var _a;
+                        _this.table.unselectAllMachines();
+                        document.querySelectorAll('[id^="selectPaymentButton"]').forEach(function (elem) { return elem.remove(); });
+                        (_a = document.getElementById("cancelSelectPayment-button")) === null || _a === void 0 ? void 0 : _a.remove();
+                    }, null, null, 'gray');
                 }
                 else {
                     this.repairMachine(id, payments[0]);

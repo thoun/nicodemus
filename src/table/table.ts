@@ -247,4 +247,8 @@ class Table {
 
         div.dataset.placed = JSON.stringify(placed);
     }
+    
+    public unselectAllMachines() {
+        this.machineStocks.forEach(stock => stock.unselectAll());
+    }
 }

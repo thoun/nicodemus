@@ -584,8 +584,13 @@ class Nicodemus implements NicodemusGame {
                             unpaidResources: payment.jokers.map(joker => `[resource${joker}]`).join(''),
                             paidResources: payment.remainingCost.filter(resource => resource > 0).map(resource => `[resource${resource}]`).join(''),
                         });
-                        (this as any).addActionButton(`selectPaymentButton${index}-button`, formatTextIcons(label), () => this.repairMachine(id, payment))
+                        (this as any).addActionButton(`selectPaymentButton${index}-button`, formatTextIcons(label), () => this.repairMachine(id, payment));
                     });
+                    (this as any).addActionButton(`cancelSelectPayment-button`, _('Cancel'), () => {
+                        this.table.unselectAllMachines();
+                        document.querySelectorAll('[id^="selectPaymentButton"]').forEach(elem => elem.remove());
+                        document.getElementById(`cancelSelectPayment-button`)?.remove();
+                    }, null, null, 'gray');
                 } else {
                     this.repairMachine(id, payments[0]);
                 }
