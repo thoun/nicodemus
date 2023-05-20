@@ -191,3 +191,7 @@ interface NotifRemoveProjectArgs {
     project: Project;
     discardedMachines: Machine[];
 }
+
+interface NotifCancelMachinePlayedArgs extends NotifMachinePlayedArgs {
+    machineSpot: number;
+}

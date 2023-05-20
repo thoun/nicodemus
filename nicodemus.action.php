@@ -85,7 +85,7 @@
         self::setAjaxMode();     
 
         $projectsIds = self::getArg( "ids", AT_numberlist, true );
-        $this->game->selectProjects(array_map(function($idStr) { return intval($idStr); }, explode(',', $projectsIds)));
+        $this->game->selectProjects(array_map(fn($idStr) => intval($idStr), explode(',', $projectsIds)));
 
         self::ajaxResponse();
     }
@@ -120,7 +120,7 @@
         self::setAjaxMode();     
 
         $resourcesTypes = self::getArg("resourcesTypes", AT_numberlist, true);
-        $this->game->selectResource(array_map(function($idStr) { return intval($idStr); }, explode(',', $resourcesTypes)));
+        $this->game->selectResource(array_map(fn($idStr) => intval($idStr), explode(',', $resourcesTypes)));
 
         self::ajaxResponse();
     }
@@ -149,6 +149,14 @@
         $completeProjects = json_decode(base64_decode(self::getArg("completeProjects", AT_base64, true)));
 
         $this->game->discardSelectedMachines($completeProjects);
+
+        self::ajaxResponse();
+    }
+
+    public function cancel() {
+        self::setAjaxMode();     
+
+        $this->game->cancel();
 
         self::ajaxResponse();
     }

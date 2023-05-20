@@ -23,7 +23,7 @@ trait ActionTrait {
         $playerId = intval(self::getActivePlayerId());
 
         $selectableMachines = $this->getSelectableMachinesForChooseAction($playerId);
-        if (!$this->array_some($selectableMachines, function ($m) use ($id) { return $m->id == $id; })) {
+        if (!$this->array_some($selectableMachines, fn($m) => $m->id == $id)) {
             throw new BgaUserException("This machine cannot be played");
         }
 
@@ -202,7 +202,7 @@ trait ActionTrait {
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
         $completeProjects = $this->getCompleteProjects($playerId, $machine);
         foreach($ids as $id) {
-            if (!$this->array_some($completeProjects, function ($p) use ($id) { return $p->id == $id; })) {
+            if (!$this->array_some($completeProjects, fn ($p) => $p->id == $id)) {
                 throw new BgaUserException("Selected project cannot be completed");
             }
         }
@@ -250,7 +250,7 @@ trait ActionTrait {
         $playerId = self::getActivePlayerId();
 
         $selectableMachines = $this->selectableMachinesForEffect();
-        if (!$this->array_some($selectableMachines, function ($m) use ($id) { return $m->id == $id; })) {
+        if (!$this->array_some($selectableMachines, fn ($m) => $m->id == $id)) {
             throw new BgaUserException("This machine cannot be selected for effect");
         }
 
@@ -273,7 +273,7 @@ trait ActionTrait {
         self::checkAction('selectProject'); 
 
         $projects = $this->getProjectsFromDb($this->projects->getCardsInLocation('projectSelection'));
-        if (!$this->array_some($projects, function ($p) use ($id) { return $p->id == $id; })) {
+        if (!$this->array_some($projects, fn ($p) => $p->id == $id)) {
             throw new BgaUserException("Selected project cannot be added to workshop");
         }
         
@@ -294,7 +294,7 @@ trait ActionTrait {
         self::checkAction('selectResource'); 
 
         $possibleCombinations = $this->getSelectResourceCombinations();
-        if (!$this->array_some($possibleCombinations, function ($comb) use ($resourcesTypes) { return $this->array_identical($comb, $resourcesTypes); })) {
+        if (!$this->array_some($possibleCombinations, fn ($comb) => $this->array_identical($comb, $resourcesTypes))) {
             throw new BgaUserException("Resource(s) cannot be selected");
         }
         
@@ -317,7 +317,7 @@ trait ActionTrait {
         $playerId = self::getActivePlayerId();
 
         $possibleExchanges = $this->getPossibleExchanges($playerId);
-        if (!$this->array_some($possibleExchanges, function ($possibleExchange) use ($from, $to) { return $possibleExchange->from == $from && $possibleExchange->to == $to; })) {
+        if (!$this->array_some($possibleExchanges, fn ($possibleExchange) => $possibleExchange->from == $from && $possibleExchange->to == $to)) {
             throw new BgaUserException("Exchange cannot be selected");
         }
 
@@ -358,7 +358,7 @@ trait ActionTrait {
 
         foreach ($completeProjects as &$project) {
             // we only keep $selectedMachinesIds from parameter
-            $completeProjectParameter = $this->array_find($completeProjectsParameter, function ($cp) use ($project) { return $cp->project->id == $project->project->id; });
+            $completeProjectParameter = $this->array_find($completeProjectsParameter, fn ($cp) => $cp->project->id == $project->project->id);
             if ($completeProjectParameter == null) {
                 throw new BgaUserException("Missing project informations");
             }
@@ -367,7 +367,7 @@ trait ActionTrait {
             if (count($selectedMachinesIds) < $project->machinesNumber) {
                 throw new BgaUserException("Should select $project->machinesNumber, but only selected ".count($selectedMachinesIds));
             }
-            if (!$this->array_some($selectedMachinesIds, function ($id) use ($project) { return $project->mandatoryMachine->id == $id; })) {
+            if (!$this->array_some($selectedMachinesIds, fn($id) => $project->mandatoryMachine->id == $id)) {
                 throw new BgaUserException("Last played machine should be on selection");
             }
 
@@ -378,13 +378,57 @@ trait ActionTrait {
             }
 
             // we update machines linked to project with selectedMachinesIds
-            $project->machines = array_values(array_filter($project->machines, function($machine) use ($selectedMachinesIds) {
-                return $this->array_some($selectedMachinesIds, function($id) use ($machine) {  return $machine->id == $id; });
-            }));
+            $project->machines = array_values(array_filter($project->machines, fn($machine) => 
+                $this->array_some($selectedMachinesIds, fn($id)=> $machine->id == $id)
+            ));
         }
 
         $this->setGlobalVariable(COMPLETED_PROJECTS, $completeProjects);
 
         $this->gamestate->nextState('completeProjects');
+    }
+
+    public function cancel() {
+        self::checkAction('cancel'); 
+        
+        $playerId = self::getActivePlayerId();
+
+        $stateId = intval($this->gamestate->state_id());
+
+        if ($stateId == ST_PLAYER_CHOOSE_PLAY_ACTION) {
+            $lastMachineId = intval(self::getGameStateValue(PLAYED_MACHINE));
+    
+            $machine = $this->getMachineFromDb($this->machines->getCard($lastMachineId));
+
+            $this->machines->moveCard($lastMachineId, 'hand', $playerId);
+    
+            self::notifyAllPlayers('cancelMachinePlayed', clienttranslate('${player_name} cancels played machine ${machineImage}'), [
+                'playerId' => $playerId,
+                'player_name' => self::getActivePlayerName(),
+                'machine' => $machine,
+                'machineImage' => $this->getUniqueId($machine),
+                'handMachinesCount' => $this->getHandCount($playerId),
+                'machineSpot' => $this->countMachinesOnTable() + 1,
+            ]);
+    
+            self::incStat(-1, 'playedMachines');
+            self::incStat(-1, 'playedMachines', $playerId);
+
+            $this->gamestate->nextState('cancel');
+        } else if ($stateId == ST_PLAYER_SELECT_RESOURCE) {
+            $context = $this->getApplyEffectContext();
+
+            if ($context->mimicCardId == null && $context->selectedCardId == null) {
+                self::incStat(-1, 'playedMachinesForWithEffect');
+                self::incStat(-1, 'playedMachinesForWithEffect', $playerId);
+            }
+    
+            $playedMachine = $this->getMachineFromDb($this->machines->getCard(intval(self::getGameStateValue(PLAYED_MACHINE))));
+            if ($playedMachine->type == 2 && $playedMachine->subType == 5) {
+                $context->selectedCardId = null; // eat previous machine, previous machine automatically selected in selectedCardId needs reset
+            }
+            
+            $this->gamestate->nextState($context->selectedCardId != null ? 'cancelSelectMachine' : 'cancelPlayAction');
+        }
     }
 }

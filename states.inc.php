@@ -115,6 +115,7 @@ $playerActionsGameStates = [
             "getCharcoalium",
             "getResource",
             "applyEffect",
+            "cancel",
         ],
         "transitions" => [
             "selectResource" => ST_PLAYER_SELECT_RESOURCE,
@@ -122,6 +123,7 @@ $playerActionsGameStates = [
             "selectProject" => ST_PLAYER_SELECT_PROJECT,
             "selectExchange" => ST_PLAYER_SELECT_EXCHANGE,
             "refillHand" => ST_REFILL_HAND,
+            "cancel" => ST_PLAYER_CHOOSE_ACTION,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -169,9 +171,12 @@ $playerActionsGameStates = [
         "args" => "argSelectResource",
         "possibleactions" => [ 
             "selectResource",
+            "cancel",
         ],
         "transitions" => [
             "refillHand" => ST_REFILL_HAND,
+            "cancelPlayAction" => ST_PLAYER_CHOOSE_PLAY_ACTION,
+            "cancelSelectMachine" => ST_PLAYER_SELECT_MACHINE,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],

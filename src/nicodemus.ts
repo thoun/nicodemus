@@ -279,6 +279,7 @@ class Nicodemus implements NicodemusGame {
                     if (!choosePlayActionArgs.canApplyEffect) {
                         dojo.addClass('applyEffect-button', 'disabled');
                     }
+                    (this as any).addActionButton(`cancel-button`, _('Cancel'), () => this.cancel(), null, null, 'gray');
                     // remove because it makes problems with ipad
                     //this.setTooltip('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
                     break;
@@ -288,6 +289,7 @@ class Nicodemus implements NicodemusGame {
                     selectResourceArgs.possibleCombinations.forEach((combination, index) => 
                         (this as any).addActionButton(`selectResourceCombination${index}-button`, formatTextIcons(combination.map(type => `[resource${type}]`).join('')), () => this.selectResource(combination))
                     );
+                    (this as any).addActionButton(`cancel-button`, _('Cancel'), () => this.cancel(), null, null, 'gray');
                     break;
 
                 case 'selectProject':
@@ -728,6 +730,14 @@ class Nicodemus implements NicodemusGame {
         });        
     }
 
+    public cancel() {
+        if(!(this as any).checkAction('cancel')) {
+            return;
+        }
+
+        this.takeAction('cancel');
+    }
+
     public takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
@@ -876,6 +886,7 @@ class Nicodemus implements NicodemusGame {
             ['discardTableMachines', ANIMATION_MS],
             ['removeProject', ANIMATION_MS],
             ['addWorkshopProjects', ANIMATION_MS],
+            ['cancelMachinePlayed', ANIMATION_MS],
         ];
 
         notifs.forEach((notif) => {
@@ -973,6 +984,20 @@ class Nicodemus implements NicodemusGame {
         notif.args.discardedMachines.filter(machine => 
             !player.discardedMachines.some(dm => dm.id == machine.id)
         ).forEach(machine =>  player.discardedMachines.push(machine));
+    }
+
+    notif_cancelMachinePlayed(notif: Notif<NotifCancelMachinePlayedArgs>) {    
+        if (notif.args.playerId == this.getPlayerId()) {
+            moveToAnotherStock(
+                this.table.machineStocks[notif.args.machineSpot], 
+                this.playerMachineHand, 
+                getUniqueId(notif.args.machine), 
+                ''+notif.args.machine.id
+            );
+        } else {
+            this.table.machineStocks[notif.args.machineSpot].removeAllTo(`playerhand-counter-${notif.args.playerId}`);
+        }
+        this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
     }
 
     notif_lastTurn() {

@@ -983,6 +983,7 @@ var Nicodemus = /** @class */ (function () {
                     if (!choosePlayActionArgs_1.canApplyEffect) {
                         dojo.addClass('applyEffect-button', 'disabled');
                     }
+                    this.addActionButton("cancel-button", _('Cancel'), function () { return _this.cancel(); }, null, null, 'gray');
                     // remove because it makes problems with ipad
                     //this.setTooltip('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
                     break;
@@ -991,6 +992,7 @@ var Nicodemus = /** @class */ (function () {
                     selectResourceArgs.possibleCombinations.forEach(function (combination, index) {
                         return _this.addActionButton("selectResourceCombination" + index + "-button", formatTextIcons(combination.map(function (type) { return "[resource" + type + "]"; }).join('')), function () { return _this.selectResource(combination); });
                     });
+                    this.addActionButton("cancel-button", _('Cancel'), function () { return _this.cancel(); }, null, null, 'gray');
                     break;
                 case 'selectProject':
                     var selectProjectArgs = args;
@@ -1337,6 +1339,12 @@ var Nicodemus = /** @class */ (function () {
             completeProjects: base64
         });
     };
+    Nicodemus.prototype.cancel = function () {
+        if (!this.checkAction('cancel')) {
+            return;
+        }
+        this.takeAction('cancel');
+    };
     Nicodemus.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
@@ -1445,6 +1453,7 @@ var Nicodemus = /** @class */ (function () {
             ['discardTableMachines', ANIMATION_MS],
             ['removeProject', ANIMATION_MS],
             ['addWorkshopProjects', ANIMATION_MS],
+            ['cancelMachinePlayed', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -1522,6 +1531,15 @@ var Nicodemus = /** @class */ (function () {
         notif.args.discardedMachines.filter(function (machine) {
             return !player.discardedMachines.some(function (dm) { return dm.id == machine.id; });
         }).forEach(function (machine) { return player.discardedMachines.push(machine); });
+    };
+    Nicodemus.prototype.notif_cancelMachinePlayed = function (notif) {
+        if (notif.args.playerId == this.getPlayerId()) {
+            moveToAnotherStock(this.table.machineStocks[notif.args.machineSpot], this.playerMachineHand, getUniqueId(notif.args.machine), '' + notif.args.machine.id);
+        }
+        else {
+            this.table.machineStocks[notif.args.machineSpot].removeAllTo("playerhand-counter-" + notif.args.playerId);
+        }
+        this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
     };
     Nicodemus.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

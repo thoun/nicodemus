@@ -123,4 +123,10 @@ trait DebugUtilTrait {
             $this->debugSetMachineInHand($playerId, $card[0], $card[1], $card[2]);
         }
     }
+
+    function debug($debugData) {
+        if ($this->getBgaEnvironment() != 'studio') { 
+            return;
+        }die('debug data : '.json_encode($debugData));
+    }
 }
