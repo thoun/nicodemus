@@ -34,7 +34,7 @@
   	function build_page($viewArgs) {
         /*********** Place your code below:  ************/
 
-		
+
         $this->tpl['MY_HAND'] = self::_("My hand");
 
         /*********** Do not change anything below this line  ************/

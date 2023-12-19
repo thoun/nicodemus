@@ -80,7 +80,7 @@ class Nicodemus extends Table {
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
         $gameinfos = self::getGameinfos();
         $default_colors = $gameinfos['player_colors'];
- 
+
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
@@ -93,16 +93,16 @@ class Nicodemus extends Table {
                 self::setGameStateValue(FIRST_PLAYER, $playerId);
             }
         }
-        $sql .= implode($values, ',');
+        $sql .= implode(',', $values);
         self::DbQuery($sql);
         self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
         self::reloadPlayersBasicInfos();
-        
+
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
         self::setGameStateInitialValue(LAST_TURN, 0);
-        
+
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         self::initStat('table', 'turnsNumber', 0);
@@ -245,7 +245,7 @@ class Nicodemus extends Table {
         // $from_version is the current version of this game database, in numerical form.
         // For example, if the game was running with a release of your game named "140430-1345",
         // $from_version is equal to 1404301345
-        
+
         // Example:
 //        if( $from_version <= 1404301345 )
 //        {
