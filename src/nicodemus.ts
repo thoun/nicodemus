@@ -10,7 +10,6 @@ declare const board: HTMLDivElement;
 const ANIMATION_MS = 500;
 
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
-const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 const LOCAL_STORAGE_ZOOM_KEY = 'Nicodemus-zoom';
 
 const isDebug = window.location.host == 'studio.boardgamearena.com';
@@ -34,19 +33,14 @@ class Nicodemus implements NicodemusGame {
     private selectedPlayerProjectsIds: number[] = []; 
     private selectedTableProjectsIds: number[] = [];
 
-    public zoom: number = 1;
+    private zoomManager: ZoomManager;
     public showColorblindIndications: boolean;
 
     public clickAction: 'play' | 'select' = 'play';
 
     private TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
 
-    constructor() {    
-        const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
-        if (zoomStr) {
-            this.zoom = Number(zoomStr);
-        }
-    }
+    constructor() {}
     
     /*
         setup:
@@ -98,16 +92,23 @@ class Nicodemus implements NicodemusGame {
             this.notif_lastTurn();
         }
 
+        this.zoomManager = new ZoomManager({
+            element: document.getElementById('full-table'),
+            smooth: false,
+            zoomControls: {
+                color: 'black',
+            },
+            zoomLevels: ZOOM_LEVELS,
+            localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
+            onDimensionsChange: () => {
+                [this.playerMachineHand,  ...this.playersTables.map(pt => pt.machineStock)].forEach(stock => stock.updateDisplay());
+            },
+        });
+
         this.addHelp();
         this.setupNotifications();
 
         this.setupPreferences();
-
-        document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
-        document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
-        if (this.zoom !== 1) {
-            this.setZoom(this.zoom);
-        }
 
         log( "Ending game setup" );
     }
@@ -332,43 +333,6 @@ class Nicodemus implements NicodemusGame {
     }
     public setTooltipToClass(className: string, html: string) {
         (this as any).addTooltipHtmlToClass(className, html, this.TOOLTIP_DELAY);
-    }
-
-    private setZoom(zoom: number = 1) {
-        this.zoom = zoom;
-        localStorage.setItem(LOCAL_STORAGE_ZOOM_KEY, ''+this.zoom);
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom);
-        dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
-        dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
-
-        const div = document.getElementById('full-table');
-        if (zoom === 1) {
-            div.style.transform = '';
-            div.style.margin = '';
-        } else {
-            div.style.transform = `scale(${zoom})`;
-            div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
-        }
-
-        [this.playerMachineHand,  ...this.playersTables.map(pt => pt.machineStock)].forEach(stock => stock.updateDisplay());
-
-        document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
-    }
-
-    public zoomIn() {
-        if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
-            return;
-        }
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) + 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
-    }
-
-    public zoomOut() {
-        if (this.zoom === ZOOM_LEVELS[0]) {
-            return;
-        }
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
     }
 
     private setupPreferences() {

@@ -1,3 +1,284 @@
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+var DEFAULT_ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
+function throttle(callback, delay) {
+    var last;
+    var timer;
+    return function () {
+        var context = this;
+        var now = +new Date();
+        var args = arguments;
+        if (last && now < last + delay) {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                last = now;
+                callback.apply(context, args);
+            }, delay);
+        }
+        else {
+            last = now;
+            callback.apply(context, args);
+        }
+    };
+}
+var advThrottle = function (func, delay, options) {
+    if (options === void 0) { options = { leading: true, trailing: false }; }
+    var timer = null, lastRan = null, trailingArgs = null;
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (timer) { //called within cooldown period
+            lastRan = this; //update context
+            trailingArgs = args; //save for later
+            return;
+        }
+        if (options.leading) { // if leading
+            func.call.apply(// if leading
+            func, __spreadArray([this], args, false)); //call the 1st instance
+        }
+        else { // else it's trailing
+            lastRan = this; //update context
+            trailingArgs = args; //save for later
+        }
+        var coolDownPeriodComplete = function () {
+            if (options.trailing && trailingArgs) { // if trailing and the trailing args exist
+                func.call.apply(// if trailing and the trailing args exist
+                func, __spreadArray([lastRan], trailingArgs, false)); //invoke the instance with stored context "lastRan"
+                lastRan = null; //reset the status of lastRan
+                trailingArgs = null; //reset trailing arguments
+                timer = setTimeout(coolDownPeriodComplete, delay); //clear the timout
+            }
+            else {
+                timer = null; // reset timer
+            }
+        };
+        timer = setTimeout(coolDownPeriodComplete, delay);
+    };
+};
+var ZoomManager = /** @class */ (function () {
+    /**
+     * Place the settings.element in a zoom wrapper and init zoomControls.
+     *
+     * @param settings: a `ZoomManagerSettings` object
+     */
+    function ZoomManager(settings) {
+        var _this = this;
+        var _a, _b, _c, _d, _e, _f;
+        this.settings = settings;
+        if (!settings.element) {
+            throw new DOMException('You need to set the element to wrap in the zoom element');
+        }
+        this._zoomLevels = (_a = settings.zoomLevels) !== null && _a !== void 0 ? _a : DEFAULT_ZOOM_LEVELS;
+        this._zoom = this.settings.defaultZoom || 1;
+        if (this.settings.localStorageZoomKey) {
+            var zoomStr = localStorage.getItem(this.settings.localStorageZoomKey);
+            if (zoomStr) {
+                this._zoom = Number(zoomStr);
+            }
+        }
+        this.wrapper = document.createElement('div');
+        this.wrapper.id = 'bga-zoom-wrapper';
+        this.wrapElement(this.wrapper, settings.element);
+        this.wrapper.appendChild(settings.element);
+        settings.element.classList.add('bga-zoom-inner');
+        if ((_b = settings.smooth) !== null && _b !== void 0 ? _b : true) {
+            settings.element.dataset.smooth = 'true';
+            settings.element.addEventListener('transitionend', advThrottle(function () { return _this.zoomOrDimensionChanged(); }, this.throttleTime, { leading: true, trailing: true, }));
+        }
+        if ((_d = (_c = settings.zoomControls) === null || _c === void 0 ? void 0 : _c.visible) !== null && _d !== void 0 ? _d : true) {
+            this.initZoomControls(settings);
+        }
+        if (this._zoom !== 1) {
+            this.setZoom(this._zoom);
+        }
+        this.throttleTime = (_e = settings.throttleTime) !== null && _e !== void 0 ? _e : 100;
+        window.addEventListener('resize', advThrottle(function () {
+            var _a;
+            _this.zoomOrDimensionChanged();
+            if ((_a = _this.settings.autoZoom) === null || _a === void 0 ? void 0 : _a.expectedWidth) {
+                _this.setAutoZoom();
+            }
+        }, this.throttleTime, { leading: true, trailing: true, }));
+        if (window.ResizeObserver) {
+            new ResizeObserver(advThrottle(function () { return _this.zoomOrDimensionChanged(); }, this.throttleTime, { leading: true, trailing: true, })).observe(settings.element);
+        }
+        if ((_f = this.settings.autoZoom) === null || _f === void 0 ? void 0 : _f.expectedWidth) {
+            this.setAutoZoom();
+        }
+    }
+    Object.defineProperty(ZoomManager.prototype, "zoom", {
+        /**
+         * Returns the zoom level
+         */
+        get: function () {
+            return this._zoom;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(ZoomManager.prototype, "zoomLevels", {
+        /**
+         * Returns the zoom levels
+         */
+        get: function () {
+            return this._zoomLevels;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    ZoomManager.prototype.setAutoZoom = function () {
+        var _this = this;
+        var _a, _b, _c;
+        var zoomWrapperWidth = document.getElementById('bga-zoom-wrapper').clientWidth;
+        if (!zoomWrapperWidth) {
+            setTimeout(function () { return _this.setAutoZoom(); }, 200);
+            return;
+        }
+        var expectedWidth = (_a = this.settings.autoZoom) === null || _a === void 0 ? void 0 : _a.expectedWidth;
+        var newZoom = this.zoom;
+        while (newZoom > this._zoomLevels[0] && newZoom > ((_c = (_b = this.settings.autoZoom) === null || _b === void 0 ? void 0 : _b.minZoomLevel) !== null && _c !== void 0 ? _c : 0) && zoomWrapperWidth / newZoom < expectedWidth) {
+            newZoom = this._zoomLevels[this._zoomLevels.indexOf(newZoom) - 1];
+        }
+        if (this._zoom == newZoom) {
+            if (this.settings.localStorageZoomKey) {
+                localStorage.setItem(this.settings.localStorageZoomKey, '' + this._zoom);
+            }
+        }
+        else {
+            this.setZoom(newZoom);
+        }
+    };
+    /**
+     * Sets the available zoomLevels and new zoom to the provided values.
+     * @param zoomLevels the new array of zoomLevels that can be used.
+     * @param newZoom if provided the zoom will be set to this value, if not the last element of the zoomLevels array will be set as the new zoom
+     */
+    ZoomManager.prototype.setZoomLevels = function (zoomLevels, newZoom) {
+        if (!zoomLevels || zoomLevels.length <= 0) {
+            return;
+        }
+        this._zoomLevels = zoomLevels;
+        var zoomIndex = newZoom && zoomLevels.includes(newZoom) ? this._zoomLevels.indexOf(newZoom) : this._zoomLevels.length - 1;
+        this.setZoom(this._zoomLevels[zoomIndex]);
+    };
+    /**
+     * Set the zoom level. Ideally, use a zoom level in the zoomLevels range.
+     * @param zoom zool level
+     */
+    ZoomManager.prototype.setZoom = function (zoom) {
+        var _a, _b, _c, _d;
+        if (zoom === void 0) { zoom = 1; }
+        this._zoom = zoom;
+        if (this.settings.localStorageZoomKey) {
+            localStorage.setItem(this.settings.localStorageZoomKey, '' + this._zoom);
+        }
+        var newIndex = this._zoomLevels.indexOf(this._zoom);
+        (_a = this.zoomInButton) === null || _a === void 0 ? void 0 : _a.classList.toggle('disabled', newIndex === this._zoomLevels.length - 1);
+        (_b = this.zoomOutButton) === null || _b === void 0 ? void 0 : _b.classList.toggle('disabled', newIndex === 0);
+        this.settings.element.style.transform = zoom === 1 ? '' : "scale(".concat(zoom, ")");
+        (_d = (_c = this.settings).onZoomChange) === null || _d === void 0 ? void 0 : _d.call(_c, this._zoom);
+        this.zoomOrDimensionChanged();
+    };
+    /**
+     * Call this method for the browsers not supporting ResizeObserver, everytime the table height changes, if you know it.
+     * If the browsert is recent enough (>= Safari 13.1) it will just be ignored.
+     */
+    ZoomManager.prototype.manualHeightUpdate = function () {
+        if (!window.ResizeObserver) {
+            this.zoomOrDimensionChanged();
+        }
+    };
+    /**
+     * Everytime the element dimensions changes, we update the style. And call the optional callback.
+     * Unsafe method as this is not protected by throttle. Surround with  `advThrottle(() => this.zoomOrDimensionChanged(), this.throttleTime, { leading: true, trailing: true, })` to avoid spamming recomputation.
+     */
+    ZoomManager.prototype.zoomOrDimensionChanged = function () {
+        var _a, _b;
+        this.settings.element.style.width = "".concat(this.wrapper.offsetWidth / this._zoom, "px");
+        this.wrapper.style.height = "".concat(this.settings.element.offsetHeight * this._zoom, "px");
+        (_b = (_a = this.settings).onDimensionsChange) === null || _b === void 0 ? void 0 : _b.call(_a, this._zoom);
+    };
+    /**
+     * Simulates a click on the Zoom-in button.
+     */
+    ZoomManager.prototype.zoomIn = function () {
+        if (this._zoom === this._zoomLevels[this._zoomLevels.length - 1]) {
+            return;
+        }
+        var newIndex = this._zoomLevels.indexOf(this._zoom) + 1;
+        this.setZoom(newIndex === -1 ? 1 : this._zoomLevels[newIndex]);
+    };
+    /**
+     * Simulates a click on the Zoom-out button.
+     */
+    ZoomManager.prototype.zoomOut = function () {
+        if (this._zoom === this._zoomLevels[0]) {
+            return;
+        }
+        var newIndex = this._zoomLevels.indexOf(this._zoom) - 1;
+        this.setZoom(newIndex === -1 ? 1 : this._zoomLevels[newIndex]);
+    };
+    /**
+     * Changes the color of the zoom controls.
+     */
+    ZoomManager.prototype.setZoomControlsColor = function (color) {
+        if (this.zoomControls) {
+            this.zoomControls.dataset.color = color;
+        }
+    };
+    /**
+     * Set-up the zoom controls
+     * @param settings a `ZoomManagerSettings` object.
+     */
+    ZoomManager.prototype.initZoomControls = function (settings) {
+        var _this = this;
+        var _a, _b, _c, _d, _e, _f;
+        this.zoomControls = document.createElement('div');
+        this.zoomControls.id = 'bga-zoom-controls';
+        this.zoomControls.dataset.position = (_b = (_a = settings.zoomControls) === null || _a === void 0 ? void 0 : _a.position) !== null && _b !== void 0 ? _b : 'top-right';
+        this.zoomOutButton = document.createElement('button');
+        this.zoomOutButton.type = 'button';
+        this.zoomOutButton.addEventListener('click', function () { return _this.zoomOut(); });
+        if ((_c = settings.zoomControls) === null || _c === void 0 ? void 0 : _c.customZoomOutElement) {
+            settings.zoomControls.customZoomOutElement(this.zoomOutButton);
+        }
+        else {
+            this.zoomOutButton.classList.add("bga-zoom-out-icon");
+        }
+        this.zoomInButton = document.createElement('button');
+        this.zoomInButton.type = 'button';
+        this.zoomInButton.addEventListener('click', function () { return _this.zoomIn(); });
+        if ((_d = settings.zoomControls) === null || _d === void 0 ? void 0 : _d.customZoomInElement) {
+            settings.zoomControls.customZoomInElement(this.zoomInButton);
+        }
+        else {
+            this.zoomInButton.classList.add("bga-zoom-in-icon");
+        }
+        this.zoomControls.appendChild(this.zoomOutButton);
+        this.zoomControls.appendChild(this.zoomInButton);
+        this.wrapper.appendChild(this.zoomControls);
+        this.setZoomControlsColor((_f = (_e = settings.zoomControls) === null || _e === void 0 ? void 0 : _e.color) !== null && _f !== void 0 ? _f : 'black');
+    };
+    /**
+     * Wraps an element around an existing DOM element
+     * @param wrapper the wrapper element
+     * @param element the existing element
+     */
+    ZoomManager.prototype.wrapElement = function (wrapper, element) {
+        element.parentNode.insertBefore(wrapper, element);
+        wrapper.appendChild(element);
+    };
+    return ZoomManager;
+}());
 function slideToObjectAndAttach(object, destinationId, posX, posY) {
     var destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
@@ -12,10 +293,10 @@ function slideToObjectAndAttach(object, destinationId, posX, posY) {
         var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0);
         //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
         object.style.transition = "transform 0.5s ease-in";
-        object.style.transform = "translate(" + deltaX + "px, " + deltaY + "px)";
+        object.style.transform = "translate(".concat(deltaX, "px, ").concat(deltaY, "px)");
         var transitionend = function () {
-            object.style.top = posY !== undefined ? posY + "px" : 'unset';
-            object.style.left = posX !== undefined ? posX + "px" : 'unset';
+            object.style.top = posY !== undefined ? "".concat(posY, "px") : 'unset';
+            object.style.left = posX !== undefined ? "".concat(posX, "px") : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? '' + originalZIndex : 'unset';
             object.style.transform = 'unset';
@@ -87,7 +368,7 @@ function getUniqueId(object) {
     return object.type * 10 + object.subType;
 }
 function setupMachineCards(machineStocks) {
-    var cardsurl = g_gamethemeurl + "img/cards.jpg";
+    var cardsurl = "".concat(g_gamethemeurl, "img/cards.jpg");
     machineStocks.forEach(function (machineStock) {
         return MACHINES_IDS.forEach(function (cardId, index) {
             return machineStock.addItemType(cardId, 0, cardsurl, index);
@@ -95,7 +376,7 @@ function setupMachineCards(machineStocks) {
     });
 }
 function setupProjectCards(projectStocks) {
-    var cardsurl = g_gamethemeurl + "img/projects.jpg";
+    var cardsurl = "".concat(g_gamethemeurl, "img/projects.jpg");
     projectStocks.forEach(function (projectStock) {
         PROJECTS_IDS.forEach(function (cardId, index) {
             return projectStock.addItemType(cardId, 0, cardsurl, index);
@@ -129,7 +410,7 @@ function getMachineTooltip(type) {
 }
 function setupMachineCard(game, cardDiv, type) {
     var tooltip = getMachineTooltip(type);
-    tooltip += "<br><div class=\"tooltip-image\"><div class=\"tooltip-machine machine" + MACHINES_IDS.indexOf(type) + "\"></div></div>";
+    tooltip += "<br><div class=\"tooltip-image\"><div class=\"tooltip-machine machine".concat(MACHINES_IDS.indexOf(type), "\"></div></div>");
     game.setTooltip(cardDiv.id, tooltip);
     if (game.showColorblindIndications) {
         dojo.place(getColorBlindIndicationHtmlByType(type), cardDiv.id);
@@ -189,11 +470,11 @@ function getResourceName(type) {
     }
 }
 function getColorBlindIndicationHtml(color) {
-    return "<div class=\"indication\" style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</div>";
+    return "<div class=\"indication\" style=\"color: ".concat(getMachineColor(color), "\">").concat(getColorName(color), "</div>");
 }
 function getColorBlindIndicationHtmlByType(type) {
     var color = Math.floor(type / 10);
-    return "<div class=\"indication\" style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</div>";
+    return "<div class=\"indication\" style=\"color: ".concat(getMachineColor(color), "\">").concat(getColorName(color), "</div>");
 }
 function getColorBlindProjectHtml(type) {
     if (type >= 10 && type <= 14) {
@@ -217,17 +498,17 @@ function setupProjectCard(game, cardDiv, type) {
     var tooltip = getProjectTooltip(type);
     if (type >= 11 && type <= 14) {
         var color = type - 10;
-        tooltip += "<br><strong style=\"color: " + getMachineColor(color) + "\">" + getColorName(color) + "</strong>";
+        tooltip += "<br><strong style=\"color: ".concat(getMachineColor(color), "\">").concat(getColorName(color), "</strong>");
     }
     else if (type >= 31) {
         tooltip += "<br>";
         var resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
         tooltip += Object.keys(resources).map(function (key) {
             var resources = RESOURCE_PROJECTS_RESOURCES[type - 31];
-            return formatTextIcons("[resource" + key + "]") + " " + resources[key] + " " + getResourceName(Number(key));
+            return "".concat(formatTextIcons("[resource".concat(key, "]")), " ").concat(resources[key], " ").concat(getResourceName(Number(key)));
         }).join(', ');
     }
-    tooltip += "<br><div class=\"tooltip-image\"><div class=\"tooltip-project project" + PROJECTS_IDS.indexOf(type) + "\"></div></div>";
+    tooltip += "<br><div class=\"tooltip-image\"><div class=\"tooltip-project project".concat(PROJECTS_IDS.indexOf(type), "\"></div></div>");
     game.setTooltip(cardDiv.id, tooltip);
     if (game.showColorblindIndications) {
         var html = getColorBlindProjectHtml(type);
@@ -240,22 +521,22 @@ function moveToAnotherStock(sourceStock, destinationStock, uniqueId, cardId) {
     if (sourceStock === destinationStock) {
         return;
     }
-    var sourceStockItemId = sourceStock.container_div.id + "_item_" + cardId;
+    var sourceStockItemId = "".concat(sourceStock.container_div.id, "_item_").concat(cardId);
     if (document.getElementById(sourceStockItemId)) {
         destinationStock.addToStockWithId(uniqueId, cardId, sourceStockItemId);
         sourceStock.removeFromStockById(cardId);
     }
     else {
-        console.warn(sourceStockItemId + " not found in ", sourceStock);
+        console.warn("".concat(sourceStockItemId, " not found in "), sourceStock);
         destinationStock.addToStockWithId(uniqueId, cardId, sourceStock.container_div.id);
     }
-    var destinationDiv = document.getElementById(destinationStock.container_div.id + "_item_" + cardId);
+    var destinationDiv = document.getElementById("".concat(destinationStock.container_div.id, "_item_").concat(cardId));
     destinationDiv.style.zIndex = '10';
     setTimeout(function () { return destinationDiv.style.zIndex = 'unset'; }, 1000);
 }
 function addToStockWithId(destinationStock, uniqueId, cardId, from) {
     destinationStock.addToStockWithId(uniqueId, cardId, from);
-    var destinationDiv = document.getElementById(destinationStock.container_div.id + "_item_" + cardId);
+    var destinationDiv = document.getElementById("".concat(destinationStock.container_div.id, "_item_").concat(cardId));
     destinationDiv.style.zIndex = '10';
     setTimeout(function () { return destinationDiv.style.zIndex = 'unset'; }, 1000);
 }
@@ -287,26 +568,26 @@ var Table = /** @class */ (function () {
         var html = '';
         // points
         players.forEach(function (player) {
-            return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker " + (player.color.startsWith('00') ? 'blue' : 'red') + "\"></div>";
+            return html += "<div id=\"player-".concat(player.id, "-point-marker\" class=\"point-marker ").concat(player.color.startsWith('00') ? 'blue' : 'red', "\"></div>");
         });
         dojo.place(html, 'table');
         players.forEach(function (player) { return _this.setPoints(Number(player.id), Number(player.score)); });
         // projects
         html = '';
         for (var i = 1; i <= 6; i++) {
-            html += "<div id=\"table-project-" + i + "\" class=\"table-project-stock\" style=\"left: " + 181 * (i - 1) + "px\"></div>";
+            html += "<div id=\"table-project-".concat(i, "\" class=\"table-project-stock\" style=\"left: ").concat(181 * (i - 1), "px\"></div>");
         }
         dojo.place(html, 'table-projects');
         var _loop_1 = function (i) {
             this_1.projectStocks[i] = new ebg.stock();
             this_1.projectStocks[i].setSelectionAppearance('class');
             this_1.projectStocks[i].selectionClass = 'selected';
-            this_1.projectStocks[i].create(this_1.game, $("table-project-" + i), PROJECT_WIDTH, PROJECT_HEIGHT);
+            this_1.projectStocks[i].create(this_1.game, $("table-project-".concat(i)), PROJECT_WIDTH, PROJECT_HEIGHT);
             this_1.projectStocks[i].setSelectionMode(0);
             this_1.projectStocks[i].onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
             dojo.connect(this_1.projectStocks[i], 'onChangeSelection', this_1, function () {
                 _this.projectStocks[i].getSelectedItems()
-                    .filter(function (item) { return document.getElementById("table-project-" + i + "_item_" + item.id).classList.contains('disabled'); })
+                    .filter(function (item) { return document.getElementById("table-project-".concat(i, "_item_").concat(item.id)).classList.contains('disabled'); })
                     .forEach(function (item) { return _this.projectStocks[i].unselectItem(item.id); });
                 _this.onProjectSelectionChanged();
             });
@@ -328,7 +609,7 @@ var Table = /** @class */ (function () {
             var firstRow = i <= 5;
             var left = (firstRow ? 204 : 0) + (i - (firstRow ? 1 : 6)) * 204;
             var top_1 = firstRow ? 0 : 210;
-            html += "<div id=\"table-machine-spot-" + i + "\" class=\"machine-spot\" style=\"left: " + left + "px; top: " + top_1 + "px\"></div>";
+            html += "<div id=\"table-machine-spot-".concat(i, "\" class=\"machine-spot\" style=\"left: ").concat(left, "px; top: ").concat(top_1, "px\"></div>");
         }
         html += "\n            <div id=\"machine-deck\" class=\"stockitem deck\"></div>\n            <div id=\"remaining-machine-counter\" class=\"remaining-counter\"></div>\n        </div>";
         dojo.place(html, 'table');
@@ -336,7 +617,7 @@ var Table = /** @class */ (function () {
             this_2.machineStocks[i] = new ebg.stock();
             this_2.machineStocks[i].setSelectionAppearance('class');
             this_2.machineStocks[i].selectionClass = 'selected';
-            this_2.machineStocks[i].create(this_2.game, $("table-machine-spot-" + i), MACHINE_WIDTH, MACHINE_HEIGHT);
+            this_2.machineStocks[i].create(this_2.game, $("table-machine-spot-".concat(i)), MACHINE_WIDTH, MACHINE_HEIGHT);
             this_2.machineStocks[i].setSelectionMode(0);
             this_2.machineStocks[i].onItemCreate = function (cardDiv, type) {
                 var _a;
@@ -380,7 +661,7 @@ var Table = /** @class */ (function () {
     Table.prototype.onMachineSelectionChanged = function (items, stockId) {
         if (items.length == 1) {
             var cardId = Number(items[0].id);
-            var datasetPayments = document.getElementById(stockId + "_item_" + cardId).dataset.payments;
+            var datasetPayments = document.getElementById("".concat(stockId, "_item_").concat(cardId)).dataset.payments;
             var payments = (datasetPayments === null || datasetPayments === void 0 ? void 0 : datasetPayments.length) && datasetPayments[0] == '[' ? JSON.parse(datasetPayments) : undefined;
             this.game.machineClick(cardId, 'table', payments);
         }
@@ -403,26 +684,26 @@ var Table = /** @class */ (function () {
         var equality = opponentScore === points;
         var playerShouldShift = equality && playerId > opponentId;
         var opponentShouldShift = equality && !playerShouldShift;
-        var markerDiv = document.getElementById("player-" + playerId + "-point-marker");
+        var markerDiv = document.getElementById("player-".concat(playerId, "-point-marker"));
         var top = points % 2 ? 40 : 52;
         var left = 16 + points * 46.2;
         if (playerShouldShift) {
             top -= 5;
             left -= 5;
         }
-        markerDiv.style.transform = "translateX(" + left + "px) translateY(" + top + "px)";
+        markerDiv.style.transform = "translateX(".concat(left, "px) translateY(").concat(top, "px)");
         if (opponentShouldShift) {
-            var opponentMarkerDiv = document.getElementById("player-" + opponentId + "-point-marker");
+            var opponentMarkerDiv = document.getElementById("player-".concat(opponentId, "-point-marker"));
             if (opponentMarkerDiv) {
-                opponentMarkerDiv.style.transform = "translateX(" + (left - 5) + "px) translateY(" + (top - 5) + "px)";
+                opponentMarkerDiv.style.transform = "translateX(".concat(left - 5, "px) translateY(").concat(top - 5, "px)");
             }
         }
     };
     Table.prototype.machinePlayed = function (playerId, machine) {
-        var fromHandId = "my-machines_item_" + machine.id;
-        var from = document.getElementById(fromHandId) ? fromHandId : "player-icon-" + playerId;
+        var fromHandId = "my-machines_item_".concat(machine.id);
+        var from = document.getElementById(fromHandId) ? fromHandId : "player-icon-".concat(playerId);
         this.machineStocks[machine.location_arg].addToStockWithId(getUniqueId(machine), '' + machine.id, from);
-        dojo.addClass("table-machine-spot-" + machine.location_arg + "_item_" + machine.id, 'selected');
+        dojo.addClass("table-machine-spot-".concat(machine.location_arg, "_item_").concat(machine.id), 'selected');
     };
     Table.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
@@ -450,11 +731,11 @@ var Table = /** @class */ (function () {
     Table.prototype.addResources = function (type, resources) {
         var _this = this;
         var toMachine = type == 0 && resources.length && resources[0].location === 'machine';
-        var divId = "table-resources" + type;
+        var divId = "table-resources".concat(type);
         if (toMachine) {
             var machineId_1 = resources[0].location_arg;
             var stock = this.machineStocks.find(function (stock) { return stock === null || stock === void 0 ? void 0 : stock.items.find(function (item) { return Number(item.id) == machineId_1; }); });
-            divId = stock.container_div.id + "_item_" + machineId_1;
+            divId = "".concat(stock.container_div.id, "_item_").concat(machineId_1);
         }
         var div = document.getElementById(divId);
         if (!div) {
@@ -465,8 +746,8 @@ var Table = /** @class */ (function () {
         resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
             var newPlace = toMachine ? _this.getPlaceOnMachine(placed) : _this.getPlaceOnTable(placed);
             placed.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
-            var resourceDivId = "resource" + type + "-" + resource.id;
-            var resourceDiv = document.getElementById("resource" + type + "-" + resource.id);
+            var resourceDivId = "resource".concat(type, "-").concat(resource.id);
+            var resourceDiv = document.getElementById("resource".concat(type, "-").concat(resource.id));
             if (resourceDiv) {
                 var originDiv = resourceDiv.parentElement;
                 var originPlaced = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
@@ -474,15 +755,15 @@ var Table = /** @class */ (function () {
                 var tableMachinesDiv = document.getElementById('table-machines');
                 if ((tableMachinesDiv.contains(originDiv) && tableMachinesDiv.contains(div)) || originDiv.classList.contains('to_be_destroyed')) {
                     div.appendChild(resourceDiv);
-                    resourceDiv.style.left = newPlace.x + "px";
-                    resourceDiv.style.top = newPlace.y + "px";
+                    resourceDiv.style.left = "".concat(newPlace.x, "px");
+                    resourceDiv.style.top = "".concat(newPlace.y, "px");
                 }
                 else {
                     slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
                 }
             }
             else {
-                var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + (newPlace.x - 16) + "px; top: " + (newPlace.y - 16) + "px;\"\n                ></div>";
+                var html = "<div id=\"".concat(resourceDivId, "\"\n                    class=\"cube resource").concat(type, " aspect").concat(resource.id % (type == 0 ? 8 : 4), "\" \n                    style=\"left: ").concat(newPlace.x - 16, "px; top: ").concat(newPlace.y - 16, "px;\"\n                ></div>");
                 dojo.place(html, divId);
             }
         });
@@ -499,19 +780,19 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var color = player.color.startsWith('00') ? 'blue' : 'red';
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n\n                <div id=\"player-resources-" + this.playerId + "\" class=\"player-resources " + side + "\">\n                    <div id=\"player" + this.playerId + "-resources1\" class=\"wood-counter\"></div>\n                    <div id=\"player" + this.playerId + "-resources3\" class=\"crystal-counter\"></div>\n                    <div id=\"player" + this.playerId + "-resources2\" class=\"copper-counter\"></div>\n                    <div id=\"player" + this.playerId + "-resources0\" class=\"top charcoalium-counter\"></div>\n                </div>\n            </div>\n            <div id=\"machines-and-projects-" + this.playerId + "\" class=\"machines-and-projects\">\n                <div id=\"player-table-" + this.playerId + "-projects\"></div>\n                <div id=\"player-table-" + this.playerId + "-machines\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-".concat(this.playerId, "\" class=\"player-table whiteblock ").concat(side, "\" style=\"background-color: #").concat(player.color, "40;\">\n            <div class=\"name-column ").concat(color, " ").concat(side, "\">\n                <div class=\"player-name\">").concat(player.name, "</div>\n                <div id=\"player-icon-").concat(this.playerId, "\" class=\"player-icon ").concat(color, "\"></div>\n\n                <div id=\"player-resources-").concat(this.playerId, "\" class=\"player-resources ").concat(side, "\">\n                    <div id=\"player").concat(this.playerId, "-resources1\" class=\"wood-counter\"></div>\n                    <div id=\"player").concat(this.playerId, "-resources3\" class=\"crystal-counter\"></div>\n                    <div id=\"player").concat(this.playerId, "-resources2\" class=\"copper-counter\"></div>\n                    <div id=\"player").concat(this.playerId, "-resources0\" class=\"top charcoalium-counter\"></div>\n                </div>\n            </div>\n            <div id=\"machines-and-projects-").concat(this.playerId, "\" class=\"machines-and-projects\">\n                <div id=\"player-table-").concat(this.playerId, "-projects\"></div>\n                <div id=\"player-table-").concat(this.playerId, "-machines\"></div>\n            </div>\n        </div>");
         dojo.place(html, 'playerstables');
         // projects        
         this.projectStock = new ebg.stock();
         this.projectStock.setSelectionAppearance('class');
         this.projectStock.selectionClass = 'selected';
-        this.projectStock.create(this.game, $("player-table-" + this.playerId + "-projects"), PROJECT_WIDTH, PROJECT_HEIGHT);
+        this.projectStock.create(this.game, $("player-table-".concat(this.playerId, "-projects")), PROJECT_WIDTH, PROJECT_HEIGHT);
         this.projectStock.setSelectionMode(0);
         //this.projectStock.centerItems = true;
         this.projectStock.onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
         dojo.connect(this.projectStock, 'onChangeSelection', this, function () {
             _this.projectStock.getSelectedItems()
-                .filter(function (item) { return document.getElementById("player-table-" + _this.playerId + "-projects_item_" + item.id).classList.contains('disabled'); })
+                .filter(function (item) { return document.getElementById("player-table-".concat(_this.playerId, "-projects_item_").concat(item.id)).classList.contains('disabled'); })
                 .forEach(function (item) { return _this.projectStock.unselectItem(item.id); });
             _this.onProjectSelectionChanged();
         });
@@ -522,7 +803,7 @@ var PlayerTable = /** @class */ (function () {
         this.machineStock = new ebg.stock();
         this.machineStock.setSelectionAppearance('class');
         this.machineStock.selectionClass = 'selected';
-        this.machineStock.create(this.game, $("player-table-" + this.playerId + "-machines"), MACHINE_WIDTH, MACHINE_HEIGHT);
+        this.machineStock.create(this.game, $("player-table-".concat(this.playerId, "-machines")), MACHINE_WIDTH, MACHINE_HEIGHT);
         this.machineStock.setSelectionMode(0);
         this.machineStock.centerItems = true;
         this.machineStock.onItemCreate = function (cardDiv, type) { return setupMachineCard(game, cardDiv, type); };
@@ -582,7 +863,7 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.addResources = function (type, resources) {
         var _this = this;
-        var divId = "player" + this.playerId + "-resources" + type;
+        var divId = "player".concat(this.playerId, "-resources").concat(type);
         var div = document.getElementById(divId);
         if (!div) {
             return;
@@ -594,23 +875,23 @@ var PlayerTable = /** @class */ (function () {
         resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
             var newPlace = _this.getPlaceOnPlayerBoard(placed, type, under);
             placed.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
-            var resourceDivId = "resource" + type + "-" + resource.id;
-            var resourceDiv = document.getElementById("resource" + type + "-" + resource.id);
+            var resourceDivId = "resource".concat(type, "-").concat(resource.id);
+            var resourceDiv = document.getElementById("resource".concat(type, "-").concat(resource.id));
             if (resourceDiv) {
                 var originDiv = resourceDiv.parentElement;
                 var originPlaced = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
                 originDiv.dataset.placed = JSON.stringify(originPlaced.filter(function (place) { return place.resourceId != resource.id; }));
                 if (originDiv.classList.contains('to_be_destroyed')) {
                     div.appendChild(resourceDiv);
-                    resourceDiv.style.left = newPlace.x + "px";
-                    resourceDiv.style.top = newPlace.y + "px";
+                    resourceDiv.style.left = "".concat(newPlace.x, "px");
+                    resourceDiv.style.top = "".concat(newPlace.y, "px");
                 }
                 else {
                     slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
                 }
             }
             else {
-                var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + newPlace.x + "px; top: " + newPlace.y + "px;\"\n                ></div>";
+                var html = "<div id=\"".concat(resourceDivId, "\"\n                    class=\"cube resource").concat(type, " aspect").concat(resource.id % (type == 0 ? 8 : 4), "\" \n                    style=\"left: ").concat(newPlace.x, "px; top: ").concat(newPlace.y, "px;\"\n                ></div>");
                 dojo.place(html, divId);
             }
         });
@@ -622,7 +903,7 @@ var PlayerTable = /** @class */ (function () {
         this.setProjectStockVisibility();
     };
     PlayerTable.prototype.setProjectStockVisibility = function () {
-        dojo.toggleClass("player-table-" + this.playerId + "-projects", 'empty', !this.projectStock.items.length);
+        dojo.toggleClass("player-table-".concat(this.playerId, "-projects"), 'empty', !this.projectStock.items.length);
     };
     PlayerTable.prototype.setProjectSelectable = function (selectable) {
         this.projectStock.setSelectionMode(selectable ? 2 : 0);
@@ -631,14 +912,14 @@ var PlayerTable = /** @class */ (function () {
         }
     };
     PlayerTable.prototype.setResourcesPosition = function (under) {
-        dojo.toggleClass("machines-and-projects-" + this.playerId, 'resources-under', under);
-        dojo.toggleClass("player-resources-" + this.playerId, 'under', under);
+        dojo.toggleClass("machines-and-projects-".concat(this.playerId), 'resources-under', under);
+        dojo.toggleClass("player-resources-".concat(this.playerId), 'under', under);
         this.repositionResourceTokens(under);
     };
     PlayerTable.prototype.repositionResourceTokens = function (under) {
         var _this = this;
         var _loop_5 = function (type) {
-            var divId = "player" + this_3.playerId + "-resources" + type;
+            var divId = "player".concat(this_3.playerId, "-resources").concat(type);
             var div = document.getElementById(divId);
             if (!div) {
                 return { value: void 0 };
@@ -646,12 +927,12 @@ var PlayerTable = /** @class */ (function () {
             var oldPlaced = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
             var placed = [];
             oldPlaced.forEach(function (place) {
-                var resourceDiv = document.getElementById("resource" + type + "-" + place.resourceId);
+                var resourceDiv = document.getElementById("resource".concat(type, "-").concat(place.resourceId));
                 var newPlace = _this.getPlaceOnPlayerBoard(placed, type, under);
                 newPlace.resourceId = place.resourceId;
                 placed.push(newPlace);
-                resourceDiv.style.left = newPlace.x + "px";
-                resourceDiv.style.top = newPlace.y + "px";
+                resourceDiv.style.left = "".concat(newPlace.x, "px");
+                resourceDiv.style.top = "".concat(newPlace.y, "px");
             });
             div.dataset.placed = JSON.stringify(placed);
         };
@@ -673,7 +954,7 @@ var DiscardedMachineSelector = /** @class */ (function () {
         this.machineStocks = [];
         var html = "<div id=\"discarded-machines-selector\" class=\"whiteblock\">";
         completeProjects.forEach(function (completeProject) {
-            html += "\n            <div class=\"complete-project\">\n                <div class=\"project-infos\">\n                    <div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(completeProject.project)) + "\">" + (_this.game.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(completeProject.project)) : '') + "</div>\n                    <div><span id=\"discarded-machines-selector-" + completeProject.project.id + "-counter\" class=\"machine-counter\">1</span> / " + completeProject.machinesNumber + "</div>\n                </div>\n                <div id=\"discarded-machines-selector-" + completeProject.project.id + "-machines\" class=\"machines\"></div>\n            </div>";
+            html += "\n            <div class=\"complete-project\">\n                <div class=\"project-infos\">\n                    <div class=\"project project".concat(PROJECTS_IDS.indexOf(getUniqueId(completeProject.project)), "\">").concat(_this.game.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(completeProject.project)) : '', "</div>\n                    <div><span id=\"discarded-machines-selector-").concat(completeProject.project.id, "-counter\" class=\"machine-counter\">1</span> / ").concat(completeProject.machinesNumber, "</div>\n                </div>\n                <div id=\"discarded-machines-selector-").concat(completeProject.project.id, "-machines\" class=\"machines\"></div>\n            </div>");
         });
         html += "</div>";
         dojo.place(html, 'myhand-wrap', 'before');
@@ -683,7 +964,7 @@ var DiscardedMachineSelector = /** @class */ (function () {
             _this.machineStocks[projectId] = new ebg.stock();
             _this.machineStocks[projectId].setSelectionAppearance('class');
             _this.machineStocks[projectId].selectionClass = 'selected';
-            _this.machineStocks[projectId].create(_this.game, $("discarded-machines-selector-" + projectId + "-machines"), MACHINE_WIDTH, MACHINE_HEIGHT);
+            _this.machineStocks[projectId].create(_this.game, $("discarded-machines-selector-".concat(projectId, "-machines")), MACHINE_WIDTH, MACHINE_HEIGHT);
             _this.machineStocks[projectId].setSelectionMode(2);
             _this.machineStocks[projectId].centerItems = true;
             _this.machineStocks[projectId].onItemCreate = function (cardDiv, type) { return setupMachineCard(game, cardDiv, type); };
@@ -695,7 +976,7 @@ var DiscardedMachineSelector = /** @class */ (function () {
             completeProject.machines.forEach(function (machine) { return _this.machineStocks[projectId].addToStockWithId(getUniqueId(machine), '' + machine.id); });
             completeProject.selectedMachinesIds = [completeProject.mandatoryMachine.id];
             _this.machineStocks[projectId].selectItem('' + completeProject.mandatoryMachine.id);
-            dojo.addClass("discarded-machines-selector-" + projectId + "-machines_item_" + completeProject.mandatoryMachine.id, 'disabled');
+            dojo.addClass("discarded-machines-selector-".concat(projectId, "-machines_item_").concat(completeProject.mandatoryMachine.id), 'disabled');
         });
     }
     DiscardedMachineSelector.prototype.destroy = function () {
@@ -708,7 +989,7 @@ var DiscardedMachineSelector = /** @class */ (function () {
             this.machineStocks[projectId].selectItem(itemId);
             return;
         }
-        var selected = dojo.hasClass("discarded-machines-selector-" + projectId + "-machines_item_" + itemId, 'selected');
+        var selected = dojo.hasClass("discarded-machines-selector-".concat(projectId, "-machines_item_").concat(itemId), 'selected');
         if (selected) {
             this.machineStocks.forEach(function (stock) {
                 if (stock.items.some(function (item) { return item.id === itemId; })) {
@@ -730,11 +1011,11 @@ var DiscardedMachineSelector = /** @class */ (function () {
         this.completeProjects.forEach(function (completeProject) {
             var projectId = completeProject.project.id;
             completeProject.selectedMachinesIds = _this.machineStocks[projectId].getSelectedItems().map(function (item) { return Number(item.id); });
-            document.getElementById("discarded-machines-selector-" + projectId + "-counter").innerHTML = '' + completeProject.selectedMachinesIds.length;
+            document.getElementById("discarded-machines-selector-".concat(projectId, "-counter")).innerHTML = '' + completeProject.selectedMachinesIds.length;
             var validProject = completeProject.machinesNumber == completeProject.selectedMachinesIds.length;
             var validWarningProject = completeProject.machinesNumber < completeProject.selectedMachinesIds.length;
-            dojo.toggleClass("discarded-machines-selector-" + projectId + "-counter", 'valid', validProject);
-            dojo.toggleClass("discarded-machines-selector-" + projectId + "-counter", 'validWarning', validWarningProject);
+            dojo.toggleClass("discarded-machines-selector-".concat(projectId, "-counter"), 'valid', validProject);
+            dojo.toggleClass("discarded-machines-selector-".concat(projectId, "-counter"), 'validWarning', validWarningProject);
         });
         //this.onDiscardedMachinesSelectionChanged?.(this.completeProjects);
         var allValidSelection = this.completeProjects.every(function (cp) { return cp.machinesNumber <= cp.selectedMachinesIds.length; });
@@ -745,14 +1026,8 @@ var DiscardedMachineSelector = /** @class */ (function () {
     };
     return DiscardedMachineSelector;
 }());
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
-};
 var ANIMATION_MS = 500;
 var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
-var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 var LOCAL_STORAGE_ZOOM_KEY = 'Nicodemus-zoom';
 var isDebug = window.location.host == 'studio.boardgamearena.com';
 var log = isDebug ? console.log.bind(window.console) : function () { };
@@ -766,13 +1041,8 @@ var Nicodemus = /** @class */ (function () {
         this.playersTables = [];
         this.selectedPlayerProjectsIds = [];
         this.selectedTableProjectsIds = [];
-        this.zoom = 1;
         this.clickAction = 'play';
         this.TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
-        var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
-        if (zoomStr) {
-            this.zoom = Number(zoomStr);
-        }
     }
     /*
         setup:
@@ -815,14 +1085,21 @@ var Nicodemus = /** @class */ (function () {
         if (gamedatas.endTurn) {
             this.notif_lastTurn();
         }
+        this.zoomManager = new ZoomManager({
+            element: document.getElementById('full-table'),
+            smooth: false,
+            zoomControls: {
+                color: 'black',
+            },
+            zoomLevels: ZOOM_LEVELS,
+            localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
+            onDimensionsChange: function () {
+                __spreadArray([_this.playerMachineHand], _this.playersTables.map(function (pt) { return pt.machineStock; }), true).forEach(function (stock) { return stock.updateDisplay(); });
+            },
+        });
         this.addHelp();
         this.setupNotifications();
         this.setupPreferences();
-        document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
-        document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
-        if (this.zoom !== 1) {
-            this.setZoom(this.zoom);
-        }
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -865,7 +1142,7 @@ var Nicodemus = /** @class */ (function () {
             this.table.setMachineSelectable(true);
             this.getMachineStocks().forEach(function (stock) { return stock.items.forEach(function (item) {
                 var machine = args.selectableMachines.find(function (machine) { return machine.id === Number(item.id); });
-                var divId = stock.container_div.id + "_item_" + item.id;
+                var divId = "".concat(stock.container_div.id, "_item_").concat(item.id);
                 if (machine) {
                     document.getElementById(divId).dataset.payments = JSON.stringify(machine.payments);
                 }
@@ -876,13 +1153,13 @@ var Nicodemus = /** @class */ (function () {
         }
     };
     Nicodemus.prototype.onEnteringStateChoosePlayAction = function (args) {
-        dojo.addClass("table-machine-spot-" + args.machine.location_arg + "_item_" + args.machine.id, 'selected');
+        dojo.addClass("table-machine-spot-".concat(args.machine.location_arg, "_item_").concat(args.machine.id), 'selected');
     };
     Nicodemus.prototype.onEnteringStateSelectMachine = function (args) {
         var stocks = this.getMachineStocks();
         stocks.forEach(function (stock) { return stock.items
             .filter(function (item) { return !args.selectableMachines.some(function (machine) { return machine.id === Number(item.id); }); })
-            .forEach(function (item) { return dojo.addClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
+            .forEach(function (item) { return dojo.addClass("".concat(stock.container_div.id, "_item_").concat(item.id), 'disabled'); }); });
         stocks.forEach(function (stock) { return stock.setSelectionMode(1); });
     };
     Nicodemus.prototype.onEnteringStateChooseProject = function (args) {
@@ -895,7 +1172,7 @@ var Nicodemus = /** @class */ (function () {
             this.table.setProjectSelectable(true);
             this.getProjectStocks().forEach(function (stock) { return stock.items
                 .filter(function (item) { return !args.projects.some(function (project) { return project.id === Number(item.id); }); })
-                .forEach(function (item) { return dojo.addClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
+                .forEach(function (item) { return dojo.addClass("".concat(stock.container_div.id, "_item_").concat(item.id), 'disabled'); }); });
         }
     };
     Nicodemus.prototype.onEnteringStateChooseProjectDiscardedMachine = function (args) {
@@ -940,7 +1217,7 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.onLeavingStateSelectMachine = function () {
         var stocks = this.getMachineStocks();
         stocks.forEach(function (stock) { return stock.items
-            .forEach(function (item) { return dojo.removeClass(stock.container_div.id + "_item_" + item.id, 'disabled'); }); });
+            .forEach(function (item) { return dojo.removeClass("".concat(stock.container_div.id, "_item_").concat(item.id), 'disabled'); }); });
         stocks.forEach(function (stock) { return stock.setSelectionMode(0); });
     };
     Nicodemus.prototype.onLeavingChooseProject = function () {
@@ -958,12 +1235,12 @@ var Nicodemus = /** @class */ (function () {
             switch (stateName) {
                 case 'choosePlayAction':
                     var choosePlayActionArgs_1 = args;
-                    this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.machine.points + " [resource0])"), function () { return _this.getCharcoalium(); });
+                    this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (".concat(choosePlayActionArgs_1.machine.points, " [resource0])")), function () { return _this.getCharcoalium(); });
                     if (choosePlayActionArgs_1.machine.produce == 9) {
                         var _loop_6 = function (i) {
-                            this_4.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
-                            dojo.removeClass("getResource" + i + "-button", 'bgabutton_blue');
-                            dojo.addClass("getResource" + i + "-button", 'bgabutton_gray');
+                            this_4.addActionButton("getResource".concat(i, "-button"), _('Get resource') + formatTextIcons(" ([resource".concat(i, "])")), function () { return _this.getResource(i); });
+                            dojo.removeClass("getResource".concat(i, "-button"), 'bgabutton_blue');
+                            dojo.addClass("getResource".concat(i, "-button"), 'bgabutton_gray');
                         };
                         var this_4 = this;
                         // for those machines, getting 1 resource is not the best option, so we "unlight" them
@@ -972,14 +1249,14 @@ var Nicodemus = /** @class */ (function () {
                         }
                     }
                     else {
-                        this.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + choosePlayActionArgs_1.machine.produce + "])"), function () { return _this.getResource(choosePlayActionArgs_1.machine.produce); });
+                        this.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource".concat(choosePlayActionArgs_1.machine.produce, "])")), function () { return _this.getResource(choosePlayActionArgs_1.machine.produce); });
                         if (choosePlayActionArgs_1.machine.type == 1 || choosePlayActionArgs_1.machine.produce == 0) {
                             // for those machines, getting 1 resource is not the best option, so we "unlight" them
                             dojo.removeClass('getResource-button', 'bgabutton_blue');
                             dojo.addClass('getResource-button', 'bgabutton_gray');
                         }
                     }
-                    this.addActionButton('applyEffect-button', _('Apply effect') + (" <div class=\"effect effect" + MACHINES_IDS.indexOf(getUniqueId(choosePlayActionArgs_1.machine)) + "\"></div>"), function () { return _this.applyEffect(); });
+                    this.addActionButton('applyEffect-button', _('Apply effect') + " <div class=\"effect effect".concat(MACHINES_IDS.indexOf(getUniqueId(choosePlayActionArgs_1.machine)), "\"></div>"), function () { return _this.applyEffect(); });
                     if (!choosePlayActionArgs_1.canApplyEffect) {
                         dojo.addClass('applyEffect-button', 'disabled');
                     }
@@ -990,20 +1267,20 @@ var Nicodemus = /** @class */ (function () {
                 case 'selectResource':
                     var selectResourceArgs = args;
                     selectResourceArgs.possibleCombinations.forEach(function (combination, index) {
-                        return _this.addActionButton("selectResourceCombination" + index + "-button", formatTextIcons(combination.map(function (type) { return "[resource" + type + "]"; }).join('')), function () { return _this.selectResource(combination); });
+                        return _this.addActionButton("selectResourceCombination".concat(index, "-button"), formatTextIcons(combination.map(function (type) { return "[resource".concat(type, "]"); }).join('')), function () { return _this.selectResource(combination); });
                     });
                     this.addActionButton("cancel-button", _('Cancel'), function () { return _this.cancel(); }, null, null, 'gray');
                     break;
                 case 'selectProject':
                     var selectProjectArgs = args;
                     selectProjectArgs.projects.forEach(function (project) {
-                        return _this.addActionButton("selectProject" + project.id + "-button", "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\">" + (_this.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(project)) : '') + "</div>", function () { return _this.selectProject(project.id); });
+                        return _this.addActionButton("selectProject".concat(project.id, "-button"), "<div class=\"project project".concat(PROJECTS_IDS.indexOf(getUniqueId(project)), "\">").concat(_this.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(project)) : '', "</div>"), function () { return _this.selectProject(project.id); });
                     });
                     break;
                 case 'selectExchange':
                     var selectExchangeArgs = args;
                     selectExchangeArgs.possibleExchanges.forEach(function (possibleExchange, index) {
-                        return _this.addActionButton("selectExchange" + index + "-button", formatTextIcons("[resource" + possibleExchange.from + "] &#x21E8; [resource" + possibleExchange.to + "]"), function () { return _this.selectExchange(possibleExchange); });
+                        return _this.addActionButton("selectExchange".concat(index, "-button"), formatTextIcons("[resource".concat(possibleExchange.from, "] &#x21E8; [resource").concat(possibleExchange.to, "]")), function () { return _this.selectExchange(possibleExchange); });
                     });
                     this.addActionButton('skipExchange-button', _('Skip'), function () { return _this.skipExchange(); }, null, null, 'red');
                     break;
@@ -1027,39 +1304,6 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.setTooltipToClass = function (className, html) {
         this.addTooltipHtmlToClass(className, html, this.TOOLTIP_DELAY);
-    };
-    Nicodemus.prototype.setZoom = function (zoom) {
-        if (zoom === void 0) { zoom = 1; }
-        this.zoom = zoom;
-        localStorage.setItem(LOCAL_STORAGE_ZOOM_KEY, '' + this.zoom);
-        var newIndex = ZOOM_LEVELS.indexOf(this.zoom);
-        dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
-        dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
-        var div = document.getElementById('full-table');
-        if (zoom === 1) {
-            div.style.transform = '';
-            div.style.margin = '';
-        }
-        else {
-            div.style.transform = "scale(" + zoom + ")";
-            div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
-        }
-        __spreadArray([this.playerMachineHand], this.playersTables.map(function (pt) { return pt.machineStock; })).forEach(function (stock) { return stock.updateDisplay(); });
-        document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
-    };
-    Nicodemus.prototype.zoomIn = function () {
-        if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
-            return;
-        }
-        var newIndex = ZOOM_LEVELS.indexOf(this.zoom) + 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
-    };
-    Nicodemus.prototype.zoomOut = function () {
-        if (this.zoom === ZOOM_LEVELS[0]) {
-            return;
-        }
-        var newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
     };
     Nicodemus.prototype.setupPreferences = function () {
         var _this = this;
@@ -1117,10 +1361,10 @@ var Nicodemus = /** @class */ (function () {
         }
     };
     Nicodemus.prototype.getProjectStocks = function () {
-        return __spreadArray(__spreadArray([], this.table.projectStocks.slice(1)), this.playersTables.map(function (pt) { return pt.projectStock; }));
+        return __spreadArray(__spreadArray([], this.table.projectStocks.slice(1), true), this.playersTables.map(function (pt) { return pt.projectStock; }), true);
     };
     Nicodemus.prototype.getMachineStocks = function () {
-        return __spreadArray(__spreadArray([this.playerMachineHand], this.table.machineStocks.slice(1)), this.playersTables.map(function (pt) { return pt.machineStock; }));
+        return __spreadArray(__spreadArray([this.playerMachineHand], this.table.machineStocks.slice(1), true), this.playersTables.map(function (pt) { return pt.machineStock; }), true);
     };
     Nicodemus.prototype.setHandSelectable = function (selectable) {
         this.playerMachineHand.setSelectionMode(selectable ? 1 : 0);
@@ -1149,27 +1393,27 @@ var Nicodemus = /** @class */ (function () {
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
             // charcoalium & resources counters
-            dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-" + player.id + "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"wood-counter-wrapper-" + player.id + "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-" + player.id + "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-" + player.id + "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
+            dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-".concat(player.id, "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"wood-counter-wrapper-").concat(player.id, "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-").concat(player.id, "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-").concat(player.id, "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-").concat(player.id, "\"></span>\n                </div>\n            </div>"), "player_board_".concat(player.id));
             var charcoaliumCounter = new ebg.counter();
-            charcoaliumCounter.create("charcoalium-counter-" + playerId);
+            charcoaliumCounter.create("charcoalium-counter-".concat(playerId));
             charcoaliumCounter.setValue(player.resources[0].length);
             _this.charcoaliumCounters[playerId] = charcoaliumCounter;
             var woodCounter = new ebg.counter();
-            woodCounter.create("wood-counter-" + playerId);
+            woodCounter.create("wood-counter-".concat(playerId));
             woodCounter.setValue(player.resources[1].length);
             _this.woodCounters[playerId] = woodCounter;
             var copperCounter = new ebg.counter();
-            copperCounter.create("copper-counter-" + playerId);
+            copperCounter.create("copper-counter-".concat(playerId));
             copperCounter.setValue(player.resources[2].length);
             _this.copperCounters[playerId] = copperCounter;
             var crystalCounter = new ebg.counter();
-            crystalCounter.create("crystal-counter-" + playerId);
+            crystalCounter.create("crystal-counter-".concat(playerId));
             crystalCounter.setValue(player.resources[3].length);
             _this.crystalCounters[playerId] = crystalCounter;
             // hand cards counter
-            dojo.place("<div class=\"counters\">\n                <div id=\"playerhand-counter-wrapper-" + player.id + "\" class=\"playerhand-counter\">\n                    <div class=\"player-hand-card\"></div> \n                    <span id=\"playerhand-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
+            dojo.place("<div class=\"counters\">\n                <div id=\"playerhand-counter-wrapper-".concat(player.id, "\" class=\"playerhand-counter\">\n                    <div class=\"player-hand-card\"></div> \n                    <span id=\"playerhand-counter-").concat(player.id, "\"></span>\n                </div>\n            </div>"), "player_board_".concat(player.id));
             var handCounter = new ebg.counter();
-            handCounter.create("playerhand-counter-" + playerId);
+            handCounter.create("playerhand-counter-".concat(playerId));
             handCounter.setValue(player.handMachinesCount);
             _this.handCounters[playerId] = handCounter;
             var html = "<div class=\"fp-button-grid\">";
@@ -1179,16 +1423,16 @@ var Nicodemus = /** @class */ (function () {
             else {
                 html += "<div></div>";
             }
-            html += "<button class=\"bgabutton bgabutton_gray discarded-button\" id=\"discarded-button-" + player.id + "\">" + _('Completed projects') + "</button>\n            </div>";
-            dojo.place(html, "player_board_" + player.id);
-            document.getElementById("discarded-button-" + player.id).addEventListener('click', function () { return _this.showDiscarded(playerId); });
+            html += "<button class=\"bgabutton bgabutton_gray discarded-button\" id=\"discarded-button-".concat(player.id, "\">").concat(_('Completed projects'), "</button>\n            </div>");
+            dojo.place(html, "player_board_".concat(player.id));
+            document.getElementById("discarded-button-".concat(player.id)).addEventListener('click', function () { return _this.showDiscarded(playerId); });
         });
     };
     Nicodemus.prototype.createPlayerTables = function (gamedatas) {
         var _this = this;
         var players = Object.values(gamedatas.players).sort(function (a, b) { return a.playerNo - b.playerNo; });
         var playerIndex = players.findIndex(function (player) { return Number(player.id) === Number(_this.player_id); });
-        var orderedPlayers = playerIndex > 0 ? __spreadArray(__spreadArray([], players.slice(playerIndex)), players.slice(0, playerIndex)) : players;
+        var orderedPlayers = playerIndex > 0 ? __spreadArray(__spreadArray([], players.slice(playerIndex), true), players.slice(0, playerIndex), true) : players;
         orderedPlayers.forEach(function (player, index) {
             return _this.createPlayerTable(gamedatas, Number(player.id), index ? 'right' : 'left');
         });
@@ -1223,10 +1467,10 @@ var Nicodemus = /** @class */ (function () {
                     payments.forEach(function (payment, index) {
                         var label = dojo.string.substitute(_('Use ${jokers} as ${unpaidResources} and pay ${paidResources}'), {
                             jokers: payment.jokers.map(function (_) { return '[resource9]'; }).join(''),
-                            unpaidResources: payment.jokers.map(function (joker) { return "[resource" + joker + "]"; }).join(''),
-                            paidResources: payment.remainingCost.filter(function (resource) { return resource > 0; }).map(function (resource) { return "[resource" + resource + "]"; }).join(''),
+                            unpaidResources: payment.jokers.map(function (joker) { return "[resource".concat(joker, "]"); }).join(''),
+                            paidResources: payment.remainingCost.filter(function (resource) { return resource > 0; }).map(function (resource) { return "[resource".concat(resource, "]"); }).join(''),
                         });
-                        _this.addActionButton("selectPaymentButton" + index + "-button", formatTextIcons(label), function () { return _this.repairMachine(id, payment); });
+                        _this.addActionButton("selectPaymentButton".concat(index, "-button"), formatTextIcons(label), function () { return _this.repairMachine(id, payment); });
                     });
                     this.addActionButton("cancelSelectPayment-button", _('Cancel'), function () {
                         var _a;
@@ -1348,7 +1592,7 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
-        this.ajaxcall("/nicodemus/nicodemus/" + action + ".html", data, this, function () { });
+        this.ajaxcall("/nicodemus/nicodemus/".concat(action, ".html"), data, this, function () { });
     };
     Nicodemus.prototype.setPoints = function (playerId, points) {
         var _a;
@@ -1369,21 +1613,21 @@ var Nicodemus = /** @class */ (function () {
         var helpDialog = new ebg.popindialog();
         helpDialog.create('nicodemusHelpDialog');
         helpDialog.setTitle(_("Cards help"));
-        var html = "<div id=\"help-popin\">\n            <h1>" + _("Machines effects") + "</h1>\n            <div id=\"help-machines\" class=\"help-section\">\n                <h2 style=\"color: " + getMachineColor(1) + "\">" + getColorName(1) + "</h2>\n                <table>";
-        MACHINES_IDS.slice(0, 5).forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + index + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
-        html += "\n                </table>\n                <h2 style=\"color: " + getMachineColor(2) + "\">" + getColorName(2) + "</h2>\n                <table>";
-        MACHINES_IDS.slice(5, 10).forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + (index + 5) + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
-        html += "\n                </table>\n                <h2 style=\"color: " + getMachineColor(3) + "\">" + getColorName(3) + "</h2>\n                <table>";
-        MACHINES_IDS.slice(10, 14).forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + (index + 10) + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
-        html += "\n                </table>\n                <h2 style=\"color: " + getMachineColor(4) + "\">" + getColorName(4) + "</h2>\n                <table>";
-        MACHINES_IDS.slice(14, 16).forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + (index + 14) + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
-        html += "\n                </table>\n            </div>\n            <h1>" + _("Projects") + "</h1>\n            <div id=\"help-projects\" class=\"help-section\">\n                <table><tr><td class=\"grid\">";
-        PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project" + (index + 1) + "\" class=\"project\">" + (_this.showColorblindIndications ? getColorBlindIndicationHtml(index + 1) : '') + "</div>"; });
-        html += "</td></tr><tr><td>" + getProjectTooltip(11) + "</td></tr>\n            <tr><td><div id=\"project0\" class=\"project\">" + (this.showColorblindIndications ? getColorBlindIndicationHtml(0) : '') + "</div></td></tr><tr><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
-        PROJECTS_IDS.slice(6, 9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 6) + "\" class=\"project\"></div>"; });
-        html += "</td></tr><tr><td>" + getProjectTooltip(29) + "</td></tr>\n            <tr><td><div id=\"project5\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
-        PROJECTS_IDS.slice(9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 9) + "\" class=\"project\"></div>"; });
-        html += "</td></tr><tr><td>" + getProjectTooltip(31) + "</td></tr></table>\n            </div>\n        </div>";
+        var html = "<div id=\"help-popin\">\n            <h1>".concat(_("Machines effects"), "</h1>\n            <div id=\"help-machines\" class=\"help-section\">\n                <h2 style=\"color: ").concat(getMachineColor(1), "\">").concat(getColorName(1), "</h2>\n                <table>");
+        MACHINES_IDS.slice(0, 5).forEach(function (number, index) { return html += "<tr><td><div id=\"machine".concat(index, "\" class=\"machine\"></div></td><td>").concat(getMachineTooltip(number), "</td></tr>"); });
+        html += "\n                </table>\n                <h2 style=\"color: ".concat(getMachineColor(2), "\">").concat(getColorName(2), "</h2>\n                <table>");
+        MACHINES_IDS.slice(5, 10).forEach(function (number, index) { return html += "<tr><td><div id=\"machine".concat(index + 5, "\" class=\"machine\"></div></td><td>").concat(getMachineTooltip(number), "</td></tr>"); });
+        html += "\n                </table>\n                <h2 style=\"color: ".concat(getMachineColor(3), "\">").concat(getColorName(3), "</h2>\n                <table>");
+        MACHINES_IDS.slice(10, 14).forEach(function (number, index) { return html += "<tr><td><div id=\"machine".concat(index + 10, "\" class=\"machine\"></div></td><td>").concat(getMachineTooltip(number), "</td></tr>"); });
+        html += "\n                </table>\n                <h2 style=\"color: ".concat(getMachineColor(4), "\">").concat(getColorName(4), "</h2>\n                <table>");
+        MACHINES_IDS.slice(14, 16).forEach(function (number, index) { return html += "<tr><td><div id=\"machine".concat(index + 14, "\" class=\"machine\"></div></td><td>").concat(getMachineTooltip(number), "</td></tr>"); });
+        html += "\n                </table>\n            </div>\n            <h1>".concat(_("Projects"), "</h1>\n            <div id=\"help-projects\" class=\"help-section\">\n                <table><tr><td class=\"grid\">");
+        PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project".concat(index + 1, "\" class=\"project\">").concat(_this.showColorblindIndications ? getColorBlindIndicationHtml(index + 1) : '', "</div>"); });
+        html += "</td></tr><tr><td>".concat(getProjectTooltip(11), "</td></tr>\n            <tr><td><div id=\"project0\" class=\"project\">").concat(this.showColorblindIndications ? getColorBlindIndicationHtml(0) : '', "</div></td></tr><tr><td>").concat(getProjectTooltip(10), "</td></tr><tr><td class=\"grid\">");
+        PROJECTS_IDS.slice(6, 9).forEach(function (number, index) { return html += "<div id=\"project".concat(index + 6, "\" class=\"project\"></div>"); });
+        html += "</td></tr><tr><td>".concat(getProjectTooltip(29), "</td></tr>\n            <tr><td><div id=\"project5\" class=\"project\"></div></td></tr><tr><td>").concat(getProjectTooltip(20), "</td></tr><tr><td class=\"grid\">");
+        PROJECTS_IDS.slice(9).forEach(function (number, index) { return html += "<div id=\"project".concat(index + 9, "\" class=\"project\"></div>"); });
+        html += "</td></tr><tr><td>".concat(getProjectTooltip(31), "</td></tr></table>\n            </div>\n        </div>");
         // Show the dialog
         helpDialog.setContent(html);
         helpDialog.show();
@@ -1393,19 +1637,19 @@ var Nicodemus = /** @class */ (function () {
         var discardedDialog = new ebg.popindialog();
         discardedDialog.create('nicodemusDiscardedDialog');
         discardedDialog.setTitle('');
-        var html = "<div id=\"discarded-popin\">\n            <h1>" + _("Completed projects") + "</h1>\n            <div class=\"discarded-cards\">";
+        var html = "<div id=\"discarded-popin\">\n            <h1>".concat(_("Completed projects"), "</h1>\n            <div class=\"discarded-cards\">");
         if (this.gamedatas.players[playerId].discardedProjects.length) {
-            this.gamedatas.players[playerId].discardedProjects.forEach(function (project) { return html += "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\">" + (_this.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(project)) : '') + "</div>"; });
+            this.gamedatas.players[playerId].discardedProjects.forEach(function (project) { return html += "<div class=\"project project".concat(PROJECTS_IDS.indexOf(getUniqueId(project)), "\">").concat(_this.showColorblindIndications ? getColorBlindProjectHtml(getUniqueId(project)) : '', "</div>"); });
         }
         else {
-            html += "<div class=\"message\">" + _('No completed projects') + "</div>";
+            html += "<div class=\"message\">".concat(_('No completed projects'), "</div>");
         }
-        html += "</div>\n            <h1>" + _("Discarded machines") + "</h1>\n            <div class=\"discarded-cards\">";
+        html += "</div>\n            <h1>".concat(_("Discarded machines"), "</h1>\n            <div class=\"discarded-cards\">");
         if (this.gamedatas.players[playerId].discardedMachines.length) {
-            this.gamedatas.players[playerId].discardedMachines.forEach(function (machine) { return html += "<div class=\"machine machine" + MACHINES_IDS.indexOf(getUniqueId(machine)) + "\">" + (_this.showColorblindIndications ? getColorBlindIndicationHtml(machine.type) : '') + "</div>"; });
+            this.gamedatas.players[playerId].discardedMachines.forEach(function (machine) { return html += "<div class=\"machine machine".concat(MACHINES_IDS.indexOf(getUniqueId(machine)), "\">").concat(_this.showColorblindIndications ? getColorBlindIndicationHtml(machine.type) : '', "</div>"); });
         }
         else {
-            html += "<div class=\"message\">" + _('No discarded machines') + "</div>";
+            html += "<div class=\"message\">".concat(_('No discarded machines'), "</div>");
         }
         html += "</div>\n        </div>";
         // Show the dialog
@@ -1456,7 +1700,7 @@ var Nicodemus = /** @class */ (function () {
             ['cancelMachinePlayed', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
-            dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
+            dojo.subscribe(notif[0], _this, "notif_".concat(notif[0]));
             _this.notifqueue.setSynchronous(notif[0], notif[1]);
         });
     };
@@ -1488,7 +1732,7 @@ var Nicodemus = /** @class */ (function () {
             from = 'machine-deck';
         }
         else if (notif.args.from > 0) {
-            from = "player-icon-" + notif.args.from;
+            from = "player-icon-".concat(notif.args.from);
         }
         (_a = notif.args.machines) === null || _a === void 0 ? void 0 : _a.forEach(function (machine) { return addToStockWithId(_this.playerMachineHand, getUniqueId(machine), '' + machine.id, from); });
         this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
@@ -1537,7 +1781,7 @@ var Nicodemus = /** @class */ (function () {
             moveToAnotherStock(this.table.machineStocks[notif.args.machineSpot], this.playerMachineHand, getUniqueId(notif.args.machine), '' + notif.args.machine.id);
         }
         else {
-            this.table.machineStocks[notif.args.machineSpot].removeAllTo("playerhand-counter-" + notif.args.playerId);
+            this.table.machineStocks[notif.args.machineSpot].removeAllTo("playerhand-counter-".concat(notif.args.playerId));
         }
         this.handCounters[notif.args.playerId].toValue(notif.args.handMachinesCount);
     };
@@ -1545,7 +1789,7 @@ var Nicodemus = /** @class */ (function () {
         if (document.getElementById('last-round')) {
             return;
         }
-        dojo.place("<div id=\"last-round\">\n            " + _("This is the last round of the game!") + "\n        </div>", 'page-title');
+        dojo.place("<div id=\"last-round\">\n            ".concat(_("This is the last round of the game!"), "\n        </div>"), 'page-title');
     };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
@@ -1555,23 +1799,23 @@ var Nicodemus = /** @class */ (function () {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
                 if (typeof args.machine_type == 'string' && args.machine_type[0] != '<' && typeof args.machine == 'object') {
-                    args.machine_type = "<strong style=\"color: " + getMachineColor(args.machine.type) + "\">" + _(args.machine_type) + "</strong>";
+                    args.machine_type = "<strong style=\"color: ".concat(getMachineColor(args.machine.type), "\">").concat(_(args.machine_type), "</strong>");
                 }
                 ['resource', 'resourceFrom', 'resourceTo'].forEach(function (argNameStart) {
-                    if (typeof args[argNameStart + "Name"] == 'string' && typeof args[argNameStart + "Type"] == 'number' && args[argNameStart + "Name"][0] != '<') {
-                        args[argNameStart + "Name"] = formatTextIcons("[resource" + args[argNameStart + "Type"] + "]");
+                    if (typeof args["".concat(argNameStart, "Name")] == 'string' && typeof args["".concat(argNameStart, "Type")] == 'number' && args["".concat(argNameStart, "Name")][0] != '<') {
+                        args["".concat(argNameStart, "Name")] = formatTextIcons("[resource".concat(args["".concat(argNameStart, "Type")], "]"));
                     }
                 });
                 if (typeof args.machineImage == 'number') {
-                    args.machineImage = "<div class=\"machine machine" + MACHINES_IDS.indexOf(args.machineImage) + "\">" + (this.showColorblindIndications ? getColorBlindIndicationHtmlByType(args.machineImage) : '') + "</div>";
+                    args.machineImage = "<div class=\"machine machine".concat(MACHINES_IDS.indexOf(args.machineImage), "\">").concat(this.showColorblindIndications ? getColorBlindIndicationHtmlByType(args.machineImage) : '', "</div>");
                 }
                 if (typeof args.projectImage == 'number') {
-                    args.projectImage = "<div class=\"project project" + PROJECTS_IDS.indexOf(args.projectImage) + "\">" + (this.showColorblindIndications ? getColorBlindProjectHtml(args.projectImage) : '') + "</div>";
+                    args.projectImage = "<div class=\"project project".concat(PROJECTS_IDS.indexOf(args.projectImage), "\">").concat(this.showColorblindIndications ? getColorBlindProjectHtml(args.projectImage) : '', "</div>");
                 }
                 if (typeof args.machineEffect == 'object') {
                     var uniqueId_1 = getUniqueId(args.machineEffect);
-                    var id_1 = "action-bar-effect" + uniqueId_1;
-                    args.machineEffect = "<div id=\"" + id_1 + "\" class=\"effect-in-text effect effect" + MACHINES_IDS.indexOf(uniqueId_1) + "\"></div>";
+                    var id_1 = "action-bar-effect".concat(uniqueId_1);
+                    args.machineEffect = "<div id=\"".concat(id_1, "\" class=\"effect-in-text effect effect").concat(MACHINES_IDS.indexOf(uniqueId_1), "\"></div>");
                     setTimeout(function () {
                         var effectImage = document.getElementById(id_1);
                         if (effectImage) {
