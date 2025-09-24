@@ -14,6 +14,8 @@
  *
  */
 
+use Bga\GameFramework\GameStateBuilder;
+
 /*
    Game state machine is a tool used to facilitate game developpement by doing common stuff that can be set up
    in a very easy way from this configuration file.
@@ -52,15 +54,7 @@
 require_once("modules/php/constants.inc.php");
 
 $basicGameStates = [
-
-    // The initial state. Please do not modify.
-    ST_BGA_GAME_SETUP => [
-        "name" => "gameSetup",
-        "description" => clienttranslate("Game setup"),
-        "type" => "manager",
-        "action" => "stGameSetup",
-        "transitions" => [ "" => ST_PLAYER_CHOOSE_ACTION ]
-    ],
+    ST_BGA_GAME_SETUP => GameStateBuilder::gameSetup(ST_PLAYER_CHOOSE_ACTION)->build(),
 
     ST_NEXT_PLAYER => [
         "name" => "nextPlayer",
@@ -69,19 +63,11 @@ $basicGameStates = [
         "action" => "stNextPlayer",
         "transitions" => [
             "nextPlayer" => ST_PLAYER_CHOOSE_ACTION, 
-            "endGame" => ST_END_GAME,
+            "endGame" => ST_END_SCORE,
         ],
     ],
    
-    // Final state.
-    // Please do not modify.
-    ST_END_GAME => [
-        "name" => "gameEnd",
-        "description" => clienttranslate("End of game"),
-        "type" => "manager",
-        "action" => "stGameEnd",
-        "args" => "argGameEnd",
-    ],
+    ST_END_SCORE => GameStateBuilder::endScore()->build(),
 ];
 
 

@@ -129,4 +129,8 @@ trait DebugUtilTrait {
             return;
         }die('debug data : '.json_encode($debugData));
     }
+
+    public function debug_goToState(int $state = ST_END_SCORE) {
+      $this->gamestate->jumpToState($state);
+    }
 }

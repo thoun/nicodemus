@@ -22,6 +22,7 @@ define('ST_REFILL_HAND', 85);
 
 define('ST_NEXT_PLAYER', 90);
 
+define('ST_END_SCORE', 98);
 define('ST_END_GAME', 99);
 define('END_SCORE', 100);
 

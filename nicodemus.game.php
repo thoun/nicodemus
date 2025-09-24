@@ -16,6 +16,8 @@
   *
   */
 
+use Bga\GameFramework\Components\Deck;
+use Bga\GameFramework\Table;
 
 require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
 
@@ -36,6 +38,10 @@ class Nicodemus extends Table {
     use EffectTrait;
     use ProjectTrait;
     use DebugUtilTrait;
+
+    public Deck $machines;
+    public Deck $projects;
+    public Deck $resources;
 
 	function __construct() {
         // Your global variables labels:
@@ -61,11 +67,6 @@ class Nicodemus extends Table {
         $this->resources = self::getNew("module.common.deck");
         $this->resources->init("resource");
 	}
-	
-    protected function getGameName() {
-		// Used for translations and stuff. Please do not modify.
-        return "nicodemus";
-    }	
 
     /*
         setupNewGame:
@@ -114,9 +115,6 @@ class Nicodemus extends Table {
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
-        // TODO TEMP card to test
-        $this->debugSetup();
-
         /************ End of the game initialization *****/
     }
 
@@ -129,7 +127,7 @@ class Nicodemus extends Table {
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas() {
+    protected function getAllDatas(): array {
         $result = [];
     
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
