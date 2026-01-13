@@ -18,8 +18,7 @@
 
 use Bga\GameFramework\Components\Deck;
 use Bga\GameFramework\Table;
-
-require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
+use Bga\GameFramework\VisibleSystemException;
 
 require_once('modules/php/constants.inc.php');
 require_once('modules/php/utils.php');
@@ -52,20 +51,17 @@ class Nicodemus extends Table {
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
         
-        self::initGameStateLabels([
+        $this->initGameStateLabels([
             FIRST_PLAYER => 10,
             PLAYED_MACHINE => 11,
             LAST_TURN => 12,
         ]); 
 
-        $this->machines = self::getNew("module.common.deck");
-        $this->machines->init("machine");
+        $this->machines = $this->deckFactory->createDeck("machine");
 
-        $this->projects = self::getNew("module.common.deck");
-        $this->projects->init("project");
+        $this->projects = $this->deckFactory->createDeck("project");
 
-        $this->resources = self::getNew("module.common.deck");
-        $this->resources->init("resource");
+        $this->resources = $this->deckFactory->createDeck("resource");
 	}
 
     /*
@@ -79,7 +75,7 @@ class Nicodemus extends Table {
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
-        $gameinfos = self::getGameinfos();
+        $gameinfos = $this->getGameinfos();
         $default_colors = $gameinfos['player_colors'];
 
         // Create players
@@ -91,23 +87,21 @@ class Nicodemus extends Table {
             $values[] = "('".$playerId."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
 
             if ($this->getFirstPlayerId() == 0) {
-                self::setGameStateValue(FIRST_PLAYER, $playerId);
+                $this->setGameStateValue(FIRST_PLAYER, $playerId);
             }
         }
         $sql .= implode(',', $values);
-        self::DbQuery($sql);
-        self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
-        self::reloadPlayersBasicInfos();
+        $this->DbQuery($sql);
+        $this->reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
+        $this->reloadPlayersBasicInfos();
 
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue(LAST_TURN, 0);
+        $this->setGameStateInitialValue(LAST_TURN, 0);
 
         // Init game statistics
-        // (note: statistics used in this file must be defined in your stats.inc.php file)
-        self::initStat('table', 'turnsNumber', 0);
-        self::initStat('player', 'turnsNumber', 0);
+        $this->playerStats->init('turnsNumber', 0, updateTableStat: true);
 
         $this->setupCards();
         $this->setInitialCardsAndResources($players);
@@ -115,7 +109,7 @@ class Nicodemus extends Table {
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
-        /************ End of the game initialization *****/
+        return \ST_PLAYER_CHOOSE_ACTION;
     }
 
     /*
@@ -130,12 +124,12 @@ class Nicodemus extends Table {
     protected function getAllDatas(): array {
         $result = [];
     
-        $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
+        $current_player_id = $this->getCurrentPlayerId();    // !! We must only return informations visible by this player !!
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score, player_no playerNo FROM player ";
-        $result['players'] = self::getCollectionFromDb($sql);
+        $result['players'] = $this->getCollectionFromDb($sql);
 
         foreach($result['players'] as $playerId => &$player) {
             $player['playerNo'] = intval($player['playerNo']);
@@ -159,9 +153,9 @@ class Nicodemus extends Table {
             $result['resources'][$i] = $this->getResources($i, 0);
         }
 
-        $stateName = $this->gamestate->state()['name'];
+        $stateName = $this->gamestate->getCurrentMainState()->name;
         if ($stateName !== 'gameEnd') {
-            $result['endTurn'] = self::getGameStateValue(LAST_TURN) > 0;            
+            $result['endTurn'] = $this->getGameStateValue(LAST_TURN) > 0;            
         }
 
         $result['remainingMachines'] = $this->getRemainingMachines();
@@ -221,7 +215,7 @@ class Nicodemus extends Table {
             return;
         }
 
-        throw new feException("Zombie mode not supported at this game state: ".$statename);
+        throw new VisibleSystemException("Zombie mode not supported at this game state: ".$statename);
     }
     
 ///////////////////////////////////////////////////////////////////////////////////:
@@ -250,14 +244,14 @@ class Nicodemus extends Table {
 //            // ! important ! Use DBPREFIX_<table_name> for all tables
 //
 //            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
-//            self::applyDbUpgradeToAllDB( $sql );
+//            $this->applyDbUpgradeToAllDB( $sql );
 //        }
 //        if( $from_version <= 1405061421 )
 //        {
 //            // ! important ! Use DBPREFIX_<table_name> for all tables
 //
 //            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
-//            self::applyDbUpgradeToAllDB( $sql );
+//            $this->applyDbUpgradeToAllDB( $sql );
 //        }
 //        // Please add your future database scheme changes here
 //

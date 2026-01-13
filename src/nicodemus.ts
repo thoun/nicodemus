@@ -1,10 +1,3 @@
-declare const define;
-declare const ebg;
-declare const $;
-declare const dojo: Dojo;
-declare const _;
-declare const g_gamethemeurl;
-
 declare const board: HTMLDivElement;
 
 const ANIMATION_MS = 500;
@@ -40,6 +33,8 @@ class Nicodemus implements NicodemusGame {
 
     private TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
 
+    public bga: Bga;
+
     constructor() {}
     
     /*
@@ -62,7 +57,7 @@ class Nicodemus implements NicodemusGame {
 
         log('gamedatas', gamedatas);
 
-        this.showColorblindIndications = (this as any).prefs[203].value == 1;
+        this.showColorblindIndications = this.bga.userPreferences.get(203) == 1;
 
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
@@ -107,8 +102,7 @@ class Nicodemus implements NicodemusGame {
 
         this.addHelp();
         this.setupNotifications();
-
-        this.setupPreferences();
+        this.bga.userPreferences.onChange = (prefId: number, prefValue: number) => this.onPreferenceChange(prefId, prefValue);
 
         log( "Ending game setup" );
     }
@@ -333,29 +327,6 @@ class Nicodemus implements NicodemusGame {
     }
     public setTooltipToClass(className: string, html: string) {
         (this as any).addTooltipHtmlToClass(className, html, this.TOOLTIP_DELAY);
-    }
-
-    private setupPreferences() {
-        // Extract the ID and value from the UI control
-        const onchange = (e) => {
-          var match = e.target.id.match(/^preference_control_(\d+)$/);
-          if (!match) {
-            return;
-          }
-          var prefId = +match[1];
-          var prefValue = +e.target.value;
-          (this as any).prefs[prefId].value = prefValue;
-          this.onPreferenceChange(prefId, prefValue);
-        }
-        
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        
-        // Call onPreferenceChange() now
-        dojo.forEach(
-          dojo.query("#ingame_menu_content .preference_control"),
-          el => onchange({ target: el })
-        );
     }
       
     private onPreferenceChange(prefId: number, prefValue: number) {
@@ -704,8 +675,7 @@ class Nicodemus implements NicodemusGame {
 
     public takeAction(action: string, data?: any) {
         data = data || {};
-        data.lock = true;
-        (this as any).ajaxcall(`/nicodemus/nicodemus/${action}.html`, data, this, () => {});
+        this.bga.actions.performAction(action, data, { checkAction: false });
     }
     
     private setPoints(playerId: number, points: number) {
@@ -720,7 +690,7 @@ class Nicodemus implements NicodemusGame {
 
     private addHelp() {
         dojo.place(`<button id="nicodemus-help-button">?</button>`, 'left-side');
-        dojo.connect( $('nicodemus-help-button'), 'onclick', this, () => this.showHelp());
+        document.getElementById('nicodemus-help-button').addEventListener('click', () => this.showHelp());
     }
 
     private showHelp() {

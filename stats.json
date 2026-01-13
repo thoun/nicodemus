@@ -1,0 +1,136 @@
+{
+    "table": {
+        "turnsNumber": {
+            "id": 10,
+            "name": "Number of turns",
+            "type": "int"
+        },
+        "playedMachines": {
+            "id": 11,
+            "name": "Machines played",
+            "type": "int"
+        },
+        "playedMachinesForCharcoalium": {
+            "id": 12,
+            "name": "Played machines for charcoalium",
+            "type": "int"
+        },
+        "playedMachinesForResource": {
+            "id": 13,
+            "name": "Played machines for resource",
+            "type": "int"
+        },
+        "playedMachinesForWithEffect": {
+            "id": 14,
+            "name": "Played machines with effect",
+            "type": "int"
+        },
+        "repairedMachines": {
+            "id": 15,
+            "name": "Repaired machines",
+            "type": "int"
+        },
+        "completedProjects": {
+            "id": 16,
+            "name": "Completed projects",
+            "type": "int"
+        },
+        "pointsWithRepairedMachines": {
+            "id": 17,
+            "name": "Points with repaired machines",
+            "type": "int"
+        },
+        "pointsWithCompletedProjects": {
+            "id": 18,
+            "name": "Points with completed projects",
+            "type": "int"
+        },
+        "collectedCharcoalium": {
+            "id": 20,
+            "name": "Collected charcoalium",
+            "type": "int"
+        },
+        "collectedWood": {
+            "id": 21,
+            "name": "Collected wood",
+            "type": "int"
+        },
+        "collectedCopper": {
+            "id": 22,
+            "name": "Collected copper",
+            "type": "int"
+        },
+        "collectedCrystal": {
+            "id": 23,
+            "name": "Collected crystal",
+            "type": "int"
+        }
+    },
+    "player": {
+        "turnsNumber": {
+            "id": 10,
+            "name": "Number of turns",
+            "type": "int"
+        },
+        "playedMachines": {
+            "id": 11,
+            "name": "Machines played",
+            "type": "int"
+        },
+        "playedMachinesForCharcoalium": {
+            "id": 12,
+            "name": "Played machines for charcoalium",
+            "type": "int"
+        },
+        "playedMachinesForResource": {
+            "id": 13,
+            "name": "Played machines for resource",
+            "type": "int"
+        },
+        "playedMachinesForWithEffect": {
+            "id": 14,
+            "name": "Played machines with effect",
+            "type": "int"
+        },
+        "repairedMachines": {
+            "id": 15,
+            "name": "Repaired machines",
+            "type": "int"
+        },
+        "completedProjects": {
+            "id": 16,
+            "name": "Completed projects",
+            "type": "int"
+        },
+        "pointsWithRepairedMachines": {
+            "id": 17,
+            "name": "Points with repaired machines",
+            "type": "int"
+        },
+        "pointsWithCompletedProjects": {
+            "id": 18,
+            "name": "Points with completed projects",
+            "type": "int"
+        },
+        "collectedCharcoalium": {
+            "id": 20,
+            "name": "Collected charcoalium",
+            "type": "int"
+        },
+        "collectedWood": {
+            "id": 21,
+            "name": "Collected wood",
+            "type": "int"
+        },
+        "collectedCopper": {
+            "id": 22,
+            "name": "Collected copper",
+            "type": "int"
+        },
+        "collectedCrystal": {
+            "id": 23,
+            "name": "Collected crystal",
+            "type": "int"
+        }
+    }
+}

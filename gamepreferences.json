@@ -1,0 +1,57 @@
+{
+    "201": {
+        "name": "Table position",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Before players workshop"
+            },
+            "2": {
+                "name": "After players workshop"
+            }
+        },
+        "default": 2
+    },
+    "202": {
+        "name": "Show complete projects button",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Enabled"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 1
+    },
+    "203": {
+        "name": "Show color-blind indications",
+        "needReload": true,
+        "values": {
+            "1": {
+                "name": "Enabled"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 2
+    },
+    "204": {
+        "name": "Show player resources tokens",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Under player picture (better visibility)"
+            },
+            "2": {
+                "name": "Over player picture (more compact player board)"
+            },
+            "3": {
+                "name": "Hidden (visible in player panel)"
+            }
+        },
+        "default": 1
+    }
+}

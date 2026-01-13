@@ -53,24 +53,6 @@ use Bga\GameFramework\GameStateBuilder;
 
 require_once("modules/php/constants.inc.php");
 
-$basicGameStates = [
-    ST_BGA_GAME_SETUP => GameStateBuilder::gameSetup(ST_PLAYER_CHOOSE_ACTION)->build(),
-
-    ST_NEXT_PLAYER => [
-        "name" => "nextPlayer",
-        "description" => "",
-        "type" => "game",
-        "action" => "stNextPlayer",
-        "transitions" => [
-            "nextPlayer" => ST_PLAYER_CHOOSE_ACTION, 
-            "endGame" => ST_END_SCORE,
-        ],
-    ],
-   
-    ST_END_SCORE => GameStateBuilder::endScore()->build(),
-];
-
-
 $playerActionsGameStates = [
 
     ST_PLAYER_CHOOSE_ACTION => [
@@ -242,6 +224,17 @@ $gameGameStates = [
             "zombiePass" => ST_NEXT_PLAYER,
         ],
     ],
+
+    ST_NEXT_PLAYER => [
+        "name" => "nextPlayer",
+        "description" => "",
+        "type" => "game",
+        "action" => "stNextPlayer",
+        "transitions" => [
+            "nextPlayer" => ST_PLAYER_CHOOSE_ACTION, 
+            "endGame" => ST_END_SCORE,
+        ],
+    ],
 ];
  
-$machinestates = $basicGameStates + $playerActionsGameStates + $gameGameStates;
+$machinestates = $playerActionsGameStates + $gameGameStates;

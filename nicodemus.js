@@ -1061,7 +1061,7 @@ var Nicodemus = /** @class */ (function () {
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
-        this.showColorblindIndications = this.prefs[203].value == 1;
+        this.showColorblindIndications = this.bga.userPreferences.get(203) == 1;
         this.createPlayerPanels(gamedatas);
         this.setHand(gamedatas.handMachines);
         this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
@@ -1099,7 +1099,7 @@ var Nicodemus = /** @class */ (function () {
         });
         this.addHelp();
         this.setupNotifications();
-        this.setupPreferences();
+        this.bga.userPreferences.onChange = function (prefId, prefValue) { return _this.onPreferenceChange(prefId, prefValue); };
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -1304,24 +1304,6 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.setTooltipToClass = function (className, html) {
         this.addTooltipHtmlToClass(className, html, this.TOOLTIP_DELAY);
-    };
-    Nicodemus.prototype.setupPreferences = function () {
-        var _this = this;
-        // Extract the ID and value from the UI control
-        var onchange = function (e) {
-            var match = e.target.id.match(/^preference_control_(\d+)$/);
-            if (!match) {
-                return;
-            }
-            var prefId = +match[1];
-            var prefValue = +e.target.value;
-            _this.prefs[prefId].value = prefValue;
-            _this.onPreferenceChange(prefId, prefValue);
-        };
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        // Call onPreferenceChange() now
-        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
     };
     Nicodemus.prototype.onPreferenceChange = function (prefId, prefValue) {
         switch (prefId) {
@@ -1591,8 +1573,7 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.takeAction = function (action, data) {
         data = data || {};
-        data.lock = true;
-        this.ajaxcall("/nicodemus/nicodemus/".concat(action, ".html"), data, this, function () { });
+        this.bga.actions.performAction(action, data, { checkAction: false });
     };
     Nicodemus.prototype.setPoints = function (playerId, points) {
         var _a;
@@ -1606,7 +1587,7 @@ var Nicodemus = /** @class */ (function () {
     Nicodemus.prototype.addHelp = function () {
         var _this = this;
         dojo.place("<button id=\"nicodemus-help-button\">?</button>", 'left-side');
-        dojo.connect($('nicodemus-help-button'), 'onclick', this, function () { return _this.showHelp(); });
+        document.getElementById('nicodemus-help-button').addEventListener('click', function () { return _this.showHelp(); });
     };
     Nicodemus.prototype.showHelp = function () {
         var _this = this;
