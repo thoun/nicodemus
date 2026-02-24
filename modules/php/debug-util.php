@@ -1,6 +1,7 @@
 <?php
 
 trait DebugUtilTrait {
+    public \Bga\GameFramework\Bga $bga;
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Utility functions
@@ -54,11 +55,11 @@ trait DebugUtilTrait {
     }
 
     private function debugSetPlayerPoints(int $playerId, int $score) {
-        self::DbQuery("UPDATE player SET `player_score` = $score where `player_id` = $playerId");
+        $this->bga->playerScore->set($playerId, $score);
     }
 
     private function debugSetPoints(int $score) {
-        self::DbQuery("UPDATE player SET `player_score` = $score");
+        $this->bga->playerScore->setAll($score);
     }
 
     private function debugAddResources(int $playerId, int $number, int $type = -1) {

@@ -51,6 +51,34 @@ class Nicodemus implements NicodemusGame {
     */
 
     public setup(gamedatas: NicodemusGamedatas) {
+        this.bga.gameArea.getElement().insertAdjacentHTML('beforeend', `
+            <div id="full-table">
+                <div id="myhand-wrap" class="whiteblock">
+                    <div id="my-hand-label"><h3>${_("My hand")}</h3></div>
+                    <div id="my-machines"></div>
+                    <div id="my-projects"></div>
+                </div>
+
+                <div id="playerstables"></div>
+
+                <div id="table-wrapper">
+                    <div id="table">
+                        <div class="projects">
+                            <div id="project-deck" class="stockitem deck"></div>
+                            <div id="remaining-project-counter" class="remaining-counter"></div>
+                            <div id="table-projects"></div>
+                        </div>
+                    </div>
+                    <div id="table-resources">
+                        <div id="table-resources0" class="charcoalium-counter"></div>
+                        <div id="table-resources1" class="wood-counter"></div>
+                        <div id="table-resources3" class="crystal-counter"></div>
+                        <div id="table-resources2" class="copper-counter"></div>
+                    </div>
+                </div>
+            </div>
+        `);
+
         log( "Starting game setup" );
         
         this.gamedatas = gamedatas;
@@ -351,13 +379,16 @@ class Nicodemus implements NicodemusGame {
     }
 
     public setHand(machines: Machine[]) {
+        // @ts-ignore
         this.playerMachineHand = new ebg.stock() as Stock;
+        // @ts-ignore
         this.playerMachineHand.create(this, $('my-machines'), MACHINE_WIDTH, MACHINE_HEIGHT);
         this.playerMachineHand.setSelectionMode(1);            
         this.playerMachineHand.setSelectionAppearance('class');
         this.playerMachineHand.selectionClass = 'selected';
         this.playerMachineHand.centerItems = true;
         this.playerMachineHand.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(this, cardDiv, type);
+        // @ts-ignore
         dojo.connect(this.playerMachineHand, 'onChangeSelection', this, () => this.onPlayerMachineHandSelectionChanged(this.playerMachineHand.getSelectedItems()));
 
         setupMachineCards([this.playerMachineHand]);
@@ -399,7 +430,7 @@ class Nicodemus implements NicodemusGame {
     }
 
     public getPlayerScore(playerId: number): number {
-        return (this as any).scoreCtrl[playerId]?.getValue() ?? Number(this.gamedatas.players[playerId].score);
+        return this.bga.playerPanels.getScoreCounter(playerId).getValue();
     }
 
     private getPlayerTable(playerId: number): PlayerTable {
@@ -409,10 +440,12 @@ class Nicodemus implements NicodemusGame {
     private createPlayerPanels(gamedatas: NicodemusGamedatas) {
 
         Object.values(gamedatas.players).forEach(player => {
-            const playerId = Number(player.id);     
+            const playerId = Number(player.id); 
+            
+            const playerPanelDiv = this.bga.playerPanels.getElement(playerId);
 
             // charcoalium & resources counters
-            dojo.place(`<div class="counters">
+            playerPanelDiv.insertAdjacentHTML('beforeend', `<div class="counters">
                 <div id="charcoalium-counter-wrapper-${player.id}" class="charcoalium-counter">
                     <div class="icon charcoalium"></div> 
                     <span id="charcoalium-counter-${player.id}"></span>
@@ -429,7 +462,7 @@ class Nicodemus implements NicodemusGame {
                     <div class="icon copper"></div> 
                     <span id="copper-counter-${player.id}"></span>
                 </div>
-            </div>`, `player_board_${player.id}`);
+            </div>`);
 
             const charcoaliumCounter = new ebg.counter();
             charcoaliumCounter.create(`charcoalium-counter-${playerId}`);
@@ -452,12 +485,12 @@ class Nicodemus implements NicodemusGame {
             this.crystalCounters[playerId] = crystalCounter;
 
             // hand cards counter
-            dojo.place(`<div class="counters">
+            playerPanelDiv.insertAdjacentHTML('beforeend', `<div class="counters">
                 <div id="playerhand-counter-wrapper-${player.id}" class="playerhand-counter">
                     <div class="player-hand-card"></div> 
                     <span id="playerhand-counter-${player.id}"></span>
                 </div>
-            </div>`, `player_board_${player.id}`);
+            </div>`);
 
             const handCounter = new ebg.counter();
             handCounter.create(`playerhand-counter-${playerId}`);
@@ -475,7 +508,7 @@ class Nicodemus implements NicodemusGame {
             html += `<button class="bgabutton bgabutton_gray discarded-button" id="discarded-button-${player.id}">${_('Completed projects')}</button>
             </div>`;
 
-            dojo.place(html, `player_board_${player.id}`);
+            playerPanelDiv.insertAdjacentHTML('beforeend', html);
             document.getElementById(`discarded-button-${player.id}`).addEventListener('click', () => this.showDiscarded(playerId));
         });
     }
@@ -679,7 +712,7 @@ class Nicodemus implements NicodemusGame {
     }
     
     private setPoints(playerId: number, points: number) {
-        (this as any).scoreCtrl[playerId]?.toValue(points);
+        this.bga.playerPanels.getScoreCounter(playerId).toValue(points);
         this.table.setPoints(playerId, points);
     }
     

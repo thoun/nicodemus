@@ -59,6 +59,20 @@ declare function $(text: ElementOrId): HTMLElement;
  */
 declare function getLibUrl(name: string, version: string): string;
 
+/**
+ * Loads a versionned ESM lib.
+ * 
+ * Example of usage: `const BgaAnimations = await importEsmLib('bga-animations', '1.x');`
+ */
+declare function importEsmLib(name: string, version: string): Promise<any>;
+
+/**
+ * Loads Dojo (UMD) libs.
+ * 
+ * Example of usage: `const [Counter, Stock] = await importDojoLibs(["ebg/counter", "ebg/stock"]);`
+ */
+declare function importDojoLibs(names: string[]): Promise<any[]>;
+
 interface Gamestate {
     active_player?: string;
     args: any;
@@ -70,7 +84,7 @@ interface Gamestate {
     private_state?: Gamestate;
 }
 
-interface Gamedatas<P = Player> {
+interface Gamedatas<P extends Player = Player> {
   gamestate: Gamestate;
   gamestates: { [gamestateId: number]: Gamestate };
   playerorder: (string | number)[];
@@ -152,7 +166,7 @@ declare class StatusBar {
     disabled?: boolean;
     tooltip?: string;
     confirm?: string | (() => string | undefined | null); 
-    autoclick?: boolean;
+    autoclick?: boolean | { abortSignal?: AbortSignal, pausable?: boolean };
   }): HTMLButtonElement;
 
   /**
@@ -227,7 +241,7 @@ declare class UserPreferences {
   toggleVisibility(prefId: number, visible?: boolean): void;
 }
 
-declare class Players {
+declare class Players<P extends Player = Player> {
   /**
    * Return the id of the player who is looking at the game. The player may not be part of the game (i.e. spectator)
    * @returns {number} the current player id
@@ -238,9 +252,9 @@ declare class Players {
    * Return the current player data stored in gamedatas.players.
    * Can be undefined, if the player isn't at this table (spectator).
    * 
-   * @returns {Object | undefined} the player
+   * @returns {P | undefined} the player
    */
-  getCurrentPlayer(): Object | undefined;
+  getCurrentPlayer(): P | undefined;
 
   /**
    * Returns true if the player on whose browser the code is running is a spectator.
@@ -273,17 +287,17 @@ declare class Players {
   /**
    * Return the active player, or null if we are not in an ACTIVE_PLAYER type state.
    * 
-   * @returns {Object | null} the active player
+   * @returns {P | null} the active player
    */
-  getActivePlayer(): Object | null;
+  getActivePlayer(): P | null;
 
   /**
    * Return the player data stored in gamedatas.players.
    * Can be undefined, if the player isn't at this table (spectator).
    * 
-   * @returns {Object | undefined} the player
+   * @returns {P | undefined} the player
    */
-  getPlayer(playerId: number) : Object | undefined;
+  getPlayer(playerId: number) : P | undefined;
 
   /**
    * Return the HTML code for a player name, colored and with optional background.
@@ -302,6 +316,15 @@ declare class Players {
    * @returns {number[]} the active player ids
    */
   getActivePlayerIds(): number[];
+
+  /**
+   * Get the avatar url of a player.
+   * 
+   * @param {number} playerId the player id to get the avatar from (or 0 to get the default avatar)
+   * @param {32 | 50 | 92 | 184} size the size of the avatar, can be 32, 50, 92 or 184 (default)
+   * @returns the avatar url
+   */
+  getPlayerAvatarUrl(playerId: number, size?: number): string;
 }
 
 declare class Actions {
@@ -543,13 +566,13 @@ declare class States {
     isOnClientState(): boolean;
 }
 
-interface Bga<G = Gamedatas> {
-  gameui: GameGui<G>;
+interface Bga<P extends Player = Player, G extends Gamedatas<P> = Gamedatas<P>> {
+  gameui: GameGui<P, G>;
   statusBar: StatusBar;
   images: Images;
   sounds: Sounds;
   userPreferences: UserPreferences;
-  players: Players;
+  players: Players<P>;
   actions: Actions;
   notifications: Notifications;
   gameArea: GameArea;
@@ -558,7 +581,7 @@ interface Bga<G = Gamedatas> {
   states: States;
 }
 
-declare class GameGui<G = Gamedatas> {
+declare class GameGui<P extends Player = Player, G extends Gamedatas<P> = Gamedatas<P>> {
   /**
    * Return true if the game is in realtime. Note that having a distinct behavior in realtime and turn-based should be exceptional.
    */
@@ -595,10 +618,12 @@ declare class GameGui<G = Gamedatas> {
 
   /**
    * The player panel score counters.
+   * 
+   * @deprecated use this.bga.playerPanels.getScoreCounter
    */
   scoreCtrl: {[player_id: number]: Counter};
 
-  bga: Bga;
+  bga: Bga<P, G>;
 
   statusBar: StatusBar;
   sounds: Sounds;

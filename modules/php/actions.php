@@ -1,5 +1,7 @@
 <?php
 
+use Bga\GameFramework\UserException;
+
 require_once(__DIR__.'/objects/machine.php');
 require_once(__DIR__.'/objects/project.php');
 require_once(__DIR__.'/objects/resource.php');
@@ -24,7 +26,7 @@ trait ActionTrait {
 
         $selectableMachines = $this->getSelectableMachinesForChooseAction($playerId);
         if (!$this->array_some($selectableMachines, fn($m) => $m->id == $id)) {
-            throw new BgaUserException("This machine cannot be played");
+            throw new UserException("This machine cannot be played");
         }
 
         $freeTableSpot = $this->countMachinesOnTable() + 1;
@@ -54,7 +56,7 @@ trait ActionTrait {
 
         $selectableMachines = $this->getSelectableMachinesForChooseAction($playerId);
         if (!$this->array_some($selectableMachines, function ($m) use ($id) { return $m->id == $id; })) {
-            throw new BgaUserException("This machine cannot be repaired");
+            throw new UserException("This machine cannot be repaired");
         }
 
         $machine = $this->getMachineFromDb($this->machines->getCard($id));
@@ -64,7 +66,7 @@ trait ActionTrait {
 
         $cost = $this->getMachineCost($machine, $tableMachines);
         if (!$this->canPay($canSpend, $cost)) {
-            throw new BgaUserException('Not enough resources');
+            throw new UserException('Not enough resources');
         }
 
         $costForPlayer = $this->getMachineCostForPlayerBeforeJoker($playerId, $machine, $tableMachines);
@@ -152,7 +154,7 @@ trait ActionTrait {
         $machine = $this->getMachineFromDb($this->machines->getCard(self::getGameStateValue(PLAYED_MACHINE)));
 
         if (($machine->produce == 9 && ($resource < 1 || $resource > 3)) || ($machine->produce != 9 && $machine->produce != $resource)) {
-            throw new BgaUserException("Machine doesn't produce this resource");
+            throw new UserException("Machine doesn't produce this resource");
         }
 
         $this->addResource($playerId, 1, $resource);
@@ -203,7 +205,7 @@ trait ActionTrait {
         $completeProjects = $this->getCompleteProjects($playerId, $machine);
         foreach($ids as $id) {
             if (!$this->array_some($completeProjects, fn ($p) => $p->id == $id)) {
-                throw new BgaUserException("Selected project cannot be completed");
+                throw new UserException("Selected project cannot be completed");
             }
         }
 
@@ -251,7 +253,7 @@ trait ActionTrait {
 
         $selectableMachines = $this->selectableMachinesForEffect();
         if (!$this->array_some($selectableMachines, fn ($m) => $m->id == $id)) {
-            throw new BgaUserException("This machine cannot be selected for effect");
+            throw new UserException("This machine cannot be selected for effect");
         }
 
         $machine = $this->getMachineForEffect();
@@ -274,7 +276,7 @@ trait ActionTrait {
 
         $projects = $this->getProjectsFromDb($this->projects->getCardsInLocation('projectSelection'));
         if (!$this->array_some($projects, fn ($p) => $p->id == $id)) {
-            throw new BgaUserException("Selected project cannot be added to workshop");
+            throw new UserException("Selected project cannot be added to workshop");
         }
         
         $playerId = self::getActivePlayerId();
@@ -295,7 +297,7 @@ trait ActionTrait {
 
         $possibleCombinations = $this->getSelectResourceCombinations();
         if (!$this->array_some($possibleCombinations, fn ($comb) => $this->array_identical($comb, $resourcesTypes))) {
-            throw new BgaUserException("Resource(s) cannot be selected");
+            throw new UserException("Resource(s) cannot be selected");
         }
         
         $playerId = self::getActivePlayerId();
@@ -318,7 +320,7 @@ trait ActionTrait {
 
         $possibleExchanges = $this->getPossibleExchanges($playerId);
         if (!$this->array_some($possibleExchanges, fn ($possibleExchange) => $possibleExchange->from == $from && $possibleExchange->to == $to)) {
-            throw new BgaUserException("Exchange cannot be selected");
+            throw new UserException("Exchange cannot be selected");
         }
 
         $machine = $this->getMachineForEffect();
@@ -360,21 +362,21 @@ trait ActionTrait {
             // we only keep $selectedMachinesIds from parameter
             $completeProjectParameter = $this->array_find($completeProjectsParameter, fn ($cp) => $cp->project->id == $project->project->id);
             if ($completeProjectParameter == null) {
-                throw new BgaUserException("Missing project informations");
+                throw new UserException("Missing project informations");
             }
             
             $selectedMachinesIds = $completeProjectParameter->selectedMachinesIds;
             if (count($selectedMachinesIds) < $project->machinesNumber) {
-                throw new BgaUserException("Should select $project->machinesNumber, but only selected ".count($selectedMachinesIds));
+                throw new UserException("Should select $project->machinesNumber, but only selected ".count($selectedMachinesIds));
             }
             if (!$this->array_some($selectedMachinesIds, fn($id) => $project->mandatoryMachine->id == $id)) {
-                throw new BgaUserException("Last played machine should be on selection");
+                throw new UserException("Last played machine should be on selection");
             }
 
             $selectedMachines = $this->getMachinesFromDb($this->machines->getCards($selectedMachinesIds));
             $mandatoryMachine = $this->getMachineFromDb($this->machines->getCard($project->mandatoryMachine->id));
             if ($this->machinesToCompleteProject($project->project, $selectedMachines, $mandatoryMachine) == null) {
-                throw new BgaUserException(self::_("Selected machines don't match project requirement"));
+                throw new UserException(clienttranslate("Selected machines don't match project requirement"));
             }
 
             // we update machines linked to project with selectedMachinesIds
@@ -393,7 +395,7 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        $stateId = intval($this->gamestate->state_id());
+        $stateId = $this->gamestate->getCurrentMainStateId();
 
         if ($stateId == ST_PLAYER_CHOOSE_PLAY_ACTION) {
             $lastMachineId = intval(self::getGameStateValue(PLAYED_MACHINE));

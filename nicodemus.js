@@ -1058,6 +1058,7 @@ var Nicodemus = /** @class */ (function () {
     */
     Nicodemus.prototype.setup = function (gamedatas) {
         var _this = this;
+        this.bga.gameArea.getElement().insertAdjacentHTML('beforeend', "\n            <div id=\"full-table\">\n                <div id=\"myhand-wrap\" class=\"whiteblock\">\n                    <div id=\"my-hand-label\"><h3>".concat(_("My hand"), "</h3></div>\n                    <div id=\"my-machines\"></div>\n                    <div id=\"my-projects\"></div>\n                </div>\n\n                <div id=\"playerstables\"></div>\n\n                <div id=\"table-wrapper\">\n                    <div id=\"table\">\n                        <div class=\"projects\">\n                            <div id=\"project-deck\" class=\"stockitem deck\"></div>\n                            <div id=\"remaining-project-counter\" class=\"remaining-counter\"></div>\n                            <div id=\"table-projects\"></div>\n                        </div>\n                    </div>\n                    <div id=\"table-resources\">\n                        <div id=\"table-resources0\" class=\"charcoalium-counter\"></div>\n                        <div id=\"table-resources1\" class=\"wood-counter\"></div>\n                        <div id=\"table-resources3\" class=\"crystal-counter\"></div>\n                        <div id=\"table-resources2\" class=\"copper-counter\"></div>\n                    </div>\n                </div>\n            </div>\n        "));
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
@@ -1326,13 +1327,16 @@ var Nicodemus = /** @class */ (function () {
     };
     Nicodemus.prototype.setHand = function (machines) {
         var _this = this;
+        // @ts-ignore
         this.playerMachineHand = new ebg.stock();
+        // @ts-ignore
         this.playerMachineHand.create(this, $('my-machines'), MACHINE_WIDTH, MACHINE_HEIGHT);
         this.playerMachineHand.setSelectionMode(1);
         this.playerMachineHand.setSelectionAppearance('class');
         this.playerMachineHand.selectionClass = 'selected';
         this.playerMachineHand.centerItems = true;
         this.playerMachineHand.onItemCreate = function (cardDiv, type) { return setupMachineCard(_this, cardDiv, type); };
+        // @ts-ignore
         dojo.connect(this.playerMachineHand, 'onChangeSelection', this, function () { return _this.onPlayerMachineHandSelectionChanged(_this.playerMachineHand.getSelectedItems()); });
         setupMachineCards([this.playerMachineHand]);
         machines.forEach(function (machine) { return _this.playerMachineHand.addToStockWithId(getUniqueId(machine), '' + machine.id); });
@@ -1364,8 +1368,7 @@ var Nicodemus = /** @class */ (function () {
         return Number(Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) != playerId; }).id);
     };
     Nicodemus.prototype.getPlayerScore = function (playerId) {
-        var _a, _b;
-        return (_b = (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) !== null && _b !== void 0 ? _b : Number(this.gamedatas.players[playerId].score);
+        return this.bga.playerPanels.getScoreCounter(playerId).getValue();
     };
     Nicodemus.prototype.getPlayerTable = function (playerId) {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
@@ -1374,8 +1377,9 @@ var Nicodemus = /** @class */ (function () {
         var _this = this;
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
+            var playerPanelDiv = _this.bga.playerPanels.getElement(playerId);
             // charcoalium & resources counters
-            dojo.place("<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-".concat(player.id, "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"wood-counter-wrapper-").concat(player.id, "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-").concat(player.id, "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-").concat(player.id, "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-").concat(player.id, "\"></span>\n                </div>\n            </div>"), "player_board_".concat(player.id));
+            playerPanelDiv.insertAdjacentHTML('beforeend', "<div class=\"counters\">\n                <div id=\"charcoalium-counter-wrapper-".concat(player.id, "\" class=\"charcoalium-counter\">\n                    <div class=\"icon charcoalium\"></div> \n                    <span id=\"charcoalium-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"wood-counter-wrapper-").concat(player.id, "\" class=\"wood-counter\">\n                    <div class=\"icon wood\"></div> \n                    <span id=\"wood-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"crystal-counter-wrapper-").concat(player.id, "\" class=\"crystal-counter\">\n                    <div class=\"icon crystal\"></div> \n                    <span id=\"crystal-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"copper-counter-wrapper-").concat(player.id, "\" class=\"copper-counter\">\n                    <div class=\"icon copper\"></div> \n                    <span id=\"copper-counter-").concat(player.id, "\"></span>\n                </div>\n            </div>"));
             var charcoaliumCounter = new ebg.counter();
             charcoaliumCounter.create("charcoalium-counter-".concat(playerId));
             charcoaliumCounter.setValue(player.resources[0].length);
@@ -1393,7 +1397,7 @@ var Nicodemus = /** @class */ (function () {
             crystalCounter.setValue(player.resources[3].length);
             _this.crystalCounters[playerId] = crystalCounter;
             // hand cards counter
-            dojo.place("<div class=\"counters\">\n                <div id=\"playerhand-counter-wrapper-".concat(player.id, "\" class=\"playerhand-counter\">\n                    <div class=\"player-hand-card\"></div> \n                    <span id=\"playerhand-counter-").concat(player.id, "\"></span>\n                </div>\n            </div>"), "player_board_".concat(player.id));
+            playerPanelDiv.insertAdjacentHTML('beforeend', "<div class=\"counters\">\n                <div id=\"playerhand-counter-wrapper-".concat(player.id, "\" class=\"playerhand-counter\">\n                    <div class=\"player-hand-card\"></div> \n                    <span id=\"playerhand-counter-").concat(player.id, "\"></span>\n                </div>\n            </div>"));
             var handCounter = new ebg.counter();
             handCounter.create("playerhand-counter-".concat(playerId));
             handCounter.setValue(player.handMachinesCount);
@@ -1406,7 +1410,7 @@ var Nicodemus = /** @class */ (function () {
                 html += "<div></div>";
             }
             html += "<button class=\"bgabutton bgabutton_gray discarded-button\" id=\"discarded-button-".concat(player.id, "\">").concat(_('Completed projects'), "</button>\n            </div>");
-            dojo.place(html, "player_board_".concat(player.id));
+            playerPanelDiv.insertAdjacentHTML('beforeend', html);
             document.getElementById("discarded-button-".concat(player.id)).addEventListener('click', function () { return _this.showDiscarded(playerId); });
         });
     };
@@ -1576,8 +1580,7 @@ var Nicodemus = /** @class */ (function () {
         this.bga.actions.performAction(action, data, { checkAction: false });
     };
     Nicodemus.prototype.setPoints = function (playerId, points) {
-        var _a;
-        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
+        this.bga.playerPanels.getScoreCounter(playerId).toValue(points);
         this.table.setPoints(playerId, points);
     };
     Nicodemus.prototype.setResourceCount = function (playerId, resource, number) {
