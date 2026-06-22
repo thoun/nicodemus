@@ -9,13 +9,12 @@
 
 
 html {
-    background: url('img/background.jpg') #eae3d3;
-    background-repeat: repeat;
+  background: url('img/background.jpg') #eae3d3;
+  background-repeat: repeat;
 }
 
-.mode_3d #game_play_area_background {
-    background: url('img/background.jpg') #eae3d3;
-    background-repeat: repeat;
+html[data-theme="dark"] {
+  background-blend-mode: color-burn;
 }
 
 /* make space between buttons on touch devices */

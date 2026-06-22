@@ -28,6 +28,12 @@ $project-height: 93px;
     overflow: hidden;
 }
 
+html[data-theme="dark"] {
+    #popin_nicodemusHelpDialog {
+        background-blend-mode: exclusion;
+    }
+}
+
 #help-popin {
     max-width: 35rem;
     max-height: calc(80vh - 80px);
